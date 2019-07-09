@@ -13,26 +13,14 @@ global {
 	file ML_file <- dxf_file("../includes/E14-15_3-gama2.dxf",#m);
 	
 	int nb_people <- 100;
+	int current_hour update: (time / #hour) mod 24;
+	float step <- 1 #mn;
 
 	//compute the environment size from the dxf file envelope
 	geometry shape <- envelope(ML_file);
-	map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), 
-	"E14"::rgb(52,152,219), 
-	"E15"::rgb(192,57,43), 
-	"Elevators"::rgb(161,196,90), 
-	"Facade_Glass"::#magenta, 
-	"Facade_Wall"::rgb(161,196,90), 
-	"Glass"::rgb(161,196,90), 
-	"Labs"::rgb(161,196,90), 
-	"Meeting rooms"::rgb(161,196,90), 
-	"Misc"::rgb(161,196,90), 
-	"Offices"::rgb(161,196,90), 
-	"Railing"::rgb(161,196,90), 
-	"Stairs"::rgb(161,196,90), 
-	"Storage"::rgb(161,196,90), 
-	"Toilets"::rgb(161,196,90), 
-	"Void"::rgb(161,196,90), 
-	"Walls"::rgb(161,196,90)];
+	map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), "E14"::rgb(52,152,219), "E15"::rgb(192,57,43), "Elevators"::rgb(161,196,90), "Facade_Glass"::#magenta, 
+	"Facade_Wall"::rgb(161,196,90), "Glass"::rgb(161,196,90), "Labs"::rgb(161,196,90), "Meeting rooms"::rgb(161,196,90), "Misc"::rgb(161,196,90), "Offices"::rgb(161,196,90), 
+	"Railing"::rgb(161,196,90), "Stairs"::rgb(161,196,90), "Storage"::rgb(161,196,90), "Toilets"::rgb(161,196,90), "Void"::rgb(161,196,90), "Walls"::rgb(161,196,90)];
 	
 	map<string,rgb> color_per_title <- ["Visitor"::#green, 
 	"Staff"::#red, 
@@ -64,12 +52,6 @@ global {
 			
 		}
 		
-		//create people number: nb_people {
-        //location <- any_location_in;
-        //}
-        
-        //create iris agents from the CSV file (use of the header of the CSV file), the attributes of the agents are initialized from the CSV files: 
-		//we set the header facet to true to directly read the values corresponding to the right column. If the header was set to false, we could use the index of the columns to initialize the agent attributes
 		create ML_people from:csv_file( "../includes/mlpeople.csv",true) with:
 			[people_status::string(get("ML_STATUS")), 
 				people_type::string(get("PERSON_TYPE")), 
@@ -78,7 +60,12 @@ global {
 				people_title::string(get("TITLE")), 
 				people_office::string(get("OFFICE")), 
 				people_group::string(get("ML_GROUP"))
-			];	
+			]{
+			 location <- any_location_in( one_of (ML_element where (each.layer="Elevators")));
+			 start_work <- 6 + rnd(4);
+			 end_work <- 16 + rnd(6);
+			 objective <- "resting";
+		}
 			
 		ask ML_people{
 			if (people_status = "FALSE"){
@@ -105,26 +92,7 @@ species ML_element
 	}
 }
 
-
-/* species people skills: [moving]{
-    rgb color <- #red ;
-    ML_element mySpace;
-    
-    reflex move{
-    	do wander;
-    }
-    
-    aspect base {
-        draw circle(10) color: color;
-    }
-    int start_work ;
-    int end_work  ;
-    string objective ; 
-    point the_target <- nil ;
-
-} */
-
-species ML_people {
+species ML_people skills:[moving]{
 	string people_status;
 	string people_type;
 	string people_lastname;
@@ -134,10 +102,29 @@ species ML_people {
 	string people_group;
 	string type;
 	rgb color ;
+	point the_target;
+	int start_work;
+	int end_work;
+	string objective;
+
+		
+	reflex time_to_work when: current_hour = start_work and objective = "resting"{
+		objective <- "working" ;
+		the_target <- any_location_in( one_of (ML_element where (each.layer="Labs")));
+	}
+		
+	reflex time_to_go_home when: current_hour = end_work and objective = "working"{
+		objective <- "resting" ;
+		the_target <- any_location_in( one_of (ML_element where (each.layer="Elevators"))); 
+	} 
 	
-	//init {
-	//	color <- type ="Iris-setosa" ? #blue : ((type ="Iris-virginica") ? #red: #yellow);
-	//}
+	 reflex move when: the_target != nil{
+    	do goto target:the_target speed:0.5;
+    	do wander speed:0.1;
+    	if the_target = location {
+			the_target <- nil ;
+		}
+    }
 	
 	aspect default {
 		draw circle(30) color: color_per_title[people_type]; 
@@ -147,23 +134,13 @@ species ML_people {
 experiment DXFAgents type: gui
 {   
 	parameter "Number of people agents" var: nb_people category: "People";
-
+	float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
-		display map type: opengl
+		display map type:opengl draw_env:false
 		{
 			species ML_element;
-			//species people aspect: base;
 			species ML_people;
 		}
-
-		//display "As_Image" type: opengl
-		//{
-		//	graphics "ML"
-		//	{
-		//		draw ML_file at: {0,0} color: # brown;
-		//	}
-
-		}
-
-	}
+	}	
+}
