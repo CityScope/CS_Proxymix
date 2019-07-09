@@ -18,16 +18,11 @@ global {
 
 	//compute the environment size from the dxf file envelope
 	geometry shape <- envelope(ML_file);
-	map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), "E14"::rgb(52,152,219), "E15"::rgb(192,57,43), "Elevators"::rgb(161,196,90), "Facade_Glass"::#magenta, 
-	"Facade_Wall"::rgb(161,196,90), "Glass"::rgb(161,196,90), "Labs"::rgb(161,196,90), "Meeting rooms"::rgb(161,196,90), "Misc"::rgb(161,196,90), "Offices"::rgb(161,196,90), 
-	"Railing"::rgb(161,196,90), "Stairs"::rgb(161,196,90), "Storage"::rgb(161,196,90), "Toilets"::rgb(161,196,90), "Void"::rgb(161,196,90), "Walls"::rgb(161,196,90)];
+	map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), "E14"::rgb(175,175,175), "E15"::rgb(175,175,175), "Elevators"::rgb(200,200,200), "Facade_Glass"::#darkgray, 
+	"Facade_Wall"::rgb(175,175,175), "Glass"::rgb(150,150,150), "Labs"::rgb(75,75,75), "Meeting rooms"::rgb(125,125,125), "Misc"::rgb(161,196,90), "Offices"::rgb(175,175,175), 
+	"Railing"::rgb(125,124,120), "Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Void"::rgb(10,10,10), "Walls"::rgb(175,175,175)];
 	
-	map<string,rgb> color_per_title <- ["Visitor"::#green, 
-	"Staff"::#red, 
-	"Student"::#yellow, 
-	"Other"::#magenta, 
-	"Visitor/Affiliate"::#green, 
-	"Faculty/PI"::#blue];
+	map<string,rgb> color_per_title <- ["Visitor"::#green,"Staff"::#red, "Student"::#yellow, "Other"::#magenta, "Visitor/Affiliate"::#green, "Faculty/PI"::#blue];
 	
 	init {
 	//create house_element agents from the dxf file and initialized the layer attribute of the agents from the the file
@@ -41,7 +36,7 @@ global {
 			ask layers[la]
 			{
 				color <- color_per_layer[la];
-				color <- col;
+				//color <- col;
 			}
 		}
 		
@@ -84,8 +79,13 @@ species ML_element
 	string layer;
 	rgb color;
 	aspect default
-		{
+	{
 		draw shape color: color;
+	}
+	
+	aspect extrusion
+	{
+		draw shape color: color depth:50;
 	}
 	init {
 		shape <- polygon(shape.points);
@@ -127,20 +127,44 @@ species ML_people skills:[moving]{
     }
 	
 	aspect default {
-		draw circle(30) color: color_per_title[people_type]; 
+		draw circle(10) color: color_per_title[people_type] border: color_per_title[people_type]-50; 
 	}
 }
 
-experiment DXFAgents type: gui
+experiment OneFloor type: gui
 {   
 	parameter "Number of people agents" var: nb_people category: "People";
 	float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
-		display map type:opengl draw_env:false
+		display map type:opengl draw_env:false background:#black
 		{
 			species ML_element;
 			species ML_people;
+		}
+	}	
+}
+
+
+experiment AllLab type: gui
+{   
+	parameter "Number of people agents" var: nb_people category: "People";
+	float minimum_cycle_duration<-0.02;
+	output
+	{	layout #split;
+		display map type:opengl draw_env:false background:#black
+		{
+			species ML_element;
+			species ML_people;
+			
+			species ML_element  position:{0,0,0.25};
+			species ML_people position:{0,0,0.25};
+			
+			species ML_element  position:{0,0,0.5};
+			species ML_people position:{0,0,0.5};
+			
+			species ML_element  position:{0,0,0.75};
+			species ML_people position:{0,0,0.75};
 		}
 	}	
 }
