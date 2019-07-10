@@ -14,7 +14,10 @@ global {
 	
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 24;
-	float step <- 1 #mn;
+	float step <- 60 #sec;
+	bool drawInteraction <- false parameter: "Draw Interaction:" category: "Interaction";
+	bool updateGraph <- true parameter: "Update Graph:" category: "Interaction";
+	int distance <- 20 parameter: "Distance:" category: "Interaction" min: 1 max: 100;
 
 	//compute the environment size from the dxf file envelope
 	geometry shape <- envelope(ML_file);
@@ -23,6 +26,8 @@ global {
 	"Railing"::rgb(125,124,120), "Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Void"::rgb(10,10,10), "Walls"::rgb(175,175,175)];
 	
 	map<string,rgb> color_per_title <- ["Visitor"::#green,"Staff"::#red, "Student"::#yellow, "Other"::#magenta, "Visitor/Affiliate"::#green, "Faculty/PI"::#blue];
+	
+	graph<ML_people, ML_people> interaction_graph;
 	
 	init {
 	//create house_element agents from the dxf file and initialized the layer attribute of the agents from the the file
@@ -57,8 +62,8 @@ global {
 				people_group::string(get("ML_GROUP"))
 			]{
 			 location <- any_location_in( one_of (ML_element where (each.layer="Elevators")));
-			 start_work <- 6 + rnd(4);
-			 end_work <- 16 + rnd(6);
+			 start_work <- 0 + rnd(12);
+			 end_work <- 8 + rnd(16);
 			 objective <- "resting";
 		}
 			
@@ -69,8 +74,15 @@ global {
 			if (people_office != "E15-3" or people_office != "E14-3"){
 				//do die;
 			}
+			if( flip(0.5)){
+				do die;
+			}
 		}
         
+	}
+	
+	reflex updateGraph when: (drawInteraction = true and updateGraph=true) {
+		interaction_graph <- graph<ML_people, ML_people>(ML_people as_distance_graph (distance ));
 	}
 }
 
@@ -80,7 +92,7 @@ species ML_element
 	rgb color;
 	aspect default
 	{
-		draw shape color: color;
+		draw shape color: color empty:true;
 	}
 	
 	aspect extrusion
@@ -115,19 +127,20 @@ species ML_people skills:[moving]{
 		
 	reflex time_to_go_home when: current_hour = end_work and objective = "working"{
 		objective <- "resting" ;
-		the_target <- any_location_in( one_of (ML_element where (each.layer="Elevators"))); 
+		the_target <- any_location_in( one_of (ML_element where (each.layer="Offices"))); 
 	} 
 	
 	 reflex move when: the_target != nil{
     	do goto target:the_target speed:0.5;
-    	do wander speed:0.1;
+    	//do wander speed:0.01;
     	if the_target = location {
 			the_target <- nil ;
 		}
     }
 	
 	aspect default {
-		draw circle(10) color: color_per_title[people_type] border: color_per_title[people_type]-50; 
+		//draw circle(10) color: color_per_title[people_type] border: color_per_title[people_type]-50; 
+		draw circle(10) color: #white border: #gray; 
 	}
 }
 
@@ -137,9 +150,21 @@ experiment OneFloor type: gui
 	float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
-		display map type:opengl draw_env:false background:#black
+		display map type:java2D draw_env:false background:#black
 		{
 			species ML_element;
+			species ML_people;
+			graphics "interaction_graph" {
+				if (interaction_graph != nil and drawInteraction = true) {
+					loop eg over: interaction_graph.edges {
+						ML_people src <- interaction_graph source_of eg;
+						ML_people target <- interaction_graph target_of eg;
+						geometry edge_geom <- geometry(eg);
+						draw line(edge_geom.points) width:1.5 color: #white;
+					}
+
+				}
+			}
 			species ML_people;
 		}
 	}	
