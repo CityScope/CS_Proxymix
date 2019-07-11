@@ -17,7 +17,7 @@ global {
 	float step <- 60 #sec;
 	bool drawInteraction <- false parameter: "Draw Interaction:" category: "Interaction";
 	bool updateGraph <- true parameter: "Update Graph:" category: "Interaction";
-	int distance <- 20 parameter: "Distance:" category: "Interaction" min: 1 max: 100;
+	int distance <- 200 parameter: "Distance:" category: "Interaction" min: 1 max: 1000;
 
 	//compute the environment size from the dxf file envelope
 	geometry shape <- envelope(ML_file);
@@ -52,14 +52,15 @@ global {
 			
 		}
 		
-		create ML_people from:csv_file( "../includes/mlpeople.csv",true) with:
+		create ML_people from:csv_file( "../includes/mlpeople_modified.csv",true) with:
 			[people_status::string(get("ML_STATUS")), 
 				people_type::string(get("PERSON_TYPE")), 
 				people_lastname::string(get("LAST_NAME")),
 				people_firstname::string(get("FIRST_NAME")), 
 				people_title::string(get("TITLE")), 
 				people_office::string(get("OFFICE")), 
-				people_group::string(get("ML_GROUP"))
+				people_group::string(get("ML_GROUP")),
+				floor::int(get("FLOOR"))
 			]{
 			 location <- any_location_in( one_of (ML_element where (each.layer="Elevators")));
 			 start_work <- 0 + rnd(12);
@@ -74,7 +75,7 @@ global {
 			if (people_office != "E15-3" or people_office != "E14-3"){
 				//do die;
 			}
-			if( flip(0.5)){
+			if( floor!=3){
 				do die;
 			}
 		}
@@ -92,7 +93,7 @@ species ML_element
 	rgb color;
 	aspect default
 	{
-		draw shape color: color empty:true;
+		draw shape color: color empty:false;
 	}
 	
 	aspect extrusion
@@ -112,6 +113,7 @@ species ML_people skills:[moving]{
 	string people_title;
 	string people_office;
 	string people_group;
+	int floor;
 	string type;
 	rgb color ;
 	point the_target;
@@ -150,17 +152,18 @@ experiment OneFloor type: gui
 	float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
-		display map type:java2D draw_env:false background:#black
+		display map type:opengl draw_env:false background:#black
 		{
 			species ML_element;
-			species ML_people;
+			species ML_people trace:true;
+			
 			graphics "interaction_graph" {
 				if (interaction_graph != nil and drawInteraction = true) {
 					loop eg over: interaction_graph.edges {
-						ML_people src <- interaction_graph source_of eg;
-						ML_people target <- interaction_graph target_of eg;
+						//ML_people src <- interaction_graph source_of eg;
+						//ML_people target <- interaction_graph target_of eg;
 						geometry edge_geom <- geometry(eg);
-						draw line(edge_geom.points) width:1.5 color: #white;
+						draw line(edge_geom.points) width:1 color: #white;
 					}
 
 				}
