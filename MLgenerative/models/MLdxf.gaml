@@ -10,7 +10,7 @@ model MLdxf
 /* Insert your model definition here */
 
 global {
-	file ML_file <- dxf_file("../includes/E14-15_3-gama2.dxf",#m);
+	file ML_file <- dxf_file("../includes/E14-15_3-gama3.dxf",#m);
 	
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 24;
@@ -23,7 +23,7 @@ global {
 	geometry shape <- envelope(ML_file);
 	map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), "E14"::rgb(175,175,175), "E15"::rgb(175,175,175), "Elevators"::rgb(200,200,200), "Facade_Glass"::#darkgray, 
 	"Facade_Wall"::rgb(175,175,175), "Glass"::rgb(150,150,150), "Labs"::rgb(75,75,75), "Meeting rooms"::rgb(125,125,125), "Misc"::rgb(161,196,90), "Offices"::rgb(175,175,175), 
-	"Railing"::rgb(125,124,120), "Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Void"::rgb(10,10,10), "Walls"::rgb(175,175,175)];
+	"Railing"::rgb(125,124,120), "Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Void"::rgb(100,10,10), "Walls"::rgb(175,175,175)];
 	
 	map<string,rgb> color_per_title <- ["Visitor"::#green,"Staff"::#red, "Student"::#yellow, "Other"::#magenta, "Visitor/Affiliate"::#green, "Faculty/PI"::#blue];
 	
@@ -39,8 +39,12 @@ global {
 		{
 			rgb col <- rnd_color(255);
 			ask layers[la]
-			{
-				color <- color_per_layer[la];
+			{   if(color_per_layer.keys contains la){
+				   color <- color_per_layer[la];
+				}else{
+					color <-#gray;
+				}
+				
 				//color <- col;
 			}
 		}
@@ -62,21 +66,24 @@ global {
 				people_group::string(get("ML_GROUP")),
 				floor::int(get("FLOOR"))
 			]{
-			 location <- any_location_in( one_of (ML_element where (each.layer="Elevators")));
+			 location <- any_location_in( one_of (ML_element where (each.layer="Elevators_Primary")));
 			 start_work <- 0 + rnd(12);
 			 end_work <- 8 + rnd(16);
 			 objective <- "resting";
+			 myoffice <- first(ML_element where (each.layer = people_office));
+			 //location <- any_location_in (myoffice.shape);
 		}
-			
+	
+					
 		ask ML_people{
 			if (people_status = "FALSE"){
 				do die;
 			}
-			if (people_office != "E15-3" or people_office != "E14-3"){
-				//do die;
-			}
 			if( floor!=3){
 				do die;
+			}
+				if(myoffice=nil){
+				do die;	
 			}
 		}
         
@@ -92,8 +99,8 @@ species ML_element
 	string layer;
 	rgb color;
 	aspect default
-	{
-		draw shape color: color empty:false;
+	{   
+		draw shape color: color border:color empty:false;
 	}
 	
 	aspect extrusion
@@ -120,16 +127,18 @@ species ML_people skills:[moving]{
 	int start_work;
 	int end_work;
 	string objective;
+	ML_element myoffice;
+
 
 		
 	reflex time_to_work when: current_hour = start_work and objective = "resting"{
 		objective <- "working" ;
-		the_target <- any_location_in( one_of (ML_element where (each.layer="Labs")));
+		the_target <- any_location_in(myoffice);
 	}
 		
 	reflex time_to_go_home when: current_hour = end_work and objective = "working"{
 		objective <- "resting" ;
-		the_target <- any_location_in( one_of (ML_element where (each.layer="Offices"))); 
+		the_target <- any_location_in( one_of (ML_element where (each.layer="Elevators_Primary"))); 
 	} 
 	
 	 reflex move when: the_target != nil{
@@ -141,8 +150,8 @@ species ML_people skills:[moving]{
     }
 	
 	aspect default {
-		//draw circle(10) color: color_per_title[people_type] border: color_per_title[people_type]-50; 
-		draw circle(10) color: #white border: #gray; 
+		draw circle(10) color: color_per_title[people_type] border: color_per_title[people_type]-50; 
+		//draw circle(10) color: #white border: #gray; 
 	}
 }
 
@@ -153,9 +162,10 @@ experiment OneFloor type: gui
 	output
 	{	layout #split;
 		display map type:opengl draw_env:false background:#black
-		{
+		{   
 			species ML_element;
-			species ML_people trace:true;
+			species ML_people;
+			//species ML_people trace:false;
 			
 			graphics "interaction_graph" {
 				if (interaction_graph != nil and drawInteraction = true) {
@@ -168,7 +178,7 @@ experiment OneFloor type: gui
 
 				}
 			}
-			species ML_people;
+			
 		}
 	}	
 }
