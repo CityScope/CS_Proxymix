@@ -16,6 +16,8 @@ global {
 	int current_hour update: (time / #hour) mod 24;
 	float step <- 60 #sec;
 	bool drawInteraction <- false parameter: "Draw Interaction:" category: "Interaction";
+	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
+	bool draw_grid <- false parameter: "Draw Grid:" category: "Interaction";
 	bool updateGraph <- true parameter: "Update Graph:" category: "Interaction";
 	int distance <- 200 parameter: "Distance:" category: "Interaction" min: 1 max: 1000;
 
@@ -23,11 +25,15 @@ global {
 	geometry shape <- envelope(ML_file);
 	map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), "E14"::rgb(175,175,175), "E15"::rgb(175,175,175), "Elevators"::rgb(200,200,200), "Facade_Glass"::#darkgray, 
 	"Facade_Wall"::rgb(175,175,175), "Glass"::rgb(150,150,150), "Labs"::rgb(75,75,75), "Meeting rooms"::rgb(125,125,125), "Misc"::rgb(161,196,90), "Offices"::rgb(175,175,175), 
-	"Railing"::rgb(125,124,120), "Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Void"::rgb(100,10,10), "Walls"::rgb(175,175,175)];
+	"Railing"::rgb(125,124,120), "Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Void"::rgb(10,10,10), "Walls"::rgb(175,175,175)];
 	
 	map<string,rgb> color_per_title <- ["Visitor"::#green,"Staff"::#red, "Student"::#yellow, "Other"::#magenta, "Visitor/Affiliate"::#green, "Faculty/PI"::#blue];
 	
 	graph<ML_people, ML_people> interaction_graph;
+	
+	//DImension of the grid agent
+	int nb_cols <- 75;
+	int nb_rows <- 50;
 	
 	init {
 	//create house_element agents from the dxf file and initialized the layer attribute of the agents from the the file
@@ -66,7 +72,7 @@ global {
 				people_group::string(get("ML_GROUP")),
 				floor::int(get("FLOOR"))
 			]{
-			 location <- any_location_in( one_of (ML_element where (each.layer="Elevators_Primary")));
+			 location <- any_location_in( one_of (ML_element where (each.layer="Offices")));
 			 start_work <- 0 + rnd(12);
 			 end_work <- 8 + rnd(16);
 			 objective <- "resting";
@@ -86,6 +92,12 @@ global {
 				do die;	
 			}
 		}
+		
+		ask ML_element where (each.layer="Stairs" or each.layer="Void" ){
+			ask cell overlapping self {
+				is_wall <- true;
+			}
+		}
         
 	}
 	
@@ -100,7 +112,7 @@ species ML_element
 	rgb color;
 	aspect default
 	{   
-		draw shape color: color border:color empty:false;
+		draw shape color: color border:color empty:true;
 	}
 	
 	aspect extrusion
@@ -142,7 +154,8 @@ species ML_people skills:[moving]{
 	} 
 	
 	 reflex move when: the_target != nil{
-    	do goto target:the_target speed:0.5;
+    	do goto target:the_target speed:0.5 on: (cell where not each.is_wall) recompute_path: false;
+    	
     	//do wander speed:0.01;
     	if the_target = location {
 			the_target <- nil ;
@@ -152,7 +165,23 @@ species ML_people skills:[moving]{
 	aspect default {
 		draw circle(10) color: color_per_title[people_type] border: color_per_title[people_type]-50; 
 		//draw circle(10) color: #white border: #gray; 
+		if (current_path != nil and draw_trajectory=true) {
+			draw current_path.shape color: #red width:2;
+		}
 	}
+}
+
+//Grid species to discretize space
+grid cell width: nb_cols height: nb_rows neighbors: 8 {
+	bool is_wall <- false;
+	bool is_exit <- false;
+	rgb color <- #white;
+	aspect default{
+		if (draw_grid){
+		  draw shape color:is_wall? #red:#black border:rgb(75,75,75) empty:true;	
+		}
+		
+	}	
 }
 
 experiment OneFloor type: gui
@@ -161,11 +190,11 @@ experiment OneFloor type: gui
 	float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
-		display map type:opengl draw_env:false background:#black
+		display map type:opengl draw_env:false background:#black 
 		{   
 			species ML_element;
 			species ML_people;
-			//species ML_people trace:false;
+			species cell aspect:default position:{0,0,-0.01};
 			
 			graphics "interaction_graph" {
 				if (interaction_graph != nil and drawInteraction = true) {
