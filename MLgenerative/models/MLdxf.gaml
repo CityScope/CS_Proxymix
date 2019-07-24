@@ -94,7 +94,7 @@ global {
 			}
 		}
 		
-		ask ML_element where (each.layer="Stairs" or each.layer="Void" ){
+		ask ML_element where (each.layer="Z_grid_walls" or each.layer="Void" ){
 			ask cell overlapping self {
 				is_wall <- true;
 			}
