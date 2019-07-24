@@ -50,8 +50,6 @@ global {
 				}else{
 					color <-#gray;
 				}
-				
-				//color <- col;
 			}
 		}
 		
@@ -63,7 +61,7 @@ global {
 		}
 		
 		create ML_people from:csv_file( "../includes/mlpeople_modified.csv",true) with:
-			[people_status::string(get("ML_STATUS")), 
+			[   people_status::string(get("ML_STATUS")), 
 				people_type::string(get("PERSON_TYPE")), 
 				people_lastname::string(get("LAST_NAME")),
 				people_firstname::string(get("FIRST_NAME")), 
@@ -72,12 +70,15 @@ global {
 				people_group::string(get("ML_GROUP")),
 				floor::int(get("FLOOR"))
 			]{
-			 location <- any_location_in( one_of (ML_element where (each.layer="Offices")));
+			 //location <- any_location_in( one_of (ML_element where (each.layer="Offices")));
 			 start_work <- 0 + rnd(12);
 			 end_work <- 8 + rnd(16);
 			 objective <- "resting";
 			 myoffice <- first(ML_element where (each.layer = people_office));
-			 //location <- any_location_in (myoffice.shape);
+			 if(myoffice != nil){
+			 	//location <- any_location_in (myoffice.shape);
+			 	location <- {0,0};
+			 } 
 		}
 	
 					
@@ -88,7 +89,7 @@ global {
 			if( floor!=3){
 				do die;
 			}
-				if(myoffice=nil){
+			if(myoffice=nil){
 				do die;	
 			}
 		}
@@ -150,13 +151,12 @@ species ML_people skills:[moving]{
 		
 	reflex time_to_go_home when: current_hour = end_work and objective = "working"{
 		objective <- "resting" ;
-		the_target <- any_location_in( one_of (ML_element where (each.layer="Elevators_Primary"))); 
+		//the_target <- any_location_in( one_of (ML_element where (each.layer="Elevators_Primary"))); 
+		the_target <- {0,0};
 	} 
 	
 	 reflex move when: the_target != nil{
     	do goto target:the_target speed:0.5 on: (cell where not each.is_wall) recompute_path: false;
-    	
-    	//do wander speed:0.01;
     	if the_target = location {
 			the_target <- nil ;
 		}
@@ -178,7 +178,7 @@ grid cell width: nb_cols height: nb_rows neighbors: 8 {
 	rgb color <- #white;
 	aspect default{
 		if (draw_grid){
-		  draw shape color:is_wall? #red:#black border:rgb(75,75,75) empty:true;	
+		  draw shape color:is_wall? #red:#black border:rgb(75,75,75) empty:false;	
 		}
 		
 	}	
