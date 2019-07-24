@@ -17,7 +17,7 @@ global {
 	float step <- 60 #sec;
 	bool drawInteraction <- false parameter: "Draw Interaction:" category: "Interaction";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
-	bool draw_grid <- false parameter: "Draw Grid:" category: "Interaction";
+	bool draw_grid <- true parameter: "Draw Grid:" category: "Interaction";
 	bool updateGraph <- true parameter: "Update Graph:" category: "Interaction";
 	int distance <- 200 parameter: "Distance:" category: "Interaction" min: 1 max: 1000;
 
@@ -32,8 +32,8 @@ global {
 	graph<ML_people, ML_people> interaction_graph;
 	
 	//DImension of the grid agent
-	int nb_cols <- 75;
-	int nb_rows <- 50;
+	int nb_cols <- 75*2;
+	int nb_rows <- 50*2;
 	
 	init {
 	//create house_element agents from the dxf file and initialized the layer attribute of the agents from the the file
@@ -94,7 +94,7 @@ global {
 			}
 		}
 		
-		ask ML_element where (each.layer="Z_grid_walls" or each.layer="Void" ){
+		ask ML_element where (each.layer="Walls" or each.layer="Void" ){
 			ask cell overlapping self {
 				is_wall <- true;
 			}
@@ -113,7 +113,7 @@ species ML_element
 	rgb color;
 	aspect default
 	{   
-		draw shape color: color border:color empty:true;
+	  draw shape color: color border:color empty:true;	
 	}
 	
 	aspect extrusion
