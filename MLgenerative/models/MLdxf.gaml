@@ -7,17 +7,17 @@
 
 model MLdxf
 
-/* Insert your model definition here */
+
 
 global {
-	file ML_file <- dxf_file("../includes/ML_4.dxf",#m);
-	
+	int curFloor<-3;
+	file ML_file <- dxf_file("../includes/ML_"+curFloor+".dxf",#m);
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 24;
 	float step <- 60 #sec;
 	bool drawInteraction <- false parameter: "Draw Interaction:" category: "Interaction";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
-	bool draw_grid <- true parameter: "Draw Grid:" category: "Interaction";
+	bool draw_grid <- false parameter: "Draw Grid:" category: "Interaction";
 	bool updateGraph <- true parameter: "Update Graph:" category: "Interaction";
 	int distance <- 200 parameter: "Distance:" category: "Interaction" min: 1 max: 1000;
 
@@ -31,7 +31,7 @@ global {
 	
 	graph<ML_people, ML_people> interaction_graph;
 	
-	//DImension of the grid agent
+	//Dimension of the grid agent
 	int nb_cols <- 75*2;
 	int nb_rows <- 50*2;
 	
@@ -57,7 +57,6 @@ global {
 			if (layer="0"){
 			  do die;	
 			}
-			
 		}
 		
 		create ML_people from:csv_file( "../includes/mlpeople_floors.csv",true) with:
@@ -70,15 +69,14 @@ global {
 				people_group::string(get("ML_GROUP")),
 				floor::int(get("FLOOR"))
 			]{
-			 //location <- any_location_in( one_of (ML_element where (each.layer="Offices")));
 			 start_work <- 0 + rnd(12);
 			 end_work <- 8 + rnd(16);
 			 objective <- "resting";
 			 myoffice <- first(ML_element where (each.layer = people_office));
 			 if(myoffice != nil){
 			 	location <- any_location_in (myoffice.shape);
-			 	//location <- {0,0};
-			 } 
+			 }
+			 myCollabOffice <- one_of(ML_people where (each.floor=floor)).myoffice;
 		}
 	
 					
@@ -86,7 +84,7 @@ global {
 			if (people_status = "FALSE"){
 				do die;
 			}
-			if( floor!=4){
+			if( floor!=curFloor){
 				do die;
 			}
 			if(myoffice=nil){
@@ -141,18 +139,19 @@ species ML_people skills:[moving]{
 	int end_work;
 	string objective;
 	ML_element myoffice;
+	ML_element myCollabOffice;
 
 
 		
 	reflex time_to_work when: current_hour = start_work and objective = "resting"{
 		objective <- "working" ;
-		the_target <- any_location_in(myoffice);
+		the_target <- any_location_in(myCollabOffice);
 	}
 		
 	reflex time_to_go_home when: current_hour = end_work and objective = "working"{
 		objective <- "resting" ;
 		//the_target <- any_location_in( one_of (ML_element where (each.layer="Elevators_Primary"))); 
-		the_target <- {0,0};
+		the_target <- any_location_in(myoffice);
 	} 
 	
 	 reflex move when: the_target != nil{
@@ -164,7 +163,6 @@ species ML_people skills:[moving]{
 	
 	aspect default {
 		draw circle(10) color: color_per_title[people_type] border: color_per_title[people_type]-50; 
-		//draw circle(10) color: #white border: #gray; 
 		if (current_path != nil and draw_trajectory=true) {
 			draw current_path.shape color: #red width:2;
 		}
@@ -186,7 +184,6 @@ grid cell width: nb_cols height: nb_rows neighbors: 8 {
 
 experiment OneFloor type: gui
 {   
-	parameter "Number of people agents" var: nb_people category: "People";
 	float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
@@ -199,8 +196,6 @@ experiment OneFloor type: gui
 			graphics "interaction_graph" {
 				if (interaction_graph != nil and drawInteraction = true) {
 					loop eg over: interaction_graph.edges {
-						//ML_people src <- interaction_graph source_of eg;
-						//ML_people target <- interaction_graph target_of eg;
 						geometry edge_geom <- geometry(eg);
 						draw line(edge_geom.points) width:1 color: #white;
 					}
@@ -212,26 +207,33 @@ experiment OneFloor type: gui
 	}	
 }
 
+experiment AllFloor type: gui {
 
-experiment AllLab type: gui
-{   
-	parameter "Number of people agents" var: nb_people category: "People";
-	float minimum_cycle_duration<-0.02;
+	init {
+		create simulation with: [curFloor:: 4];
+		create simulation with: [curFloor:: 5];
+		
+	}
 	output
 	{	layout #split;
-		display map type:opengl draw_env:false background:#black
-		{
+		display map type:opengl draw_env:false background:#black toolbar:false
+		{   
 			species ML_element;
 			species ML_people;
+			species cell aspect:default position:{0,0,-0.01};
 			
-			species ML_element  position:{0,0,0.25};
-			species ML_people position:{0,0,0.25};
+			graphics "interaction_graph" {
+				if (interaction_graph != nil and drawInteraction = true) {
+					loop eg over: interaction_graph.edges {
+						geometry edge_geom <- geometry(eg);
+						draw line(edge_geom.points) width:1 color: #white;
+					}
+
+				}
+			}
 			
-			species ML_element  position:{0,0,0.5};
-			species ML_people position:{0,0,0.5};
-			
-			species ML_element  position:{0,0,0.75};
-			species ML_people position:{0,0,0.75};
 		}
-	}	
+	}
 }
+
+
