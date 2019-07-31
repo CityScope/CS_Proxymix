@@ -10,7 +10,7 @@ model MLdxf
 /* Insert your model definition here */
 
 global {
-	file ML_file <- dxf_file("../includes/ML_3.dxf",#m);
+	file ML_file <- dxf_file("../includes/ML_4.dxf",#m);
 	
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 24;
@@ -86,7 +86,7 @@ global {
 			if (people_status = "FALSE"){
 				do die;
 			}
-			if( floor!=3){
+			if( floor!=4){
 				do die;
 			}
 			if(myoffice=nil){
