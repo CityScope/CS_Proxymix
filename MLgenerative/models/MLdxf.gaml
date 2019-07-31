@@ -10,7 +10,7 @@ model MLdxf
 
 
 global {
-	int curFloor<-3;
+	int curFloor<-2;
 	file ML_file <- dxf_file("../includes/ML_"+curFloor+".dxf",#m);
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 24;
@@ -32,8 +32,8 @@ global {
 	graph<ML_people, ML_people> interaction_graph;
 	
 	//Dimension of the grid agent
-	int nb_cols <- 75*2;
-	int nb_rows <- 50*2;
+	int nb_cols <- 75*1.5;
+	int nb_rows <- 50*1.5;
 	
 	init {
 	//create house_element agents from the dxf file and initialized the layer attribute of the agents from the the file
@@ -210,6 +210,7 @@ experiment OneFloor type: gui
 experiment AllFloor type: gui {
 
 	init {
+		create simulation with: [curFloor:: 3];
 		create simulation with: [curFloor:: 4];
 		create simulation with: [curFloor:: 5];
 		
