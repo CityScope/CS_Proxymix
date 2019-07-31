@@ -10,7 +10,7 @@ model MLdxf
 /* Insert your model definition here */
 
 global {
-	file ML_file <- dxf_file("../includes/E14-15_3-gama3.dxf",#m);
+	file ML_file <- dxf_file("../includes/ML_3.dxf",#m);
 	
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 24;
@@ -60,7 +60,7 @@ global {
 			
 		}
 		
-		create ML_people from:csv_file( "../includes/mlpeople_modified.csv",true) with:
+		create ML_people from:csv_file( "../includes/mlpeople_floors.csv",true) with:
 			[   people_status::string(get("ML_STATUS")), 
 				people_type::string(get("PERSON_TYPE")), 
 				people_lastname::string(get("LAST_NAME")),
@@ -76,8 +76,8 @@ global {
 			 objective <- "resting";
 			 myoffice <- first(ML_element where (each.layer = people_office));
 			 if(myoffice != nil){
-			 	//location <- any_location_in (myoffice.shape);
-			 	location <- {0,0};
+			 	location <- any_location_in (myoffice.shape);
+			 	//location <- {0,0};
 			 } 
 		}
 	
