@@ -1,1 +1,1 @@
-# CS_Generative_Design
+# CS_Proxymix
