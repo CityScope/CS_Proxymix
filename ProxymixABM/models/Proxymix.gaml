@@ -15,9 +15,9 @@ global {
 	file JsonFile <- json_file("../includes/project-network.json");
     map<string, unknown> collaborationFile <- JsonFile.contents;
 	int nb_people <- 100;
-	int current_hour update: 7 + (time / #hour) mod 24;
-	float step <- 60 #sec;
-	bool drawRealGraph <- true parameter: "Draw Real Graph:" category: "Vizu";
+	int current_hour update: (time / #hour) mod 18;
+	float step <- 1 #sec;
+	bool drawRealGraph <- false parameter: "Draw Real Graph:" category: "Vizu";
 	bool drawSimulatedGraph <- true parameter: "Draw Simulated Graph:" category: "Vizu";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
 	bool draw_grid <- false parameter: "Draw Grid:" category: "Interaction";
@@ -86,7 +86,7 @@ global {
 			 objective <- "resting";
 			 myoffice <- first(ML_element where (each.layer = people_office));
 			 if(myoffice != nil){
-			 	location <- any_location_in (myoffice.shape);
+			 	location <- myoffice.shape.location;
 			 } 
 		}
 		real_graph <- graph<ML_people, ML_people>([]);
@@ -101,16 +101,17 @@ global {
 			if(myoffice=nil){
 				do die;	
 			}
-			real_graph <<node(self);
-			 myDayTrip[8]<-one_of(ML_element where (each.layer="Elevators_Primary"));
-			 myDayTrip[9]<-any_location_in (myoffice.shape);
-			 myDayTrip[10]<-one_of(ML_element where (each.layer="Toilets"));
-			 myDayTrip[11]<-any_location_in (myoffice.shape);
-			 myDayTrip[12]<-one_of(ML_element where (each.layer="Elevators_Primary"));
-			 myDayTrip[14]<-any_location_in (myoffice.shape);
-			 myDayTrip[16]<-one_of(ML_element where (each.layer="Toilets"));
-			 myDayTrip[17]<-any_location_in (myoffice.shape);
-			 myDayTrip[18]<-one_of(ML_element where (each.layer="Elevators_Primary")); 
+			 real_graph <<node(self);
+			 location <- one_of(ML_element where (each.layer="Elevators_Primary"));
+			 location <- any_location_in(myoffice.shape);
+			 myDayTrip[rnd(3600*3)]<-any_location_in (myoffice.shape);
+			 myDayTrip[3600*3+rnd(3600)]<-one_of(ML_element where (each.layer="Coffee"));
+			 myDayTrip[3600*4+rnd(3600)]<-any_location_in (myoffice.shape);
+			 myDayTrip[3600*5+rnd(3600)]<-one_of(ML_element where (each.layer="Elevators_Primary"));
+			 myDayTrip[3600*6+rnd(3600)]<-any_location_in (myoffice.shape);
+			 myDayTrip[3600*6+rnd(3600*2)]<-one_of(ML_element where (each.layer="Coffee"));
+			 myDayTrip[3600*8+rnd(3600)]<-any_location_in (myoffice.shape);
+			 myDayTrip[rnd(10*3600)]<-one_of(ML_element where (each.layer="Elevators_Primary")); 
 		}
 		
 		ask ML_people{
@@ -133,7 +134,8 @@ global {
 	}
 	
 	reflex update{
-		write current_hour;
+		//write current_hour;
+		//write time;
 	}
 }
 
@@ -174,12 +176,19 @@ species ML_people skills:[moving]{
 	map<ML_people, string> collaboratorsandType;
 	
 	map<int,point> myDayTrip;
+	float tmpTime;
+	int curTrip<-0;
 
 	
 	 reflex move{
-	 	do goto target:myDayTrip[current_hour]; //speed:5.0 on: (cell where not each.is_wall);
-    	if the_target = location {
-			the_target <- nil ;
+	 	if(time = myDayTrip.keys[curTrip]){	
+	 		tmpTime <- time;
+	 		the_target<-myDayTrip[int(tmpTime)] ;
+	 	}
+	 	do goto target:the_target speed:10.0;
+    	if (the_target = location and the_target!=nil){
+			curTrip<-curTrip+1;
+			the_target<-nil;
 		}
     }
 	
@@ -219,7 +228,7 @@ grid cell width: nb_cols height: nb_rows neighbors: 8 {
 
 experiment Proxymix type: gui
 {   
-	float minimum_cycle_duration<-0.02;
+	//float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
 		display map type:opengl draw_env:false background:rgb(32,32,54)
@@ -232,7 +241,7 @@ experiment Proxymix type: gui
 				if (simulated_graph != nil and drawSimulatedGraph = true) {
 					loop eg over: simulated_graph.edges {
 						geometry edge_geom <- geometry(eg);
-						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#yellow;
+						draw curve(edge_geom.points[0],edge_geom.points[1], 0.0, 200, 90) color:#yellow;
 					}
 
 				}
