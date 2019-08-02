@@ -88,16 +88,6 @@ global {
 			 if(myoffice != nil){
 			 	location <- any_location_in (myoffice.shape);
 			 } 
-			 
-			 myDayTrip[8]<-one_of(ML_element where (each.layer="Elevators_Primary"));
-			 myDayTrip[9]<-any_location_in (myoffice.shape);
-			 myDayTrip[10]<-one_of(ML_element where (each.layer="Toilets"));
-			 myDayTrip[11]<-any_location_in (myoffice.shape);
-			 myDayTrip[12]<-one_of(ML_element where (each.layer="Elevators_Primary"));
-			 myDayTrip[14]<-any_location_in (myoffice.shape);
-			 myDayTrip[16]<-one_of(ML_element where (each.layer="Toilets"));
-			 myDayTrip[17]<-any_location_in (myoffice.shape);
-			 myDayTrip[18]<-one_of(ML_element where (each.layer="Elevators_Primary")); 
 		}
 		real_graph <- graph<ML_people, ML_people>([]);
 				
@@ -112,9 +102,18 @@ global {
 				do die;	
 			}
 			real_graph <<node(self);
+			 myDayTrip[8]<-one_of(ML_element where (each.layer="Elevators_Primary"));
+			 myDayTrip[9]<-any_location_in (myoffice.shape);
+			 myDayTrip[10]<-one_of(ML_element where (each.layer="Toilets"));
+			 myDayTrip[11]<-any_location_in (myoffice.shape);
+			 myDayTrip[12]<-one_of(ML_element where (each.layer="Elevators_Primary"));
+			 myDayTrip[14]<-any_location_in (myoffice.shape);
+			 myDayTrip[16]<-one_of(ML_element where (each.layer="Toilets"));
+			 myDayTrip[17]<-any_location_in (myoffice.shape);
+			 myDayTrip[18]<-one_of(ML_element where (each.layer="Elevators_Primary")); 
 		}
 		
-			ask ML_people{
+		ask ML_people{
         	list<list<string,string>> cells <- collaborationFile[people_username];            
         	loop mm over: cells {  
                ML_people pp <- ML_people first_with( each.people_username= string(mm[0])); //beaucoup plus optimisé que le where ici, car on s'arrête dès qu'on trouve
