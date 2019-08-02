@@ -1,11 +1,11 @@
 /***
 * Name: MLdxf
-* Author: Nicolas Ayoub
+* Author: Arnaud Grignard , Nicolas Ayoub
 * Description: 
 * Tags: Tag1, Tag2, TagN
 ***/
 
-model MLdxf
+model Proxymix
 
 
 
@@ -13,11 +13,12 @@ global {
 	int curFloor<-3;
 	file ML_file <- dxf_file("../includes/ML_"+curFloor+".dxf",#m);
 	file JsonFile <- json_file("../includes/project-network.json");
-    map<string, unknown> c <- JsonFile.contents;
+    map<string, unknown> collaborationFile <- JsonFile.contents;
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 24;
 	float step <- 60 #sec;
-	bool drawInteraction <- false parameter: "Draw Interaction:" category: "Interaction";
+	bool drawRealGraph <- true parameter: "Draw Real Graph:" category: "Vizu";
+	bool drawSimulatedGraph <- true parameter: "Draw Simulated Graph:" category: "Vizu";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
 	bool draw_grid <- false parameter: "Draw Grid:" category: "Interaction";
 	bool updateGraph <- true parameter: "Update Graph:" category: "Interaction";
@@ -31,7 +32,9 @@ global {
 	
 	map<string,rgb> color_per_title <- ["Visitor"::rgb(234,242,56),"Staff"::rgb(0,230,167), "Student"::rgb(255,66,109), "Other"::rgb(234,242,56), "Visitor/Affiliate"::rgb(234,242,56), "Faculty/PI"::rgb(37,211,250)];
 	
-	graph<ML_people, ML_people> interaction_graph;
+	graph<ML_people, ML_people> real_graph;
+	graph<ML_people, ML_people> simulated_graph;
+
 
 	int nb_cols <- 75*1.5;
 	int nb_rows <- 50*1.5;
@@ -44,7 +47,7 @@ global {
 				if (layer="0"){
 				  do die;	
 				}
-				shape<-shape translated_by {0,0,world.shape.width*floor/6}; 
+				//shape<-shape translated_by {0,0,world.shape.width*floor/6}; 
 			}
 		}
 		map layers <- list(ML_element) group_by each.layer;
@@ -84,43 +87,40 @@ global {
 			 myoffice <- first(ML_element where (each.layer = people_office));
 			 if(myoffice != nil){
 			 	location <- any_location_in (myoffice.shape);
-			 	location<-{location.x,location.y,world.shape.width*floor/6};
 			 } 
 		}
+		real_graph <- graph<ML_people, ML_people>([]);
 				
 		ask ML_people{
 			if (people_status = "FALSE"){
 				do die;
 			}
 			if( floor!=curFloor){
-				//do die;
+				do die;
 			}
 			if(myoffice=nil){
 				do die;	
 			}
-			
+			real_graph <<node(self);
 		}
 		
-		ask ML_people{
-        	list<list<string,string>> cells <- c[people_username];
-        	write people_username + "is collborating with: ";
+			ask ML_people{
+        	list<list<string,string>> cells <- collaborationFile[people_username];            
         	loop mm over: cells {  
                ML_people pp <- ML_people first_with( each.people_username= string(mm[0])); //beaucoup plus optimisé que le where ici, car on s'arrête dès qu'on trouve
             	if (pp != nil) {
-            			write pp;
-            			write mm[1] + "times"; 
-                          collaborators<<pp;
-            	          collaboratorsandNumbers[pp]<-mm[1];
-            	          collaboratorsandType[pp]<-pp.people_type;
+            		    real_graph <<edge(self,pp);
+                        collaborators<<pp;
+            	        collaboratorsandNumbers[pp]<-mm[1];
+            	        collaboratorsandType[pp]<-pp.people_type;
                 }
 
         	}
-        	myCollabOffice <- one_of(collaborators).myoffice;
 		}
 	}
 	
-	reflex updateGraph when: (drawInteraction = true and updateGraph=true) {
-		interaction_graph <- graph<ML_people, ML_people>(ML_people as_distance_graph (distance ));
+	reflex updateGraph when: (drawRealGraph = true and updateGraph=true) {
+		simulated_graph <- graph<ML_people, ML_people>(ML_people as_distance_graph (distance ));
 	}
 }
 
@@ -131,7 +131,7 @@ species ML_element
 	int floor;
 	aspect default
 	{   
-	  draw shape at:{location.x,location.y,world.shape.width*floor/6}color: color border:color empty:true;	
+	  draw shape color: color border:color empty:true;	
 	}
 	
 	init {
@@ -156,7 +156,6 @@ species ML_people skills:[moving]{
 	int end_work;
 	string objective;
 	ML_element myoffice;
-	ML_element myCollabOffice;
 	list<ML_people> collaborators;
 	map<ML_people, int> collaboratorsandNumbers;
 	map<ML_people, string> collaboratorsandType;
@@ -165,7 +164,7 @@ species ML_people skills:[moving]{
 		
 	reflex time_to_work when: current_hour = start_work and objective = "resting"{
 		objective <- "working" ;
-		the_target <- any_location_in(myCollabOffice);
+		the_target <- any_location_in(one_of(ML_element where (each.layer="Office")));
 	}
 		
 	reflex time_to_colaborate when: current_hour = end_work and objective = "working"{
@@ -199,8 +198,6 @@ species ML_people skills:[moving]{
 					}
 				}
 			}
-
-		
 	}
 }
 
@@ -219,7 +216,7 @@ grid cell width: nb_cols height: nb_rows neighbors: 8 {
 
 
 
-experiment AllFloor type: gui
+experiment Proxymix type: gui
 {   
 	float minimum_cycle_duration<-0.02;
 	output
@@ -228,15 +225,23 @@ experiment AllFloor type: gui
 		{   
 			species ML_element;
 			species ML_people;
-			species ML_people aspect:collaboration;
 			species cell aspect:default position:{0,0,-0.01};
 			
-			graphics "interaction_graph" {
-				if (interaction_graph != nil and drawInteraction = true) {
-					loop eg over: interaction_graph.edges {
+			graphics "simulated_graph" {
+				if (simulated_graph != nil and drawSimulatedGraph = true) {
+					loop eg over: simulated_graph.edges {
 						geometry edge_geom <- geometry(eg);
-						//draw line(edge_geom.points) width:1 color: #white;
-						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90);
+						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#yellow;
+					}
+
+				}
+			}
+			
+			graphics "real_graph" {
+				if (real_graph != nil and drawRealGraph = true) {
+					loop eg over: real_graph.edges {
+						geometry edge_geom <- geometry(eg);
+						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90)color:#green;
 					}
 
 				}
