@@ -128,7 +128,7 @@ global {
 		}
 	}
 	
-	reflex updateGraph when: (drawRealGraph = true and updateGraph=true) {
+	reflex updateGraph when: (drawSimulatedGraph = true and updateGraph=true) {
 		simulated_graph <- graph<ML_people, ML_people>(ML_people as_distance_graph (distance ));
 	}
 	
@@ -177,7 +177,7 @@ species ML_people skills:[moving]{
 
 	
 	 reflex move{
-	 	do goto target:myDayTrip[current_hour] speed:5.0 on: (cell where not each.is_wall);
+	 	do goto target:myDayTrip[current_hour]; //speed:5.0 on: (cell where not each.is_wall);
     	if the_target = location {
 			the_target <- nil ;
 		}
