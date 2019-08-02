@@ -15,7 +15,7 @@ global {
 	file JsonFile <- json_file("../includes/project-network.json");
     map<string, unknown> collaborationFile <- JsonFile.contents;
 	int nb_people <- 100;
-	int current_hour update: (time / #hour) mod 24;
+	int current_hour update: 7 + (time / #hour) mod 24;
 	float step <- 60 #sec;
 	bool drawRealGraph <- true parameter: "Draw Real Graph:" category: "Vizu";
 	bool drawSimulatedGraph <- true parameter: "Draw Simulated Graph:" category: "Vizu";
@@ -88,6 +88,16 @@ global {
 			 if(myoffice != nil){
 			 	location <- any_location_in (myoffice.shape);
 			 } 
+			 
+			 myDayTrip[8]<-one_of(ML_element where (each.layer="Elevators_Primary"));
+			 myDayTrip[9]<-any_location_in (myoffice.shape);
+			 myDayTrip[10]<-one_of(ML_element where (each.layer="Toilets"));
+			 myDayTrip[11]<-any_location_in (myoffice.shape);
+			 myDayTrip[12]<-one_of(ML_element where (each.layer="Elevators_Primary"));
+			 myDayTrip[14]<-any_location_in (myoffice.shape);
+			 myDayTrip[16]<-one_of(ML_element where (each.layer="Toilets"));
+			 myDayTrip[17]<-any_location_in (myoffice.shape);
+			 myDayTrip[18]<-one_of(ML_element where (each.layer="Elevators_Primary")); 
 		}
 		real_graph <- graph<ML_people, ML_people>([]);
 				
@@ -121,6 +131,10 @@ global {
 	
 	reflex updateGraph when: (drawRealGraph = true and updateGraph=true) {
 		simulated_graph <- graph<ML_people, ML_people>(ML_people as_distance_graph (distance ));
+	}
+	
+	reflex update{
+		write current_hour;
 	}
 }
 
@@ -159,24 +173,12 @@ species ML_people skills:[moving]{
 	list<ML_people> collaborators;
 	map<ML_people, int> collaboratorsandNumbers;
 	map<ML_people, string> collaboratorsandType;
-
-
-		
-	reflex time_to_work when: current_hour = start_work and objective = "resting"{
-		objective <- "working" ;
-		the_target <- any_location_in(one_of(ML_element where (each.layer="Office")));
-	}
-		
-	reflex time_to_colaborate when: current_hour = end_work and objective = "working"{
-		objective <- "resting" ;
-		//the_target <- any_location_in( one_of (ML_element where (each.layer="Elevators_Primary"))); 
-		the_target <- any_location_in(myoffice);
-	} 
 	
-	 reflex move when: the_target != nil{
-	 	do goto target:the_target speed:5;
-    	//do goto target:the_target speed:5 on: (cell where not each.is_wall) recompute_path: false;
-    	//do goto target:the_target speed:5 on: (cell where not each.is_wall) recompute_path: false;
+	map<int,point> myDayTrip;
+
+	
+	 reflex move{
+	 	do goto target:myDayTrip[current_hour] speed:5.0 on: (cell where not each.is_wall);
     	if the_target = location {
 			the_target <- nil ;
 		}
