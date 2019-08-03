@@ -17,7 +17,7 @@ global {
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 18;
 	float step <- 1 #sec;
-	bool drawRealGraph <- false parameter: "Draw Real Graph:" category: "Vizu";
+	bool drawRealGraph <- true parameter: "Draw Real Graph:" category: "Vizu";
 	bool drawSimulatedGraph <- true parameter: "Draw Simulated Graph:" category: "Vizu";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
 	bool draw_grid <- false parameter: "Draw Grid:" category: "Interaction";
@@ -105,13 +105,13 @@ global {
 			 location <- one_of(ML_element where (each.layer="Elevators_Primary"));
 			 location <- any_location_in(myoffice.shape);
 			 myDayTrip[rnd(3600*3)]<-any_location_in (myoffice.shape);
-			 myDayTrip[3600*3+rnd(3600)]<-one_of(ML_element where (each.layer="Coffee"));
+			 myDayTrip[3600*3+rnd(3600)]<-any_location_in(one_of(ML_element where (each.layer="Coffee")));
 			 myDayTrip[3600*4+rnd(3600)]<-any_location_in (myoffice.shape);
-			 myDayTrip[3600*5+rnd(3600)]<-one_of(ML_element where (each.layer="Elevators_Primary"));
+			 myDayTrip[3600*5+rnd(3600)]<-any_location_in(one_of(ML_element where (each.layer="Elevators_Primary")));
 			 myDayTrip[3600*6+rnd(3600)]<-any_location_in (myoffice.shape);
-			 myDayTrip[3600*6+rnd(3600*2)]<-one_of(ML_element where (each.layer="Coffee"));
+			 myDayTrip[3600*6+rnd(3600*2)]<-any_location_in(one_of(ML_element where (each.layer="Toilets")));
 			 myDayTrip[3600*8+rnd(3600)]<-any_location_in (myoffice.shape);
-			 myDayTrip[rnd(10*3600)]<-one_of(ML_element where (each.layer="Elevators_Primary")); 
+			 myDayTrip[3600*10+rnd(3600)]<-any_location_in(one_of(ML_element where (each.layer="Elevators_Primary"))); 
 		}
 		
 		ask ML_people{
@@ -119,23 +119,14 @@ global {
         	loop mm over: cells {  
                ML_people pp <- ML_people first_with( each.people_username= string(mm[0])); //beaucoup plus optimisé que le where ici, car on s'arrête dès qu'on trouve
             	if (pp != nil) {
-            		    real_graph <<edge(self,pp);
-                        collaborators<<pp;
-            	        collaboratorsandNumbers[pp]<-mm[1];
-            	        collaboratorsandType[pp]<-pp.people_type;
+                		real_graph <<edge(self,pp,float(mm[1]));
                 }
-
         	}
 		}
 	}
 	
 	reflex updateGraph when: (drawSimulatedGraph = true and updateGraph=true) {
 		simulated_graph <- graph<ML_people, ML_people>(ML_people as_distance_graph (distance ));
-	}
-	
-	reflex update{
-		//write current_hour;
-		//write time;
 	}
 }
 
@@ -181,13 +172,13 @@ species ML_people skills:[moving]{
 
 	
 	 reflex move{
-	 	if(time = myDayTrip.keys[curTrip]){	
+	 	if((time mod 36000) = myDayTrip.keys[curTrip]){	
 	 		tmpTime <- time;
 	 		the_target<-myDayTrip[int(tmpTime)] ;
 	 	}
 	 	do goto target:the_target speed:10.0;
     	if (the_target = location and the_target!=nil){
-			curTrip<-curTrip+1;
+			curTrip<-(curTrip+1);
 			the_target<-nil;
 		}
     }
@@ -251,7 +242,9 @@ experiment Proxymix type: gui
 				if (real_graph != nil and drawRealGraph = true) {
 					loop eg over: real_graph.edges {
 						geometry edge_geom <- geometry(eg);
-						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90)color:#green;
+						float w <- real_graph weight_of eg;
+						//draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90)color:rgb(0,w*10,0);
+						draw line(edge_geom.points[0],edge_geom.points[1]) width: w/2 color:rgb(0,255,0);
 					}
 
 				}
