@@ -1,0 +1,510 @@
+USERNAME,N_projects,ML_GROUP,is_affiliate,ML_GROUP_COLOR,degree,betweenness_centrality,eigenvector_centrality,infomap_community,infomap_community_COLOR
+a_hashmi,3,Civic Media,True,#db9057,2,0.0,2.2357121918400996e-05,45,#8557db
+dignazio,6,Civic Media,True,#db9057,4,0.0006214191320247047,6.47889139774343e-05,45,#8557db
+elplatt,2,Civic Media,False,#db9057,1,0.0,1.82362933660469e-05,45,#8557db
+emreiser,3,Civic Media,False,#db9057,4,0.010125026820697524,0.002951461604121049,45,#8557db
+erhardt,2,Civic Media,False,#db9057,2,0.0,0.0002059552662278553,45,#8557db
+jnmatias,7,Civic Media,False,#db9057,2,0.0,1.947500940098734e-05,45,#8557db
+mavipasi,2,Civic Media,False,#db9057,3,0.002977537109745596,1.9554443245650567e-05,45,#8557db
+ngyenes,1,Civic Media,True,#db9057,2,0.0,1.947500940098734e-05,45,#8557db
+rahulb,9,Civic Media,False,#db9057,12,0.02291465117723842,0.0002867159465872601,45,#8557db
+rubezc,1,Civic Media,False,#db9057,1,0.0,1.2437687455703031e-06,45,#8557db
+perovich,4,Object Based Media,False,#db5799,2,0.0,1.94800621116172e-05,45,#8557db
+ahope,4,Civic Media,False,#db9057,8,0.015240677089439991,0.0006561526864425329,21,#57db5f
+dsjen,1,Civic Media,False,#db9057,3,0.0,8.694086968667962e-05,21,#57db5f
+lemeb,1,Civic Media,False,#db9057,4,0.0,0.00036243830576480565,21,#57db5f
+matt54,3,Civic Media,False,#db9057,3,0.00013071902238921638,5.342103179241766e-05,21,#57db5f
+kzh,5,Collective Learning,False,#aadb57,4,0.0017153227857217809,0.0001189731665879178,21,#57db5f
+britneyj,4,Viral Communications,False,#91db57,6,0.007506188330611583,0.00036876424232886937,21,#57db5f
+jasrub,6,Viral Communications,False,#91db57,7,0.011702512124829697,0.0004240205176329994,21,#57db5f
+thariq,5,Viral Communications,False,#91db57,4,0.0109663943211645,0.00015972429069975797,21,#57db5f
+pewebb,4,Tangible Media,False,#5789db,13,0.04271698984307003,0.0039039764319910948,21,#57db5f
+katybell,7,Other,False,#5757db,11,0.0626280123177808,0.008687480241927687,21,#57db5f
+trich,7,Other,False,#5757db,8,0.013170829498894617,0.0010012153804693498,21,#57db5f
+emilysa,3,Object Based Media,False,#db5799,3,0.004134389286131239,0.0082755044638618,21,#57db5f
+csbishop,3,Civic Media,False,#db9057,1,0.0,1.4575787039096084e-36,7,#dbb757
+lorrie,2,Civic Media,False,#db9057,1,0.0,1.4575787039096084e-36,7,#dbb757
+kanaya,1,Civic Media,True,#db9057,3,0.0,4.006561833368215e-25,49,#b757db
+itot,2,Collective Learning,True,#aadb57,3,0.0,4.006561833368215e-25,49,#b757db
+bandy,1,Synthetic Neurobiology,True,#57dbb2,3,0.0,4.006561833368215e-25,49,#b757db
+shoh,1,Synthetic Neurobiology,False,#57dbb2,3,0.0,4.006561833368215e-25,49,#b757db
+oi7,6,Civic Media,False,#db9057,9,0.02549998492399088,0.04294622462888046,0,#db5f57
+aberke,5,City Science,False,#dbdb57,12,0.011459083279063111,0.1447230644113831,0,#db5f57
+agnis,2,City Science,False,#dbdb57,12,0.0003231311801505191,0.16054950149383324,0,#db5f57
+agrignar,21,City Science,False,#dbdb57,23,0.01150040377965326,0.2717267841957123,0,#db5f57
+aizpurua,1,City Science,False,#dbdb57,5,0.0,0.03971573783478303,0,#db5f57
+alonsolp,25,City Science,False,#dbdb57,29,0.028065780535699927,0.28580418964695803,0,#db5f57
+csmuts,13,City Science,False,#dbdb57,27,0.0587589225628282,0.27854125716974903,0,#db5f57
+devisj,7,City Science,False,#dbdb57,16,0.0013111471429536113,0.21573850851813567,0,#db5f57
+doorleyr,11,City Science,False,#dbdb57,16,0.0057580425359773455,0.21452340542186096,0,#db5f57
+gba,2,City Science,False,#dbdb57,10,0.0,0.14020931748247517,0,#db5f57
+gbabio,3,City Science,False,#dbdb57,11,1.6217522384235271e-06,0.153036908456128,0,#db5f57
+gowharji,1,City Science,False,#dbdb57,3,0.0,0.045601980808800235,0,#db5f57
+hlarrea,2,City Science,False,#dbdb57,5,0.0,0.03971573783478303,0,#db5f57
+honghaod,3,City Science,False,#dbdb57,2,0.0,0.020908207248445006,0,#db5f57
+jiw,16,City Science,False,#dbdb57,18,0.002796493171886877,0.2124877461658721,0,#db5f57
+kapeloni,5,City Science,False,#dbdb57,4,0.00028762201483913607,0.03300996328677882,0,#db5f57
+maitanei,5,City Science,False,#dbdb57,21,0.011694399269674227,0.20681680347065196,0,#db5f57
+mdchurch,5,City Science,False,#dbdb57,13,2.5452217571219992e-05,0.18095407652968926,0,#db5f57
+mkh,3,City Science,False,#dbdb57,6,2.0642589206219462e-05,0.052421605647673716,0,#db5f57
+noyman,17,City Science,False,#dbdb57,23,0.008698466147060751,0.272728503485278,0,#db5f57
+oarino,1,City Science,False,#dbdb57,5,0.0,0.03971573783478303,0,#db5f57
+rchin,2,City Science,False,#dbdb57,4,9.12235634113234e-07,0.05442876383129268,0,#db5f57
+ryanz,11,City Science,False,#dbdb57,20,0.021307636877684114,0.2259964801033981,0,#db5f57
+yasushis,6,City Science,False,#dbdb57,15,0.013787389160892016,0.1842644800852255,0,#db5f57
+lrocher,1,Human Dynamics,False,#57dbca,11,0.0,0.15729489379197395,0,#db5f57
+noriega,2,Human Dynamics,False,#57dbca,12,0.0008672925700812283,0.15889772995422266,0,#db5f57
+yleng,7,Human Dynamics,False,#57dbca,23,0.027828602451603703,0.20264478257100974,0,#db5f57
+nlutz,10,Object Based Media,False,#db5799,12,0.031607284869321996,0.12000042728003743,0,#db5f57
+pcuellar,7,Civic Media,False,#db9057,13,0.04168320611047225,0.0005335310544335982,2,#db7857
+edith,1,City Science,True,#dbdb57,3,0.0,4.824804327466606e-05,2,#db7857
+akostrow,7,Personal Robots,False,#db57b2,3,3.648942536452936e-06,4.765720111662328e-05,2,#db7857
+aymerich,1,Personal Robots,False,#db57b2,3,0.0,9.821608798406595e-05,2,#db7857
+gelso,1,Personal Robots,False,#db57b2,2,0.0,4.228291173523145e-05,2,#db7857
+haewon,19,Personal Robots,False,#db57b2,19,0.032886793106466604,0.0005887306117529485,2,#db7857
+hchen25,2,Personal Robots,False,#db57b2,6,0.0,0.00011197440920095706,2,#db7857
+igrover,5,Personal Robots,False,#db57b2,11,0.016220823803983875,0.0002793409791290015,2,#db7857
+jakory,4,Personal Robots,False,#db57b2,3,3.648942536452936e-06,5.209909848114309e-05,2,#db7857
+jinjoo,6,Personal Robots,True,#db57b2,6,0.0013231291944411333,7.562296077535743e-05,2,#db7857
+jon,2,Personal Robots,False,#db57b2,2,0.0,4.477972998098314e-05,2,#db7857
+lukulele,1,Personal Robots,False,#db57b2,3,0.0,4.920642084002581e-05,2,#db7857
+michalg,2,Personal Robots,False,#db57b2,3,0.0,4.824804327466606e-05,2,#db7857
+nikhita,9,Personal Robots,False,#db57b2,8,0.0012369549098370863,0.00011935522463861804,2,#db7857
+randiw12,5,Personal Robots,False,#db57b2,9,0.0031514036433334196,0.0001208700438780018,2,#db7857
+safinah,1,Personal Robots,False,#db57b2,2,0.0,4.050137941029287e-05,2,#db7857
+samuelsp,3,Personal Robots,False,#db57b2,7,0.0010507321366965015,0.00011465516841289259,2,#db7857
+sooyeon6,6,Personal Robots,False,#db57b2,6,0.00035743661653498565,0.00010880731035959638,2,#db7857
+sands,2,Civic Media,False,#db9057,2,0.0,0.003520941249085332,14,#a7db57
+liuymit,1,City Science,False,#dbdb57,3,0.0,0.018105810204859882,14,#a7db57
+thomassl,7,City Science,False,#dbdb57,15,0.07460873316436435,0.04058599740895102,14,#a7db57
+aekblaw,8,Responsive Environments,False,#c3db57,7,0.01039287579242811,0.0017161034115489244,14,#a7db57
+muccillo,1,Responsive Environments,False,#c3db57,2,0.0,0.00011925545297006914,14,#a7db57
+vsumini,3,Responsive Environments,False,#c3db57,5,0.0040638705198715675,0.00015898125863230393,14,#a7db57
+nicolelh,8,Opera of the Future,False,#57db80,6,0.0055923207319207476,0.014775750564082625,14,#a7db57
+jgroff,2,Lifelong Kindergarten,False,#6f57db,3,0.0,0.0029903169950351157,14,#a7db57
+andreuhl,1,Other,False,#5757db,3,0.0,0.0011200998109276974,14,#a7db57
+yun_choi,5,Conformable Decoders,False,#db5f57,1,0.0,1.0111422142657217e-05,14,#a7db57
+prathima,1,Space Enabled,False,#d357db,3,0.0,0.0011200998109276974,14,#a7db57
+srife,1,Civic Media,False,#db9057,4,0.0,2.7929707902747177e-05,4,#db9157
+zhangjia,3,Civic Media,False,#db9057,4,0.0,2.7929707902747177e-05,4,#db9157
+cjaffe,2,Responsive Environments,False,#c3db57,4,0.0,2.7929707902747177e-05,4,#db9157
+saquib,7,Social Machines,False,#db5780,14,0.023889152320967815,0.00035534305699346864,4,#db9157
+jbobrow,4,Playful Systems,False,#5fdb57,3,0.009358731607585971,3.246542478514729e-05,4,#db9157
+echristo,1,Social Computing,False,#57d3db,4,0.0,2.7929707902747177e-05,4,#db9157
+shantell,1,Social Computing,True,#57d3db,2,0.0,2.4665965000458006e-05,4,#db9157
+aamena,3,Collective Learning,False,#aadb57,4,3.040785447044113e-05,2.9820258757333843e-22,18,#75db57
+almaha,2,Collective Learning,False,#aadb57,2,7.297885072905872e-05,5.924965645424205e-23,18,#75db57
+bjun,4,Collective Learning,False,#aadb57,4,4.9868881331523465e-05,2.966862170197777e-22,18,#75db57
+ccandiav,4,Collective Learning,False,#aadb57,2,4.865256715270581e-06,1.7470187220023504e-22,18,#75db57
+crisjf,7,Collective Learning,False,#aadb57,6,0.00016906767085565273,3.529377401941462e-22,18,#75db57
+flaviopp,4,Collective Learning,False,#aadb57,4,2.1893655218717616e-05,3.0155460588618325e-22,18,#75db57
+gaojian,2,Collective Learning,False,#aadb57,2,0.0,1.5879205944488882e-22,18,#75db57
+sanjayg,2,Collective Learning,False,#aadb57,1,0.0,1.581535076939726e-23,18,#75db57
+amy_yu,1,Other,False,#5757db,1,0.0,9.420871686995433e-23,18,#75db57
+arista,2,Other,False,#5757db,3,0.0001313619313123057,2.061539157108127e-22,18,#75db57
+hartmado,3,Other,False,#5757db,5,9.608882012659398e-05,3.601349484285123e-22,18,#75db57
+mkaltenb,1,Other,False,#5757db,2,0.0,1.9033856494141546e-22,18,#75db57
+dorghian,1,Collective Learning,False,#aadb57,2,0.0,7.163080939134918e-30,56,#db57a7
+xiaojiao,1,Collective Learning,True,#aadb57,2,0.0,7.163080939134918e-30,56,#db57a7
+jingxian,1,Scalable Cooperation,False,#db7857,2,0.0,7.163080939134918e-30,56,#db57a7
+lduan,1,Collective Learning,True,#aadb57,1,0.0,0.00010179726904977745,8,#dbc457
+judyshen,2,Affective Computing,False,#8857db,12,0.012032629152395046,0.006825772375450746,8,#dbc457
+blakeley,2,Personal Robots,False,#db57b2,8,0.013720227865790422,0.006470490196531264,8,#dbc457
+dcalacci,5,Human Dynamics,False,#57dbca,9,0.00649887985707106,0.03490000969446859,8,#dbc457
+dhaval,5,Human Dynamics,False,#57dbca,5,6.634440975368975e-07,0.024404941069504707,8,#dbc457
+dubeya,4,Human Dynamics,False,#57dbca,13,0.00840672471087289,0.024934629171796018,8,#dbc457
+eaman,3,Human Dynamics,False,#57dbca,7,0.0033270171122252727,0.011879330276301526,8,#dbc457
+emoro,11,Human Dynamics,False,#57dbca,21,0.03213740123442866,0.09546076909388014,8,#dbc457
+orenled,2,Human Dynamics,False,#57dbca,2,0.0,0.002393574175799502,8,#dbc457
+pkrafft,4,Human Dynamics,False,#57dbca,7,0.0007835764538167796,0.025793383231263147,8,#dbc457
+xdong,6,Human Dynamics,True,#57dbca,8,0.001577561288336167,0.02566298936584508,8,#dbc457
+yva,4,Human Dynamics,False,#57dbca,1,0.0,0.0007555083337398947,8,#dbc457
+cebrian,15,Scalable Cooperation,False,#db7857,13,0.0032592985894272456,0.015144428267768226,8,#dbc457
+felbo,3,Scalable Cooperation,False,#db7857,9,0.001410335002841831,0.012763761830768718,8,#dbc457
+groh,8,Scalable Cooperation,False,#db7857,12,0.0022303856976485354,0.01452407677382842,8,#dbc457
+hyoun,2,Scalable Cooperation,True,#db7857,5,0.0,0.009189659475636353,8,#dbc457
+lorenzoc,2,Scalable Cooperation,False,#db7857,2,0.0,0.0007489590184140541,8,#dbc457
+mrfrank,5,Scalable Cooperation,False,#db7857,8,0.003988776136178655,0.010175732445768191,8,#dbc457
+niccolop,3,Scalable Cooperation,False,#db7857,6,6.634440975368975e-07,0.011258330005318617,8,#dbc457
+nobradov,9,Scalable Cooperation,False,#db7857,12,0.007147889821656137,0.01414113543013993,8,#dbc457
+pinary,6,Scalable Cooperation,False,#db7857,6,0.008530072837237094,0.010374523425306039,8,#dbc457
+sunlijun,3,Scalable Cooperation,False,#db7857,4,0.0032556921987626154,0.0016006243335727163,8,#dbc457
+zive,5,Scalable Cooperation,False,#db7857,9,0.0008732483554978821,0.012816609340691112,8,#dbc457
+suhara,3,Affiliates,True,#db57cb,5,6.121535502820805e-05,0.01134045482776034,8,#dbc457
+abhia,2,City Science,False,#dbdb57,9,2.2820118384799547e-05,0.054341076727736796,1,#db6b57
+cassiano,4,City Science,False,#dbdb57,11,0.005788127032225897,0.07754402580861734,1,#db6b57
+cq_zhang,4,City Science,True,#dbdb57,9,2.2820118384799547e-05,0.054341076727736796,1,#db6b57
+inigo,1,City Science,False,#dbdb57,6,0.0,0.043516733161464226,1,#db6b57
+jerryao,2,City Science,False,#dbdb57,8,0.0,0.05173896321950206,1,#db6b57
+lukeji,4,City Science,True,#dbdb57,9,2.2820118384799547e-05,0.054341076727736796,1,#db6b57
+mcllin,11,City Science,False,#dbdb57,25,0.008977036875985325,0.25682541925505353,1,#db6b57
+ptinn,11,City Science,False,#dbdb57,21,0.00718275555614463,0.21004999330866092,1,#db6b57
+taiyu,3,City Science,False,#dbdb57,9,2.2820118384799547e-05,0.0543410767277368,1,#db6b57
+yagol,2,City Science,False,#dbdb57,8,0.0,0.05173896321950206,1,#db6b57
+alhadidi,1,City Science,False,#dbdb57,3,0.0,0.01507016285664161,53,#db57cd
+apaolaza,1,City Science,False,#dbdb57,3,0.0,0.01507016285664161,53,#db57cd
+nanaco,1,City Science,False,#dbdb57,3,0.0,0.01507016285664161,53,#db57cd
+abyjain,6,Fluid Interfaces,False,#dba957,11,0.0507192236360857,0.0004209854041396036,16,#8edb57
+adamjhh,5,Fluid Interfaces,False,#dba957,8,0.007207897899241631,0.0005625658979118378,16,#8edb57
+amores,17,Fluid Interfaces,False,#dba957,20,0.1027665180656362,0.0024340490523458223,16,#8edb57
+avujic,3,Fluid Interfaces,False,#dba957,5,0.0,0.0002594923198121963,16,#8edb57
+changzj,4,Fluid Interfaces,False,#dba957,5,0.0012755974079310048,0.00030895796555402,16,#8edb57
+gbernal,6,Fluid Interfaces,False,#dba957,8,0.021169270404958435,0.0032860720152178375,16,#8edb57
+katsuyaf,1,Fluid Interfaces,False,#dba957,3,0.0,0.00020443288615547539,16,#8edb57
+patpat,6,Fluid Interfaces,False,#dba957,8,0.021725944200705297,0.0003356869304468039,16,#8edb57
+rboldu,2,Fluid Interfaces,False,#dba957,3,1.0089878983373647e-05,0.00019100847322487018,16,#8edb57
+rosello,7,Fluid Interfaces,False,#dba957,12,0.025130820001041308,0.0006227659356788373,16,#8edb57
+tomasero,8,Fluid Interfaces,False,#dba957,12,0.03304702211430845,0.001115059068168473,16,#8edb57
+xavib,3,Fluid Interfaces,False,#dba957,3,0.00022942596587379336,0.00025813953304255134,16,#8edb57
+yangtao,1,Fluid Interfaces,False,#dba957,1,0.0,0.00020900492639263886,16,#8edb57
+desireed,1,Other,False,#5757db,2,0.0,1.8006983833348807e-05,16,#8edb57
+dkong,8,Other,False,#5757db,9,0.011848116415862683,0.0002637955155254977,16,#8edb57
+nbakker,1,Other,True,#5757db,1,0.0,1.679184191124301e-05,16,#8edb57
+suryaj,2,Molecular Machines,False,#57db99,3,3.648942536452936e-06,1.9084838288144503e-05,16,#8edb57
+achituv,7,Fluid Interfaces,False,#dba957,11,0.013519828560852917,0.0015514621274484112,26,#57db9e
+weller,8,Viral Communications,False,#91db57,10,0.015701857452840494,0.0012867276407165411,26,#57db9e
+taka_y,1,Tangible Media,False,#5789db,1,0.0,9.904180367071975e-05,26,#57db9e
+asling,3,Mediated Matter,False,#dbc257,12,0.0001292523884895606,0.0032155744598905147,26,#57db9e
+bader_ch,10,Mediated Matter,False,#dbc257,21,0.006850951116871602,0.005627745433063014,26,#57db9e
+cail,4,Mediated Matter,False,#dbc257,9,0.0013244607686398212,0.003450923060820739,26,#57db9e
+darweesh,3,Mediated Matter,False,#dbc257,17,0.00381789988108008,0.005281096706697476,26,#57db9e
+dlizardo,3,Mediated Matter,False,#dbc257,20,0.011600869678374884,0.0055847469099228044,26,#57db9e
+dumo,2,Mediated Matter,False,#dbc257,11,0.0,0.00300855424912311,26,#57db9e
+fkraemer,2,Mediated Matter,False,#dbc257,6,0.0005151643635092461,0.0012241154934422402,26,#57db9e
+giorgiaf,1,Mediated Matter,False,#dbc257,7,0.0,0.0012677251563463245,26,#57db9e
+inamura,3,Mediated Matter,False,#dbc257,12,0.020747715827860398,0.0031081696334776137,26,#57db9e
+j_duro,4,Mediated Matter,False,#dbc257,12,0.0007926665342048389,0.004512209381245306,26,#57db9e
+j_klein,1,Mediated Matter,False,#dbc257,4,0.0,0.00233994222792819,26,#57db9e
+jleland,2,Mediated Matter,False,#dbc257,3,0.0,0.0006491950312153875,26,#57db9e
+josephk,1,Mediated Matter,False,#dbc257,5,0.0,0.001213148245845013,26,#57db9e
+jpcosta,5,Mediated Matter,False,#dbc257,19,0.004542216771292266,0.00548960489707537,26,#57db9e
+jvanzak,3,Mediated Matter,False,#dbc257,14,0.02089166161382408,0.0031120725653177696,26,#57db9e
+ked03,1,Mediated Matter,False,#dbc257,7,0.0,0.0012677251563463245,26,#57db9e
+kolb,5,Mediated Matter,False,#dbc257,7,0.0004344484544643782,0.0014863931376467164,26,#57db9e
+limulus,4,Mediated Matter,True,#dbc257,13,0.0009686284738041385,0.0031954748877255097,26,#57db9e
+m_kayser,4,Mediated Matter,False,#dbc257,15,0.03189993231962062,0.02513107045844447,26,#57db9e
+mlstern,2,Mediated Matter,False,#dbc257,9,0.0013290385540085312,0.0029115475523979455,26,#57db9e
+moonshot,3,Mediated Matter,False,#dbc257,4,0.0,0.0008669016712794841,26,#57db9e
+nah6cz,2,Mediated Matter,False,#dbc257,11,0.0,0.00300855424912311,26,#57db9e
+nassia,2,Mediated Matter,False,#dbc257,13,0.003700007079491613,0.004151183300832345,26,#57db9e
+renri,1,Mediated Matter,False,#dbc257,2,0.0,0.00018208781657104057,26,#57db9e
+rssmith,5,Mediated Matter,False,#dbc257,10,0.01395596771148855,0.0016208886751284026,26,#57db9e
+ssunanda,9,Mediated Matter,False,#dbc257,19,0.009217608675208315,0.005015277377733577,26,#57db9e
+stevenk,5,Mediated Matter,False,#dbc257,7,0.0001370400431953591,0.0014301055219675275,26,#57db9e
+yjtai,2,Mediated Matter,False,#dbc257,11,0.0,0.00300855424912311,26,#57db9e
+sfalcone,1,Center for Bits and Atoms,False,#57a2db,6,0.0,0.003132472021174551,26,#57db9e
+arnavk,1,Fluid Interfaces,False,#dba957,1,0.0,1.4575787039096084e-36,60,#db5775
+ewadkins,1,Fluid Interfaces,False,#dba957,1,0.0,1.4575787039096084e-36,60,#db5775
+benolds,2,Fluid Interfaces,False,#dba957,2,0.0,7.163080939134918e-30,33,#57c0db
+heun,5,Fluid Interfaces,False,#dba957,2,0.0,7.163080939134918e-30,33,#57c0db
+hobinjk,1,Fluid Interfaces,False,#dba957,2,0.0,7.163080939134918e-30,33,#57c0db
+cdvm,4,Fluid Interfaces,False,#dba957,4,0.002977537109745596,1.9410747584176332e-05,29,#57dbc4
+jsirera,1,Fluid Interfaces,False,#dba957,3,0.0,7.87285027033023e-06,29,#57dbc4
+minakhan,4,Fluid Interfaces,False,#dba957,9,0.01492746673825446,0.0001079531872535356,29,#57dbc4
+utkarshs,1,Fluid Interfaces,False,#dba957,1,0.0,6.8705333448565286e-06,29,#57dbc4
+afuste,5,Speech + Mobility,False,#57db67,5,0.007901347633227295,0.0001764639459865738,29,#57dbc4
+pe25171,4,Object Based Media,False,#db5799,3,0.0,1.9336789365428652e-05,29,#57dbc4
+erinhong,2,Fluid Interfaces,False,#dba957,3,0.0,1.3856925830320765e-06,9,#dbd057
+swgreen,4,Fluid Interfaces,False,#dba957,3,0.0,1.3856925830320765e-06,9,#dbd057
+oceane,4,Responsive Environments,False,#c3db57,2,0.0,2.8380460128197387e-05,9,#dbd057
+agnescam,4,Viral Communications,False,#91db57,5,0.009049182047223898,0.0006802286278288586,9,#dbd057
+anderton,11,Viral Communications,False,#91db57,4,0.003031579766869227,9.592383603012422e-05,9,#dbd057
+eickhoff,3,Viral Communications,False,#91db57,1,0.0,8.82804618872457e-06,9,#dbd057
+hbedri,7,Viral Communications,False,#91db57,6,0.008957864328377954,1.891310224336942e-05,9,#dbd057
+kalli,7,Viral Communications,False,#91db57,5,0.009166481903149313,5.7903693557741e-05,9,#dbd057
+mhjiang,8,Viral Communications,False,#91db57,6,0.010013881136622977,0.0001382942857018813,9,#dbd057
+smpsnr,2,Viral Communications,False,#91db57,4,0.004146420217074097,7.735581604821069e-05,9,#dbd057
+harshit,1,Fluid Interfaces,False,#dba957,1,0.0,1.589274495083357e-33,28,#57dbb7
+sangwon,5,Fluid Interfaces,False,#dba957,2,7.297885072905872e-06,2.2475735452805366e-33,28,#57dbb7
+yuhanhu,1,Fluid Interfaces,False,#dba957,1,0.0,1.589274495083357e-33,28,#57dbb7
+janetb,1,Fluid Interfaces,True,#dba957,2,0.0,0.00045827316543234527,6,#dbaa57
+tempest,1,Initiatives,False,#db5768,1,0.0,4.7420129496598635e-05,6,#dbaa57
+akito,3,Opera of the Future,True,#57db80,11,0.007890816959259726,0.003844149792671158,6,#dbaa57
+benb,2,Opera of the Future,False,#57db80,7,0.0,0.0007427520465996275,6,#dbaa57
+davidsu,7,Opera of the Future,False,#57db80,5,0.009656329149040391,0.001027426856425632,6,#dbaa57
+dnunez,2,Opera of the Future,True,#57db80,8,0.002977537109745596,0.000745587686885705,6,#dbaa57
+hanelee,2,Opera of the Future,False,#57db80,1,0.0,6.534708409995944e-05,6,#dbaa57
+holbrow,7,Opera of the Future,False,#57db80,7,0.0,0.0007427520465996275,6,#dbaa57
+patorpey,2,Opera of the Future,False,#57db80,7,0.0,0.0007427520465996275,6,#dbaa57
+platte,2,Opera of the Future,False,#57db80,7,0.0,0.0007427520465996275,6,#dbaa57
+rebklein,15,Opera of the Future,False,#57db80,14,0.018723696567863195,0.0041176386160588965,6,#dbaa57
+sovsey,1,Opera of the Future,False,#57db80,7,0.0,0.0007427520465996275,6,#dbaa57
+x_x,3,Tangible Media,True,#5789db,5,0.0,0.0035774906964153507,6,#dbaa57
+vparth,4,Object Based Media,False,#db5799,3,0.007449906114272082,0.007768173443906213,6,#dbaa57
+gabem,3,Playful Systems,True,#5fdb57,4,0.0034919324347967113,0.0030878052528274568,6,#dbaa57
+jnarain,2,Fluid Interfaces,False,#dba957,1,0.0,1.0270134850292455e-05,5,#db9e57
+nfarve,4,Fluid Interfaces,False,#dba957,1,0.0,7.535539514880614e-05,5,#db9e57
+azaria,3,Responsive Environments,False,#c3db57,7,0.00395842811514573,0.0003760661513058703,5,#db9e57
+agata,5,Affective Computing,False,#8857db,8,0.006279473071159516,0.0008462690747647743,5,#db9e57
+akanes,9,Affective Computing,False,#8857db,11,0.009716744037228773,0.002205652790737557,5,#db9e57
+asma_gh,9,Affective Computing,False,#8857db,11,0.004650182105756983,0.0010590967929698274,5,#db9e57
+cvx,7,Affective Computing,False,#8857db,7,0.01914149709028309,0.0019322081779028484,5,#db9e57
+ehinosa,1,Affective Computing,False,#8857db,5,0.0,0.0003623862417233988,5,#db9e57
+fergusoc,5,Affective Computing,False,#8857db,11,0.0182953402730065,0.0026414634379327315,5,#db9e57
+fpeng,2,Affective Computing,False,#8857db,2,0.0,0.00022346629882586717,5,#db9e57
+gleslie,4,Affective Computing,False,#8857db,1,0.0,6.73612055068038e-05,5,#db9e57
+jaquesn,13,Affective Computing,False,#8857db,13,0.008977739111155875,0.0011847791441842177,5,#db9e57
+javierhr,6,Affective Computing,False,#8857db,9,0.07511143694750014,0.02284734196811617,5,#db9e57
+ktj,8,Affective Computing,False,#8857db,4,0.002977537109745596,0.0001614671708898277,5,#db9e57
+ncjones,1,Affective Computing,False,#8857db,5,0.0,0.0007986600596492575,5,#db9e57
+sataylor,10,Affective Computing,False,#8857db,13,0.012859406959677721,0.0008719544549586755,5,#db9e57
+sfedor,6,Affective Computing,False,#8857db,6,0.0009160873718717378,0.0004716340312390098,5,#db9e57
+terumi,1,Affective Computing,False,#8857db,2,0.0,0.0001957493851193518,5,#db9e57
+kakehi,2,Fluid Interfaces,False,#dba957,4,0.00046026715141997675,9.245476017721633e-05,11,#cddb57
+sareen,6,Fluid Interfaces,False,#dba957,5,0.0014327341105742728,7.637277283749529e-05,11,#cddb57
+andresc,3,Speech + Mobility,False,#57db67,5,0.009445613206533556,4.041002168387995e-05,11,#cddb57
+manisham,7,Speech + Mobility,False,#57db67,4,0.0004670804576836375,2.6359911520161274e-05,11,#cddb57
+amosg,4,Tangible Media,False,#5789db,4,0.001528326471686162,0.00043099812486242615,11,#cddb57
+basheer,2,Tangible Media,False,#5789db,3,0.0006257701730375473,0.0002518661448476974,11,#cddb57
+chinyich,2,Tangible Media,False,#5789db,8,6.0862044719122944e-05,8.621949832088366e-05,11,#cddb57
+clarkds,2,Tangible Media,False,#5789db,6,0.0008575051385579743,7.460638065191096e-05,11,#cddb57
+daniell,4,Tangible Media,True,#5789db,5,0.003060000860527014,7.583847503159407e-05,11,#cddb57
+djfitz,7,Tangible Media,False,#5789db,10,0.01184283032658397,0.00015984188166413813,11,#cddb57
+guanyun,1,Tangible Media,False,#5789db,6,0.0,7.63929890826067e-05,11,#cddb57
+heibeck,3,Tangible Media,False,#5789db,6,0.00032475091396390977,8.722201691112076e-05,11,#cddb57
+jannik,1,Tangible Media,True,#5789db,2,0.0,5.5516884835302964e-05,11,#cddb57
+jifei,11,Tangible Media,False,#5789db,20,0.04884234318688381,0.0007955632810903383,11,#cddb57
+ken_n,11,Tangible Media,False,#5789db,12,0.016684598501056774,0.0005188545513918085,11,#cddb57
+lajv,4,Tangible Media,False,#5789db,6,0.000973476809269239,8.693339385014477e-05,11,#cddb57
+liningy,4,Tangible Media,False,#5789db,8,0.0008645664607360113,8.566371778746149e-05,11,#cddb57
+nv2247,3,Tangible Media,False,#5789db,6,0.0008901965639373136,7.703591852119752e-05,11,#cddb57
+oksana,1,Tangible Media,False,#5789db,6,0.0,7.63929890826067e-05,11,#cddb57
+olwal,1,Tangible Media,False,#5789db,1,0.0,4.830003580693704e-06,11,#cddb57
+steinerh,1,Tangible Media,False,#5789db,6,0.0,7.63929890826067e-05,11,#cddb57
+udayan,6,Tangible Media,False,#5789db,7,0.002485923204905387,0.0001119529307631272,11,#cddb57
+wwen,3,Tangible Media,False,#5789db,7,0.0007875752478508311,8.04460725946201e-05,11,#cddb57
+dvlevine,4,Biomechatronics,False,#a157db,7,0.00964666208532973,6.773008312623725e-05,11,#cddb57
+kubat,1,Fluid Interfaces,False,#dba957,1,0.0,1.4575787039096084e-36,50,#c457db
+linder,1,Fluid Interfaces,False,#dba957,1,0.0,1.4575787039096084e-36,50,#c457db
+mingrui,1,Fluid Interfaces,False,#dba957,2,0.0,6.789017067179692e-06,23,#57db78
+yedan,1,Fluid Interfaces,False,#dba957,1,0.0,3.828920301606103e-06,23,#57db78
+alauer,1,Initiatives,False,#db5768,1,0.0,3.828920301606103e-06,23,#57db78
+xxxxxxin,9,Initiatives,False,#db5768,7,0.008505823786468131,6.0113892221408245e-05,23,#57db78
+katiav,4,Responsive Environments,False,#c3db57,6,0.0023086721027737647,4.645312904699856e-05,23,#57db78
+djain,2,Speech + Mobility,False,#57db67,3,0.0,0.00038288916726302567,23,#57db78
+nbarry,1,Synthetic Neurobiology,False,#57dbb2,3,0.0,3.664378053507353e-05,23,#57db78
+viirj,5,Mediated Matter,False,#dbc257,12,0.020067447390696044,0.0004685345096334994,23,#57db78
+mmv,8,Fluid Interfaces,False,#dba957,9,1.0946827609358808e-05,1.2037619094486166e-05,15,#9bdb57
+bridgitm,2,Initiatives,False,#db5768,2,0.0003262349496034051,3.415600493780927e-06,15,#9bdb57
+aheyward,1,Social Machines,True,#db5780,8,0.0,1.1531045481535356e-05,15,#9bdb57
+ajking,1,Social Machines,False,#db5780,7,0.0,4.310537442930426e-06,15,#9bdb57
+annyuan,3,Social Machines,False,#db5780,3,0.0,7.699507258122078e-06,15,#9bdb57
+bcroy,3,Social Machines,False,#db5780,3,2.960856229578954e-05,4.602503334458025e-06,15,#9bdb57
+belen,2,Social Machines,False,#db5780,3,0.0,6.2535635031968284e-06,15,#9bdb57
+chrwang,1,Social Machines,False,#db5780,7,0.0,4.310537442930426e-06,15,#9bdb57
+dougb5,1,Social Machines,False,#db5780,7,0.0,4.310537442930426e-06,15,#9bdb57
+eyi,1,Social Machines,False,#db5780,7,0.0,4.310537442930426e-06,15,#9bdb57
+koehrsen,1,Social Machines,True,#db5780,1,0.0,7.364212286355003e-07,15,#9bdb57
+lukeglw,2,Social Machines,False,#db5780,4,0.0,8.469368454910574e-06,15,#9bdb57
+msaveski,4,Social Machines,False,#db5780,7,0.0019624436425489376,3.270201074393434e-05,15,#9bdb57
+ngillani,4,Social Machines,False,#db5780,7,0.0040937265329910166,3.924714535717188e-05,15,#9bdb57
+pbeshai,2,Social Machines,True,#db5780,10,0.00411651888406381,9.967875658754923e-06,15,#9bdb57
+pernghwa,2,Social Machines,False,#db5780,8,0.0,1.1531045481535356e-05,15,#9bdb57
+pralav,7,Social Machines,False,#db5780,17,0.03719720871153099,4.90899404654243e-05,15,#9bdb57
+russell5,5,Social Machines,False,#db5780,18,0.018024708338020636,3.623723375482066e-05,15,#9bdb57
+schaad,2,Social Machines,False,#db5780,9,0.002977537109745596,1.1575100390605622e-05,15,#9bdb57
+soph,2,Social Machines,False,#db5780,8,0.0,1.1531045481535356e-05,15,#9bdb57
+soroush,5,Social Machines,False,#db5780,11,0.0029299003781758067,3.5774356076581476e-05,15,#9bdb57
+wesc,1,Social Machines,True,#db5780,7,0.0,4.310537442930426e-06,15,#9bdb57
+wschen,1,Social Machines,True,#db5780,7,0.0,4.310537442930426e-06,15,#9bdb57
+billp,2,Scalable Cooperation,False,#db7857,9,2.2310677222883662e-05,1.3486747878423781e-05,15,#9bdb57
+sra,11,Fluid Interfaces,False,#dba957,5,0.04002593309337357,0.000156030790888033,35,#57a7db
+xuhaixu,2,Fluid Interfaces,False,#dba957,1,0.0,9.927095055272721e-06,35,#57a7db
+adragos,2,Initiatives,False,#db5768,3,0.0,7.779276184937997e-22,3,#db8557
+narula,4,Initiatives,False,#db5768,4,0.00010946827609358809,1.6182540140098639e-21,3,#db8557
+tdryja,3,Initiatives,False,#db5768,3,0.0,7.779276184937997e-22,3,#db8557
+joe,2,Opera of the Future,False,#57db80,3,0.0,7.779276184937997e-22,3,#db8557
+ave,5,Initiatives,False,#db5768,7,0.026648792998129556,0.000901100629699003,55,#db57b4
+devora,4,Responsive Environments,False,#c3db57,3,0.0,0.00029074696030224775,55,#db57b4
+barrons,1,Initiatives,False,#db5768,1,0.0,4.656256592166339e-05,25,#57db91
+hbailey,1,Initiatives,False,#db5768,4,0.0,0.00010649988549992657,25,#57db91
+kamcco,7,Initiatives,False,#db5768,10,0.014182325855993865,0.0007291156944779886,25,#57db91
+lguterma,1,Initiatives,False,#db5768,4,0.0,0.00010649988549992657,25,#57db91
+ps1,10,Initiatives,False,#db5768,11,0.017159862965739472,0.000731900944658046,25,#57db91
+cohenm,1,Camera Culture,False,#78db57,4,0.0,0.00010649988549992657,25,#57db91
+amirl,2,Viral Communications,False,#91db57,1,0.0,8.363380695965794e-06,25,#57db91
+guyzys,3,Human Dynamics,False,#57dbca,5,0.002977537109745596,0.0001314574985238034,25,#57db91
+srishti,2,Lifelong Kindergarten,False,#6f57db,4,0.0,0.00013095720715406337,25,#57db91
+yumikom,1,Lifelong Kindergarten,False,#6f57db,2,0.0,9.294790903985133e-05,25,#57db91
+artemd,10,Responsive Environments,False,#c3db57,8,0.047746394928712535,0.0018193292688272239,43,#6b57db
+cindykao,7,Speech + Mobility,False,#57db67,5,0.0031813359038988798,0.0001308275059615438,43,#6b57db
+dmajilo,2,Speech + Mobility,False,#57db67,2,0.0,0.00012404927325199055,43,#6b57db
+sfollmer,1,Tangible Media,False,#5789db,2,0.0,0.0015688980961611593,43,#6b57db
+bmayton,4,Responsive Environments,False,#c3db57,6,0.0012850918973083525,0.0003363034557674165,12,#c0db57
+ddh,9,Responsive Environments,False,#c3db57,15,0.03238224188140278,0.003798133392465995,12,#c0db57
+duhart,2,Responsive Environments,True,#c3db57,5,0.0012117655282424887,0.00031789786088539393,12,#c0db57
+eflynch,2,Responsive Environments,False,#c3db57,4,0.0,0.00030778643874273664,12,#c0db57
+gershon,7,Responsive Environments,False,#c3db57,7,0.005734292037188637,0.00037798317411061257,12,#c0db57
+sfr,4,Responsive Environments,False,#c3db57,5,1.824471268226468e-06,0.00032679668255927426,12,#c0db57
+vram,1,Responsive Environments,True,#c3db57,1,0.0,0.00024156843907470913,12,#c0db57
+tice,1,Viral Communications,False,#91db57,1,0.0,0.00024156843907470913,12,#c0db57
+cherston,4,Responsive Environments,False,#c3db57,1,0.0,1.4575787039096084e-36,46,#9157db
+paul_str,2,Responsive Environments,True,#c3db57,1,0.0,1.4575787039096084e-36,46,#9157db
+dramsay,3,Responsive Environments,False,#c3db57,1,0.0,1.4575787039096084e-36,61,#db5768
+ishwarya,5,Responsive Environments,False,#c3db57,1,0.0,1.4575787039096084e-36,61,#db5768
+elenack,2,Responsive Environments,False,#c3db57,1,0.0,5.3723107043511934e-30,52,#db57da
+lizbethb,5,Space Enabled,False,#d357db,4,4.378731043743523e-05,1.0744621408702385e-29,52,#db57da
+ufuoma,2,Space Enabled,False,#d357db,1,0.0,5.3723107043511934e-30,52,#db57da
+geppetto,1,Responsive Environments,True,#c3db57,4,0.0,0.00011389162948238593,22,#57db6b
+amarbles,1,Synthetic Neurobiology,True,#57dbb2,2,0.0,8.860261264308912e-06,22,#57db6b
+jhaas,2,Other,False,#5757db,1,0.0,9.109426422930984e-05,22,#57db6b
+slavin,19,Other,False,#5757db,13,0.03450970098068165,0.00013031910268685156,22,#57db6b
+tenzin,5,Other,False,#5757db,1,0.0,8.29607773706036e-06,22,#57db6b
+novysan,10,Object Based Media,False,#db5799,12,0.056893441548172455,0.0014312337474626424,22,#57db6b
+cwwang,3,Playful Systems,False,#5fdb57,4,0.0,0.00011389162948238593,22,#57db6b
+gregab,2,Playful Systems,False,#5fdb57,1,0.0,8.29607773706036e-06,22,#57db6b
+joscha,2,Playful Systems,False,#5fdb57,2,0.0,8.860261264308912e-06,22,#57db6b
+mperez4,1,Playful Systems,False,#5fdb57,1,0.0,8.29607773706036e-06,22,#57db6b
+mslw,2,Playful Systems,False,#5fdb57,1,0.0,8.29607773706036e-06,22,#57db6b
+tekofsky,1,Playful Systems,False,#5fdb57,1,0.0,8.29607773706036e-06,22,#57db6b
+tjlevy,2,Playful Systems,False,#5fdb57,4,0.0,0.00011389162948238593,22,#57db6b
+irmandy,3,Responsive Environments,False,#c3db57,5,0.013682439992795751,0.0001477660143582929,24,#57db85
+jaleesat,3,Lifelong Kindergarten,False,#6f57db,4,0.011137263315865946,1.136052559165018e-05,24,#57db85
+muthui,2,Lifelong Kindergarten,False,#6f57db,2,0.002977537109745596,7.261769936597e-07,24,#57db85
+yusufa,1,Lifelong Kindergarten,False,#6f57db,1,0.0,4.624095549612082e-08,24,#57db85
+carolx,2,Object Based Media,False,#db5799,2,0.0,1.0128659859734369e-05,24,#57db85
+junsuj,1,Responsive Environments,False,#c3db57,1,0.0,1.4575787039096084e-36,44,#7857db
+tonolini,1,Signal Kinetics,False,#ba57db,1,0.0,1.4575787039096084e-36,44,#7857db
+maldrich,1,Responsive Environments,False,#c3db57,1,0.0,2.3099635628619425e-06,40,#5768db
+nanzhao,4,Responsive Environments,False,#c3db57,3,0.002977537109745596,3.6307816947610265e-05,40,#5768db
+richer,2,Responsive Environments,False,#c3db57,4,0.0070425391897755586,0.00019234724426124848,40,#5768db
+orudovic,3,Affective Computing,False,#8857db,1,0.0,0.002396169002907889,13,#b4db57
+alfredom,2,Human Dynamics,True,#57dbca,7,0.0005288396034985915,0.020012679371279107,13,#b4db57
+alotaibi,3,Human Dynamics,False,#57dbca,7,0.0005027518222058597,0.00776019488413334,13,#b4db57
+bakker,3,Human Dynamics,False,#57dbca,5,2.1242058337208163e-05,0.026805197917265378,13,#b4db57
+ecstll,6,Human Dynamics,False,#57dbca,6,0.007244901179698608,0.037676406372107576,13,#b4db57
+hhao,1,Human Dynamics,False,#57dbca,3,0.0,0.0020657659643551593,13,#b4db57
+jobalbar,3,Human Dynamics,False,#57dbca,8,0.0035461862280503345,0.020402459991063274,13,#b4db57
+shada,4,Human Dynamics,False,#57dbca,4,0.00011651432282695335,0.004318654376648719,13,#b4db57
+singhv,2,Human Dynamics,False,#57dbca,6,0.00015608909635192054,0.019516431075660354,13,#b4db57
+aghasi,1,Camera Culture,False,#78db57,2,0.0,3.5294254474415656e-08,17,#81db57
+barmak,13,Camera Culture,True,#78db57,4,0.00594047844934538,5.184199507007281e-07,17,#81db57
+guysatat,9,Camera Culture,False,#78db57,5,0.019091267350721763,3.7676439136870827e-06,17,#81db57
+mrinal,1,Camera Culture,False,#78db57,3,0.0,3.785594968765177e-06,17,#81db57
+otkrist,4,Camera Culture,False,#78db57,6,0.004479685120585388,4.298773990508032e-06,17,#81db57
+redosan,1,Camera Culture,False,#78db57,2,0.0,3.5294254474415656e-08,17,#81db57
+rohan,1,Camera Culture,False,#78db57,2,0.0,3.4644787291602886e-06,17,#81db57
+arana,5,Other,False,#5757db,5,1.824471268226468e-05,4.281939938585746e-06,17,#81db57
+fkendall,1,Other,False,#5757db,1,0.0,3.2244465080821695e-06,17,#81db57
+ggbhatia,1,Other,False,#5757db,2,0.0,3.47968296710833e-06,17,#81db57
+gyauney,8,Other,False,#5757db,6,2.7975226112805846e-05,4.508666785479855e-06,17,#81db57
+kla11,5,Other,False,#5757db,4,7.297885072905872e-06,4.006198575688635e-06,17,#81db57
+pjavia,2,Other,False,#5757db,3,0.0,3.7845213915752554e-06,17,#81db57
+pratiks,16,Other,False,#5757db,12,0.05182106558852578,5.063256687859346e-05,17,#81db57
+gordonw,1,Camera Culture,False,#78db57,1,0.0,1.5560473834467124e-08,34,#57b4db
+hangzhao,1,Camera Culture,False,#78db57,2,0.0,1.6620405178895128e-08,34,#57b4db
+michaf,2,Camera Culture,False,#78db57,1,0.0,1.5560473834467124e-08,34,#57b4db
+naik,7,Camera Culture,False,#78db57,5,0.011859063243472042,2.4413666765228366e-07,34,#57b4db
+shiboxin,1,Camera Culture,False,#78db57,2,0.0,1.6620405178895128e-08,34,#57b4db
+anneli,4,Social Machines,False,#db5780,10,0.0016662710569384522,0.0003629943563610332,20,#5bdb57
+echu,6,Social Machines,False,#db5780,13,0.034488316746396866,0.00036423592859044686,20,#5bdb57
+exposito,3,Social Machines,False,#db5780,7,0.013909711168112364,0.00014705639082741013,20,#5bdb57
+isysoev,3,Social Machines,False,#db5780,8,0.001185066574123636,0.000346603032749969,20,#5bdb57
+jnazare,8,Social Machines,False,#db5780,14,0.017813553723471764,0.0004660786169699138,20,#5bdb57
+minasg,3,Social Machines,False,#db5780,10,0.04215787499920424,0.0031460859875448014,20,#5bdb57
+pbansal,1,Social Machines,False,#db5780,7,0.0,0.00034389386711788505,20,#5bdb57
+sballing,2,Social Machines,False,#db5780,5,0.00015757346855336908,9.054888832929587e-05,20,#5bdb57
+snehapm,5,Social Machines,False,#db5780,11,0.003451443707487507,0.0003657035219931171,20,#5bdb57
+jhgray,1,Personal Robots,False,#db57b2,2,0.0,4.530418696435391e-05,20,#5bdb57
+bonnerd,1,Other,False,#5757db,4,0.0,8.175255528027495e-05,20,#5bdb57
+alishap,1,Lifelong Kindergarten,True,#6f57db,1,0.0,1.4575787039096084e-36,62,#db575b
+leob,7,Lifelong Kindergarten,False,#6f57db,1,0.0,1.4575787039096084e-36,62,#db575b
+ascii,5,Lifelong Kindergarten,False,#6f57db,12,0.014448876989350854,1.5988181915246257e-05,31,#57dadb
+bowman,1,Lifelong Kindergarten,False,#6f57db,6,0.0,2.7073825717552087e-06,31,#57dadb
+chrisg,1,Lifelong Kindergarten,False,#6f57db,5,0.0,1.5945597299552487e-05,31,#57dadb
+cwillisf,1,Lifelong Kindergarten,False,#6f57db,6,0.0,2.7073825717552087e-06,31,#57dadb
+ericr,2,Lifelong Kindergarten,False,#6f57db,9,0.007297885072905872,1.5729960469299015e-05,31,#57dadb
+kaschm,1,Lifelong Kindergarten,False,#6f57db,6,0.0,2.707382571755209e-06,31,#57dadb
+khanning,1,Lifelong Kindergarten,False,#6f57db,4,0.0,1.4920026242220104e-05,31,#57dadb
+labdalla,1,Lifelong Kindergarten,False,#6f57db,1,0.0,1.0173143732302682e-06,31,#57dadb
+mellis,3,Lifelong Kindergarten,False,#6f57db,5,0.0,1.5945597299552487e-05,31,#57dadb
+morant,1,Lifelong Kindergarten,False,#6f57db,2,0.0,1.3499305934074022e-06,31,#57dadb
+nrusk,8,Lifelong Kindergarten,False,#6f57db,14,0.0177119443977432,1.9864798456696287e-05,31,#57dadb
+otts,1,Lifelong Kindergarten,False,#6f57db,2,0.0,1.3499305934074022e-06,31,#57dadb
+quacht,1,Lifelong Kindergarten,False,#6f57db,1,0.0,1.0173143732302682e-06,31,#57dadb
+ria,1,Lifelong Kindergarten,False,#6f57db,5,0.0,1.5945597299552487e-05,31,#57dadb
+rschamp,1,Lifelong Kindergarten,False,#6f57db,6,0.0,2.707382571755209e-06,31,#57dadb
+sdg1,1,Lifelong Kindergarten,True,#6f57db,2,0.0,2.281335700826034e-06,31,#57dadb
+shrutid,3,Lifelong Kindergarten,False,#6f57db,1,0.0,1.264021327595766e-06,31,#57dadb
+tarmelop,1,Lifelong Kindergarten,False,#6f57db,1,0.0,1.264021327595766e-06,31,#57dadb
+tmickel,1,Lifelong Kindergarten,False,#6f57db,6,0.0,2.707382571755209e-06,31,#57dadb
+ttseng,2,Lifelong Kindergarten,False,#6f57db,5,0.0,1.5945597299552487e-05,31,#57dadb
+jieqi,5,Other,False,#5757db,11,0.057753232864594245,0.00018292709378481056,31,#57dadb
+christan,1,Lifelong Kindergarten,False,#6f57db,1,0.0,1.4575787039096084e-36,32,#57cddb
+eschill,1,Lifelong Kindergarten,False,#6f57db,1,0.0,1.4575787039096084e-36,32,#57cddb
+chenf,1,Synthetic Neurobiology,False,#57dbb2,2,0.0,3.34367741764147e-05,10,#dadb57
+danoran,3,Synthetic Neurobiology,False,#57dbb2,6,0.013733660865097355,0.0004912800217781722,10,#dadb57
+tillberg,1,Synthetic Neurobiology,False,#57dbb2,2,0.0,3.34367741764147e-05,10,#dadb57
+nsavidis,2,Synthetic Neurobiology,False,#57dbb2,4,0.0030771025572832963,0.002966701022708767,36,#579bdb
+bdatta,5,Object Based Media,False,#db5799,3,0.001489039438076837,0.0005234000756881937,36,#579bdb
+sjolly,2,Object Based Media,False,#db5799,2,0.0,0.00022211476194264592,36,#579bdb
+vex,1,Synthetic Neurobiology,False,#57dbb2,3,0.0,4.006561833368215e-25,27,#57dbaa
+junni,1,Center for Bits and Atoms,False,#57a2db,3,0.0,4.006561833368215e-25,27,#57dbaa
+ruiqing,3,Center for Bits and Atoms,False,#57a2db,3,0.0,4.006561833368215e-25,27,#57dbaa
+shuguang,6,Molecular Machines,False,#57db99,3,0.0,4.006561833368215e-25,27,#57dbaa
+bdunning,4,Other,False,#5757db,2,0.0,7.163080939134918e-30,47,#9e57db
+tcarew,6,Other,False,#5757db,2,0.0,7.163080939134918e-30,47,#9e57db
+cbarabas,1,Other,False,#5757db,4,0.0,3.950834900941253e-21,39,#5775db
+kdinakar,3,Other,False,#5757db,4,0.0,3.950834900941253e-21,39,#5775db
+madars,2,Other,False,#5757db,5,0.00011676616116649396,4.26936598297482e-21,39,#5775db
+nsaltiel,1,Other,False,#5757db,4,0.0,3.950834900941253e-21,39,#5775db
+zittrain,1,Affiliates,True,#db57cb,4,0.0,3.950834900941253e-21,39,#5775db
+chialynn,1,Other,False,#5757db,2,0.0,7.163080939134918e-30,58,#db578e
+jliberty,4,Other,False,#5757db,2,0.0,7.163080939134918e-30,58,#db578e
+slotnick,3,Other,False,#5757db,2,0.0,7.163080939134918e-30,58,#db578e
+arata,1,Object Based Media,True,#db5799,1,0.0,1.4575787039096084e-36,30,#57dbd0
+vpanzica,1,Object Based Media,False,#db5799,1,0.0,1.4575787039096084e-36,30,#57dbd0
+asadraei,2,Conformable Decoders,False,#db5f57,1,0.0,1.4575787039096084e-36,54,#db57c0
+mghoneim,1,Conformable Decoders,False,#db5f57,1,0.0,1.4575787039096084e-36,54,#db57c0
+awad,4,Scalable Cooperation,False,#db7857,2,0.0,3.7855892405541034e-05,41,#575bdb
+dsouza,4,Scalable Cooperation,False,#db7857,2,0.0,3.7855892405541034e-05,41,#575bdb
+gaikwad,2,Space Enabled,False,#d357db,3,0.00594047844934538,0.0005573478163189497,41,#575bdb
+bmaimon,3,Biomechatronics,False,#a157db,6,0.0,9.242308008505245e-10,19,#68db57
+clites,5,Biomechatronics,False,#a157db,12,8.960181117289983e-05,1.7744562242184532e-09,19,#68db57
+crtaylor,1,Biomechatronics,False,#a157db,6,0.0,9.242308008505245e-10,19,#68db57
+emrogers,3,Biomechatronics,False,#a157db,11,3.56785492453176e-05,1.842067082539542e-09,19,#68db57
+jfduval,2,Biomechatronics,False,#a157db,7,0.0,1.3627631899131083e-09,19,#68db57
+kenpasch,1,Biomechatronics,False,#a157db,7,0.0,1.2316169366406185e-09,19,#68db57
+kuan525,1,Biomechatronics,False,#a157db,7,0.0,1.2316169366406185e-09,19,#68db57
+lfreed,6,Biomechatronics,False,#a157db,12,8.960181117289983e-05,1.7744562242184532e-09,19,#68db57
+mbweber,2,Biomechatronics,False,#a157db,7,0.0,1.2316169366406185e-09,19,#68db57
+mcarney,5,Biomechatronics,False,#a157db,11,3.56785492453176e-05,1.8420670825395423e-09,19,#68db57
+mcarty,1,Biomechatronics,True,#a157db,3,0.0,4.872127187193053e-10,19,#68db57
+romka,2,Biomechatronics,False,#a157db,7,0.0,1.2316169366406185e-09,19,#68db57
+rriso,1,Biomechatronics,True,#a157db,6,0.0,9.242308008505243e-10,19,#68db57
+shriyas,5,Biomechatronics,False,#a157db,7,1.2974017907388217e-05,9.71632502163925e-10,19,#68db57
+syeon,6,Biomechatronics,False,#a157db,15,0.00020434078204136432,2.2063584155314866e-09,19,#68db57
+thhsieh,3,Biomechatronics,False,#a157db,7,0.0,1.3627631899131083e-09,19,#68db57
+tonyshu,4,Biomechatronics,False,#a157db,11,3.56785492453176e-05,1.8420670825395423e-09,19,#68db57
+branger,2,Biomechatronics,False,#a157db,2,0.0,5.204143381413834e-24,51,#d057db
+danask,4,Biomechatronics,False,#a157db,4,7.297885072905872e-06,8.647736183578939e-24,51,#d057db
+kmoerman,5,Biomechatronics,False,#a157db,4,7.297885072905872e-06,8.647736183578939e-24,51,#d057db
+srkeyes,1,Biomechatronics,False,#a157db,3,0.0,7.444021922990614e-24,51,#d057db
+zixiliu,1,Biomechatronics,False,#a157db,3,0.0,7.444021922990614e-24,51,#d057db
+calebh,8,Open Agriculture,False,#57badb,11,7.395190207211283e-05,1.9592628500970356e-11,38,#5781db
+davidzac,1,Open Agriculture,False,#57badb,3,0.0,5.321712086372828e-12,38,#5781db
+delapa,7,Open Agriculture,False,#57badb,9,8.270936415959989e-06,1.8426471308497197e-11,38,#5781db
+hildreth,4,Open Agriculture,False,#57badb,10,5.351782386797639e-05,1.8334791313765574e-11,38,#5781db
+jrye,1,Open Agriculture,False,#57badb,5,0.0,1.1480180210766834e-11,38,#5781db
+pcerqu,1,Open Agriculture,False,#57badb,3,0.0,5.3217120863728274e-12,38,#5781db
+poitrast,3,Open Agriculture,False,#57badb,9,8.270936415959989e-06,1.8426471308497197e-11,38,#5781db
+rbaynes,3,Open Agriculture,False,#57badb,6,0.0,1.3736236604192117e-11,38,#5781db
+rebekahj,6,Open Agriculture,False,#57badb,9,8.270936415959989e-06,1.8426471308497197e-11,38,#5781db
+snowak,1,Open Agriculture,False,#57badb,7,0.0,1.56636099060112e-11,38,#5781db
+tsavas,4,Open Agriculture,False,#57badb,9,8.270936415959989e-06,1.8426471308497197e-11,38,#5781db
+zandera,1,Open Agriculture,False,#57badb,7,0.0,1.56636099060112e-11,38,#5781db
+codyg,2,Sculpting Evolution,False,#5770db,2,0.0,3.947355906337522e-06,59,#db5781
+erikad,3,Sculpting Evolution,False,#5770db,3,0.00594047844934538,5.794214812227486e-05,59,#db5781
+jmin01,2,Sculpting Evolution,False,#5770db,2,0.0,3.947355906337522e-06,59,#db5781
+smithkim,1,Social Computing,False,#57d3db,1,0.0,1.4575787039096084e-36,57,#db579b
+yonatanc,2,Social Computing,False,#57d3db,1,0.0,1.4575787039096084e-36,57,#db579b
+jleng,1,Signal Kinetics,False,#ba57db,2,0.0,4.406429948087682e-28,37,#578edb
+nselby,3,Signal Kinetics,False,#ba57db,1,0.0,2.5256896111644287e-28,37,#578edb
+unsoo,1,Signal Kinetics,False,#ba57db,2,0.0,4.406429948087682e-28,37,#578edb
+yunfeima,7,Signal Kinetics,False,#ba57db,4,3.648942536452936e-05,5.917496489927593e-28,37,#578edb
+zhluo,3,Signal Kinetics,False,#ba57db,1,0.0,2.5256896111644287e-28,37,#578edb
+karydis,1,Molecular Machines,False,#57db99,1,0.0,1.589274495083357e-33,42,#5f57db
+kfirs,3,Molecular Machines,False,#57db99,2,7.297885072905872e-06,2.2475735452805366e-33,42,#5f57db
+mkkr,1,Molecular Machines,False,#57db99,1,0.0,1.589274495083357e-33,42,#5f57db
+njakimo,2,Molecular Machines,False,#57db99,1,0.0,1.4575787039096084e-36,48,#aa57db
+pranam,2,Molecular Machines,False,#57db99,1,0.0,1.4575787039096084e-36,48,#aa57db
