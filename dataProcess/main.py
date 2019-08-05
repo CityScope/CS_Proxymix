@@ -41,6 +41,18 @@ def loadProjects(in_path='../Data/'):
 	projects = pd.concat([inactiveProjects,activeProjects])
 	return projects
 
+def loadUsers(in_path='../Data'):
+	'''
+	Loads raw data about ML users. 
+
+	Parameters
+	----------
+	in_path : str (optional)
+		Path to mlpeople.csv.
+	'''
+	people = pd.read_csv(os.path.join(in_path,'mlpeople.csv'))
+	return people
+
 def generateNework(projects):
 	'''
 	Generates network of users connected when they worked together on a project.
@@ -82,7 +94,7 @@ def filterProjects(projects):
 	return projects
 
 def main():
-	out_path = '../MLgenerative/includes/'
+	out_path = '../ProxymixABM/includes/'
 	projects = loadProjects()
 
 	projects = filterProjects(projects)
@@ -90,7 +102,7 @@ def main():
 	net = generateNework(projects)
 	data_out = formatNetwork(net)
 	with open(os.path.join(out_path,'project-network.json'), 'w') as fp:
-	    json.dump(data_out, fp)
+		json.dump(data_out, fp)
 
 if __name__ == '__main__':
 	main()
