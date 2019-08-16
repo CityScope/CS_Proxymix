@@ -53,7 +53,7 @@ def loadUsers(in_path='../Data'):
 	people = pd.read_csv(os.path.join(in_path,'mlpeople.csv'))
 	return people
 
-def generateNework(projects):
+def generateNework(projects,keepProjectData=False):
 	'''
 	Generates network of users connected when they worked together on a project.
 
@@ -67,10 +67,16 @@ def generateNework(projects):
 	net : pandas.DataFrame
 		Table with username_s, username_t, and number of projets.
 	'''
-	df = projects[['slug','username']]
-	net = pd.merge(df.rename(columns={'username':'username_s'}),df.rename(columns={'username':'username_t'}))
-	net = net[net['username_s']!=net['username_t']]
-	net = net.groupby(['username_s','username_t']).count().rename(columns={'slug':'n_projects'}).reset_index()
+	if keepProjectData:
+		df = projects[['slug','username','title']]
+		net = pd.merge(df.rename(columns={'username':'username_s'}),df.rename(columns={'username':'username_t'}))
+		net = net[net['username_s']!=net['username_t']]
+		net = net[['username_s','username_t','slug','title']]
+	else:
+		df = projects[['slug','username']]
+		net = pd.merge(df.rename(columns={'username':'username_s'}),df.rename(columns={'username':'username_t'}))
+		net = net[net['username_s']!=net['username_t']]
+		net = net.groupby(['username_s','username_t']).count().rename(columns={'slug':'n_projects'}).reset_index()
 	return net
 
 def formatNetwork(net):
