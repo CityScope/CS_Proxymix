@@ -11,7 +11,7 @@ model Proxymix
 
 global {
 	int curFloor<-3;
-	file ML_file <- dxf_file("../includes/ML_"+curFloor+".dxf",#m);
+	file ML_file <- dxf_file("../includes/ML_3.dxf",#m);
 	file JsonFile <- json_file("../includes/project-network.json");
     map<string, unknown> collaborationFile <- JsonFile.contents;
 	int nb_people <- 100;
@@ -21,7 +21,7 @@ global {
 	bool drawSimulatedGraph <- true parameter: "Draw Simulated Graph:" category: "Vizu";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
 	bool draw_grid <- false parameter: "Draw Grid:" category: "Interaction";
-	bool updateGraph <- true parameter: "Update Graph:" category: "Interaction";
+	bool instantaneaousGraph <- true parameter: "Instantaneous Graph:" category: "Interaction";
 	int distance <- 200 parameter: "Distance:" category: "Interaction" min: 1 max: 1000;
 
 	//compute the environment size from the dxf file envelope
@@ -115,9 +115,9 @@ global {
 		}
 		
 		ask ML_people{
-        	list<list<string,string>> cells <- collaborationFile[people_username];            
+        	list<list<string>>  cells <- collaborationFile[people_username];            
         	loop mm over: cells {  
-               ML_people pp <- ML_people first_with( each.people_username= string(mm[0])); //beaucoup plus optimisé que le where ici, car on s'arrête dès qu'on trouve
+               ML_people pp <- ML_people first_with( each.people_username = string(mm[0])); //beaucoup plus optimisé que le where ici, car on s'arrête dès qu'on trouve
             	if (pp != nil) {
                 		real_graph <<edge(self,pp,float(mm[1]));
                 }
@@ -125,9 +125,36 @@ global {
 		}
 	}
 	
-	reflex updateGraph when: (drawSimulatedGraph = true and updateGraph=true) {
+	reflex updateGraph when: (drawSimulatedGraph = true and instantaneaousGraph=true) {
 		simulated_graph <- graph<ML_people, ML_people>(ML_people as_distance_graph (distance ));
 	}
+	
+	
+	
+	reflex updateAggregatedGraph when: (drawSimulatedGraph = true and instantaneaousGraph=false){
+		graph simulated_graph_tmp <- graph(ML_people as_distance_graph (distance));
+		if (simulated_graph = nil) {
+			simulated_graph <- simulated_graph_tmp;
+		} else {
+			loop e over: simulated_graph_tmp.edges {
+				ML_people s <- simulated_graph_tmp source_of e;
+				ML_people t <- simulated_graph_tmp target_of e;
+				if not (s in simulated_graph.vertices) or not (t in simulated_graph.vertices) {
+					simulated_graph << edge(s::t);
+				} else {
+					if (simulated_graph edge_between (s::t)) = nil and (simulated_graph edge_between (t::s)) = nil {
+						simulated_graph << edge(s::t);
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+	
+	
 }
 
 species ML_element
@@ -232,7 +259,7 @@ experiment Proxymix type: gui
 				if (simulated_graph != nil and drawSimulatedGraph = true) {
 					loop eg over: simulated_graph.edges {
 						geometry edge_geom <- geometry(eg);
-						draw curve(edge_geom.points[0],edge_geom.points[1], 0.0, 200, 90) color:#yellow;
+						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#yellow;
 					}
 
 				}
@@ -243,8 +270,8 @@ experiment Proxymix type: gui
 					loop eg over: real_graph.edges {
 						geometry edge_geom <- geometry(eg);
 						float w <- real_graph weight_of eg;
-						//draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90)color:rgb(0,w*10,0);
-						draw line(edge_geom.points[0],edge_geom.points[1]) width: w/2 color:rgb(0,255,0);
+						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90)color:#green;//rgb(0,w*10,0);
+						//draw line(edge_geom.points[0],edge_geom.points[1]) width: w/2 color:rgb(0,255,0);
 					}
 
 				}
