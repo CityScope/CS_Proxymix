@@ -1,8 +1,7 @@
 /***
-* Name: MLdxf
+* Name: Proxymix
 * Author: Arnaud Grignard , Nicolas Ayoub
 * Description: 
-* Tags: Tag1, Tag2, TagN
 ***/
 
 model Proxymix
