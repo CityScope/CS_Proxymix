@@ -27,7 +27,7 @@ global {
 	geometry shape <- envelope(ML_file);
 	map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), "E14"::rgb(175,175,175), "E15"::rgb(175,175,175), "Elevators"::rgb(200,200,200), "Facade_Glass"::#darkgray, 
 	"Facade_Wall"::rgb(175,175,175), "Glass"::rgb(150,150,150), "Labs"::rgb(75,75,75), "Meeting rooms"::rgb(125,125,125), "Misc"::rgb(161,196,90), "Offices"::rgb(175,175,175), 
-	"Railing"::rgb(125,124,120), "Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Void"::rgb(10,10,10), "Walls"::rgb(175,175,175)];
+	"Railing"::rgb(125,124,120), "Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Void"::rgb(0,0,0), "Walls"::rgb(175,175,175)];
 	
 	map<string,rgb> color_per_title <- ["Visitor"::rgb(234,242,56),"Staff"::rgb(0,230,167), "Student"::rgb(255,66,109), "Other"::rgb(234,242,56), "Visitor/Affiliate"::rgb(234,242,56), "Faculty/PI"::rgb(37,211,250)];
 	
@@ -163,7 +163,12 @@ species ML_element
 	int floor;
 	aspect default
 	{   
-	  draw shape color: color border:color empty:true;	
+	  if (layer!="0_Void"){
+			draw shape color: rgb(38,38,38) border:#white empty:false;	
+				}	
+		else {
+			 draw shape color: rgb(0,0,0) border:#white empty:false;
+				}
 	}
 	
 	init {
@@ -248,7 +253,7 @@ experiment Proxymix type: gui
 	//float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
-		display map type:opengl draw_env:false background:rgb(32,32,54)
+		display map type:opengl draw_env:false background:rgb(0,0,0)
 		{   
 			species ML_element;
 			species ML_people;
