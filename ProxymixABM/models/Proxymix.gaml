@@ -16,11 +16,15 @@ global {
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 18;
 	float step <- 1 #sec;
-	bool drawRealGraph <- true parameter: "Draw Real Graph:" category: "Vizu";
-	bool drawSimulatedGraph <- true parameter: "Draw Simulated Graph:" category: "Vizu";
+	bool moveOnGrid <- false parameter: "Move on Grid:" category: "Model";
+	bool drawRealGraph <- false parameter: "Draw Real Graph:" category: "Vizu";
+	bool drawSimulatedGraph <- false parameter: "Draw Simulated Graph:" category: "Vizu";
+	bool draw_grid <- false parameter: "Draw Grid:" category: "Vizu";
+	bool showML_element <- false parameter: "Draw ML element:" category: "Vizu";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
-	bool draw_grid <- false parameter: "Draw Grid:" category: "Interaction";
+	
 	bool instantaneaousGraph <- true parameter: "Instantaneous Graph:" category: "Interaction";
+	bool saveGraph <- false parameter: "Save Graph:" category: "Interaction";
 	int distance <- 200 parameter: "Distance:" category: "Interaction" min: 1 max: 1000;
 
 	//compute the environment size from the dxf file envelope
@@ -153,7 +157,15 @@ global {
 
 	}
 	
-	
+	reflex saveCurrentGraph when:saveGraph{
+		save ("header: if needed graphc created at cycle:" + cycle) to: "../results/generated_graph.txt" rewrite: true;
+		graph simulated_graph_tmp <- graph(ML_people as_distance_graph (distance));
+		loop e over: simulated_graph_tmp.edges {
+				ML_people s <- simulated_graph_tmp source_of e;
+				ML_people t <- simulated_graph_tmp target_of e;
+				save (s.people_username +"," + t.people_username) to: "../results/generated_graph.txt" rewrite: false;			
+			}
+	}	
 }
 
 species ML_element
@@ -162,13 +174,15 @@ species ML_element
 	rgb color;
 	int floor;
 	aspect default
-	{   
-	  if (layer!="0_Void"){
+	{ if(showML_element){
+		if (layer!="0_Void"){
 			draw shape color: rgb(38,38,38) border:#white empty:false;	
 				}	
 		else {
 			 draw shape color: rgb(0,0,0) border:#white empty:false;
 				}
+	}  
+	  
 	}
 	
 	init {
@@ -193,6 +207,7 @@ species ML_people skills:[moving]{
 	int end_work;
 	string objective;
 	ML_element myoffice;
+	path currentPath;
 	list<ML_people> collaborators;
 	map<ML_people, int> collaboratorsandNumbers;
 	map<ML_people, string> collaboratorsandType;
@@ -206,8 +221,15 @@ species ML_people skills:[moving]{
 	 	if((time mod 36000) = myDayTrip.keys[curTrip]){	
 	 		tmpTime <- time;
 	 		the_target<-myDayTrip[int(tmpTime)] ;
+	 		currentPath<-path_between(cell where (each.is_wall=false),location,the_target);
 	 	}
-	 	do goto target:the_target speed:10.0;
+	 	if(moveOnGrid){
+	 	  //do goto target:the_target speed:10.0 on:cell where (each.is_wall=false) recompute_path:false;	
+	 	  do follow path: currentPath;	
+	 	}else{
+	 	  do goto target:the_target speed:10.0;
+	 	}
+	 	
     	if (the_target = location and the_target!=nil){
 			curTrip<-(curTrip+1);
 			the_target<-nil;
@@ -248,12 +270,12 @@ grid cell width: nb_cols height: nb_rows neighbors: 8 {
 
 
 
-experiment Proxymix type: gui
+experiment Proxymix type: gui autorun:true
 {   
 	//float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
-		display map type:opengl draw_env:false background:rgb(0,0,0)
+		display map type:java2D draw_env:false background:rgb(0,0,0) autosave:true synchronized:true refresh:every(10#cycle)
 		{   
 			species ML_element;
 			species ML_people;
@@ -263,7 +285,7 @@ experiment Proxymix type: gui
 				if (simulated_graph != nil and drawSimulatedGraph = true) {
 					loop eg over: simulated_graph.edges {
 						geometry edge_geom <- geometry(eg);
-						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#yellow;
+						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#white;
 					}
 
 				}
