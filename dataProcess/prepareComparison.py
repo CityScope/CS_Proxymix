@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 import json
 import os
-from build_network import controlGroupAffiliation
+from main import *
+from build_network import filterProjects,controlGroupAffiliation,filterNodes
 
 from sklearn.linear_model import LinearRegression
 from datetime import timedelta
@@ -84,113 +85,56 @@ def inferOverlap(users,userSet=None):
 	timeOverlap = pd.DataFrame(timeOverlap,columns=['username_s','username_t','overlap'])
 	return timeOverlap
 
-def parseUsers(projects):
-	'''
-	Parses the users from the projects provided in a dataframe.
-
-	Parameters
-	----------
-	projects : pandas.DataFrame
-	    Table of projects. Must have columns 'people' and a 'slug'.
-	'''
-	out = []
-	for slug,people in projects[['slug','people']].values:
-		if len(people)!=0:
-			for person in people:
-				if '@media.mit.edu' in person: # Keep only media lab users
-					out.append((slug,person.replace('@media.mit.edu','').strip()))
-	return pd.DataFrame(out,columns=['slug','username'])
-
-def loadProjects(in_path='../Data/'):
-	'''
-	Loads projects into a DataFrame from a given path. It takes care of putting user data into first normal form.
-
-	Parameters
-	----------
-	in_path : str (optional)
-		Path of projects-active.json and projects-inactive.json.
-	'''
-	fnameActive = 'projects-active.json'
-	fnameInactive = 'projects-inactive.json'
-	activeProjects   = pd.read_json(os.path.join(in_path,fnameActive))
-	inactiveProjects = pd.read_json(os.path.join(in_path,fnameInactive))
-	activeProjects['is_active'] = True
-	inactiveProjects['is_active'] = False
-
-	activeProjects = pd.merge(parseUsers(activeProjects),activeProjects.drop(['people','groups'],1))
-	inactiveProjects = pd.merge(parseUsers(inactiveProjects),inactiveProjects.drop(['people','groups'],1))
-
-	projects = pd.concat([inactiveProjects,activeProjects])
-	return projects
-
-def loadUsers(in_path='../Data'):
-	'''
-	Loads raw data about ML users. 
-
-	Parameters
-	----------
-	in_path : str (optional)
-		Path to mlpeople.csv.
-	'''
-	people = pd.read_csv(os.path.join(in_path,'mlpeople.csv'))
-	return people
-
-def generateNework(projects,keepProjectData=False):
-	'''
-	Generates network of users connected when they worked together on a project.
-
-	Parameters
-	----------
-	projects : pandas.DataFrame
-		Table with columns slug and username
-
-	Returns
-	-------
-	net : pandas.DataFrame
-		Table with username_s, username_t, and number of projets.
-	'''
-	if keepProjectData:
-		df = projects[['slug','username','title']]
-		net = pd.merge(df.rename(columns={'username':'username_s'}),df.rename(columns={'username':'username_t'}))
-		net = net[net['username_s']!=net['username_t']]
-		net = net[['username_s','username_t','slug','title']]
-	else:
-		df = projects[['slug','username']]
-		net = pd.merge(df.rename(columns={'username':'username_s'}),df.rename(columns={'username':'username_t'}))
-		net = net[net['username_s']!=net['username_t']]
-		net = net.groupby(['username_s','username_t']).count().rename(columns={'slug':'n_projects'}).reset_index()
-	return net
-
-def formatNetwork(net):
-	'''
-	Formats the network into a dictonary that can be written in a json file.
-
-	Parameters
-	----------
-	net : pandas.DataFrame
-		Table with username_s,username_t, and n_projects.
-	'''
-	net['username_t*n_projects']=net[['username_t','n_projects']].values.tolist()
-	return dict(net.groupby('username_s')['username_t*n_projects'].apply(list))
-
-def filterProjects(projects):
-	'''
-	Filter projects if needed (by date, for example)
-	'''
-	drop_list = ['scratch-in-practice','ml-learning-fellows-program','learning-creative-learning'] # 'scratch'
-	projects = projects[~projects['slug'].isin(drop_list)]
-	return projects
-
 def main():
-	out_path = '../ProxymixABM/includes/'
-	projects = loadProjects()
+	real_netowrk_path = '../ProxymixABM/includes/'
+	simulated_netowrk_path = '../ProxymixABM/results/'
+	out_path = 'results'
 
-	projects = filterProjects(projects)
+	with open(os.path.join(real_netowrk_path,'project-network.json')) as json_file:
+		data = json.load(json_file)
 
-	net = generateNework(projects)
-	data_out = formatNetwork(net)
-	with open(os.path.join(out_path,'project-network.json'), 'w') as fp:
-		json.dump(data_out, fp)
+	real = []
+	for s in data:
+		for t in data[s]:
+			real.append((s,t[0],t[1]))
+	real = pd.DataFrame(real,columns=['username_s','username_t','n_proj'])
+
+	generated = pd.read_csv(os.path.join(simulated_netowrk_path,'generated_graph.txt'),skiprows=1,header=None)
+	generated.columns=['username_s','username_t']
+	generated['collisionPotential'] = 1
+
+	userSet = (set(real['username_s'])|set(real['username_t'])).intersection(set(generated['username_s'])|set(generated['username_t']))
+
+	users = inferStay()
+	userSet = userSet.intersection(set(users['username']))
+
+	users = users[users['username'].isin(userSet)]
+	generated = generated[(generated['username_s'].isin(userSet))&(generated['username_t'].isin(userSet))]
+	real = real[(real['username_s'].isin(userSet))&(real['username_t'].isin(userSet))]
+
+	timeOverlap = inferOverlap(users,userSet=userSet)
+
+	userData = users[['username','ML_GROUP','diff','diff2ref']]
+	userData = pd.merge(userData,loadUsers()[['USERNAME','TITLE']].rename(columns={'USERNAME':'username'}),how='left')
+	userData.loc[userData['TITLE']!='Research Assistant','TITLE'] = 'Other'
+
+	# GENERATE OUTPUT TABLE
+	net = pd.merge(timeOverlap,real,how='left').fillna(0)
+	net = pd.merge(net,generated,how='left').fillna(0)
+	net = pd.merge(net,userData.rename(columns=dict(zip(userData.columns,[c+'_s' for c in userData.columns]))))
+	net = pd.merge(net,userData.rename(columns=dict(zip(userData.columns,[c+'_t' for c in userData.columns]))))
+
+	net['ageOldestUser'] = net[['diff_s','diff_t']].min(1)
+	net['ageYoungestUser'] = net[['diff_s','diff_t']].max(1)
+	net['SAME_GROUP'] = 0
+	net.loc[net['ML_GROUP_s']==net['ML_GROUP_t'],'SAME_GROUP'] = 1
+	net['collab'] = 0 
+	net.loc[net['n_proj']!=0,'collab']=1
+	net['collabpm'] = 365.*net['collab']/(12.*net['overlap'])
+	net['projectspm'] = 365.*net['n_proj']/(12.*net['overlap'])
+
+	net.to_csv(os.path.join(out_path,'network4comparison.csv'),index=False)
 
 if __name__ == '__main__':
 	main()
+
