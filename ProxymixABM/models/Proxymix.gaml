@@ -25,7 +25,8 @@ global {
 	
 	bool instantaneaousGraph <- true parameter: "Instantaneous Graph:" category: "Interaction";
 	bool saveGraph <- false parameter: "Save Graph:" category: "Interaction";
-	int distance <- 200 parameter: "Distance:" category: "Interaction" min: 1 max: 1000;
+	int saveCycle <- 750;
+	int distance <- 200 parameter: "Distance:" category: "Interaction" min: 1 max: 10000;
 
 	//compute the environment size from the dxf file envelope
 	geometry shape <- envelope(ML_file);
@@ -39,8 +40,8 @@ global {
 	graph<ML_people, ML_people> simulated_graph;
 
 
-	int nb_cols <- 75*1.5;
-	int nb_rows <- 50*1.5;
+	int nb_cols <- int(75*1.5);
+	int nb_rows <- int(50*1.5);
 	
 	init {
 		//--------------- ML ELEMENT CREATION-----------------------------//
@@ -157,13 +158,13 @@ global {
 
 	}
 	
-	reflex saveCurrentGraph when:saveGraph{
-		save ("header: if needed graphc created at cycle:" + cycle) to: "../results/generated_graph.txt" rewrite: true;
+	reflex saveCurrentGraph when:saveGraph and cycle=saveCycle {
+		save ("header: if needed graphc created at cycle:" + cycle) to: "../results/generated_graph"+string(distance)+".txt" rewrite: true;
 		graph simulated_graph_tmp <- graph(ML_people as_distance_graph (distance));
 		loop e over: simulated_graph_tmp.edges {
 				ML_people s <- simulated_graph_tmp source_of e;
 				ML_people t <- simulated_graph_tmp target_of e;
-				save (s.people_username +"," + t.people_username) to: "../results/generated_graph.txt" rewrite: false;			
+				save (s.people_username +"," + t.people_username) to: "../results/generated_graph"+string(distance)+".txt" rewrite: false;			
 			}
 	}	
 }
@@ -275,12 +276,11 @@ experiment Proxymix type: gui autorun:true
 	//float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
-		display map type:java2D draw_env:false background:rgb(0,0,0) autosave:true synchronized:true refresh:every(10#cycle)
+		display map type:java2D draw_env:false background:rgb(0,0,0) autosave:false synchronized:true refresh:every(10#cycle)
 		{   
 			species ML_element;
 			species ML_people;
 			species cell aspect:default position:{0,0,-0.01};
-			
 			graphics "simulated_graph" {
 				if (simulated_graph != nil and drawSimulatedGraph = true) {
 					loop eg over: simulated_graph.edges {
