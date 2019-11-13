@@ -85,9 +85,23 @@ def inferOverlap(users,userSet=None):
 	timeOverlap = pd.DataFrame(timeOverlap,columns=['username_s','username_t','overlap'])
 	return timeOverlap
 
+def loadSimulated(distance=None,userSet=[],simulated_network_path = '../ProxymixABM/results/'):
+	if distance is None:
+		generated = pd.read_csv(os.path.join(simulated_network_path,'generated_graph.txt'),skiprows=1,header=None)
+	else:
+		generated = pd.read_csv(os.path.join(simulated_network_path,'generated_graph'+str(distance)+'.txt'),skiprows=1,header=None)
+	generated.columns=['username_s','username_t']
+	if distance is None:
+		generated['collisionPotential'] = 1
+	else:
+		generated['collisionPotential_'+str(distance)] = 1
+	if len(userSet)!=0:
+		generated = generated[(generated['username_s'].isin(userSet))&(generated['username_t'].isin(userSet))]
+	return generated
+
 def main():
 	real_netowrk_path = '../ProxymixABM/includes/'
-	simulated_netowrk_path = '../ProxymixABM/results/'
+	
 	out_path = 'results'
 
 	with open(os.path.join(real_netowrk_path,'project-network.json')) as json_file:
@@ -99,19 +113,18 @@ def main():
 			real.append((s,t[0],t[1]))
 	real = pd.DataFrame(real,columns=['username_s','username_t','n_proj'])
 
-	generated = pd.read_csv(os.path.join(simulated_netowrk_path,'generated_graph.txt'),skiprows=1,header=None)
-	generated.columns=['username_s','username_t']
-	generated['collisionPotential'] = 1
 
+	generated = loadSimulated()
 	userSet = (set(real['username_s'])|set(real['username_t'])).intersection(set(generated['username_s'])|set(generated['username_t']))
 
 	users = inferStay()
 	userSet = userSet.intersection(set(users['username']))
 
 	users = users[users['username'].isin(userSet)]
-	generated = generated[(generated['username_s'].isin(userSet))&(generated['username_t'].isin(userSet))]
 	real = real[(real['username_s'].isin(userSet))&(real['username_t'].isin(userSet))]
+	generated = loadSimulated(userSet=userSet)
 
+	print('\tInferring time overlap',len(userSet))
 	timeOverlap = inferOverlap(users,userSet=userSet)
 
 	userData = users[['username','ML_GROUP','diff','diff2ref']]
@@ -119,8 +132,16 @@ def main():
 	userData.loc[userData['TITLE']!='Research Assistant','TITLE'] = 'Other'
 
 	# GENERATE OUTPUT TABLE
+	print('Generating output')
 	net = pd.merge(timeOverlap,real,how='left').fillna(0)
 	net = pd.merge(net,generated,how='left').fillna(0)
+
+	simulated_network_path = '../ProxymixABM/results/'
+	distances = sorted([int(f.split('.')[-2].split('h')[-1]) for f in os.listdir(simulated_network_path) if (f.split('.')[-1]=='txt')&(f.split('.')[-2][-1]!='h')])
+	for d in distances:
+		print('\tLoading simulated network:',d)
+		generated = loadSimulated(distance=d,userSet=userSet)
+		net = pd.merge(net,generated,how='left').fillna(0)
 	net = pd.merge(net,userData.rename(columns=dict(zip(userData.columns,[c+'_s' for c in userData.columns]))))
 	net = pd.merge(net,userData.rename(columns=dict(zip(userData.columns,[c+'_t' for c in userData.columns]))))
 
@@ -132,6 +153,10 @@ def main():
 	net.loc[net['n_proj']!=0,'collab']=1
 	net['collabpm'] = 365.*net['collab']/(12.*net['overlap'])
 	net['projectspm'] = 365.*net['n_proj']/(12.*net['overlap'])
+
+	net['collisionPotential_dis'] = max(distances)
+	for d in distances:
+		net.loc[(net['collisionPotential_dis']>d)&(net['collisionPotential_'+str(d)]==1),'collisionPotential_dis'] = d
 
 	net.to_csv(os.path.join(out_path,'network4comparison.csv'),index=False)
 
