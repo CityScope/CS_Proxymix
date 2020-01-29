@@ -106,7 +106,7 @@ grid cell width: nb_cols height: nb_rows neighbors: 8 {
 experiment test type: gui {
 	
 	output {
-		display map type:java2D draw_env:false background:rgb(0,0,0) autosave:false synchronized:true refresh:every(10#cycle)
+		display map type:opengl rotate:180 draw_env:false background:rgb(0,0,0) autosave:false synchronized:true refresh:every(10#cycle) camera_pos: {44201.4139,15933.2568,47524.9197} camera_look_pos: {44201.4139,15932.4273,0.0863} camera_up_vector: {0.0,1.0,0.0}
 		{
 			species ML_element;
 			species ML_people;
