@@ -17,7 +17,7 @@ global {
 	//file shape_tram <- shape_file('../include/tram.shp', 0);
 	
 		
-    float step <- 60 #mn parameter: "Time speed" category: "Model"; 
+    float step <- 1 #s parameter: "Time speed" category: "Model"; 
     
     int nb_cols <- int(50);
 	int nb_rows <- int(30);
@@ -26,7 +26,7 @@ global {
 	//Definition of the shape of the world as the bounds of the shapefiles to show everything contained
 	// by the area delimited by the bounds
 	geometry shape <- envelope(shape_file_bounds);
-	int nb_people <- 1000;
+	int nb_people <- 2;
 	int day_time update: cycle mod 144;
 	int min_work_start <- 36;
 	int max_work_start <- 60;
@@ -106,7 +106,7 @@ species building
 	int height;
 	aspect base
 	{
-		draw shape color: color depth: height;
+		draw shape color: color;// depth: height;
 	}
 
 }
@@ -267,7 +267,7 @@ experiment test type: gui {
 }
 
 experiment road_traffic type: gui
-{
+{   float minimun_cycle_duration <- 0.025;
 	parameter 'Shapefile for the buildings:' var: shape_file_buildings category: 'GIS';
 //	parameter 'Shapefile for the roads:' var: shape_file_roads category: 'GIS';
 	parameter 'Shapefile for the bounds:' var: shape_file_bounds category: 'GIS';
@@ -295,8 +295,8 @@ experiment road_traffic type: gui
 		}
 	};
 	output
-	{
-		display city_display type:opengl 
+	{	
+		display city_display type:opengl synchronized:true camera_pos: {292.3925,360.1845,286.8195} camera_look_pos: {292.3975,360.1842,-0.0015} camera_up_vector: {0.9991,0.0428,0.0}
 		{
 			species building aspect: base refresh: true;
 //			species road aspect: base ;
