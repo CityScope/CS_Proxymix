@@ -12,9 +12,9 @@ model Campus
 global {
 	//Load of the different shapefiles used by the model
 	file shape_file_buildings <- shape_file('../includes/campus.shp', 0);
-	//file shape_file_roads <- shape_file('../includes/road.shp', 0);
+	file shape_file_roads <- shape_file('../includes/route.shp', 0);
 	file shape_file_bounds <- shape_file('../includes/environ.shp', 0);
-	//file shape_tram <- shape_file('../include/tram.shp', 0);
+	file shape_tram <- shape_file('../includes/station_T2.shp', 0);
 	
 		
     float step <- 1 #s parameter: "Time speed" category: "Model"; 
@@ -27,21 +27,25 @@ global {
 	// by the area delimited by the bounds
 	geometry shape <- envelope(shape_file_bounds);
 	int nb_people <- 2;
-	int day_time update: cycle mod 144;
-	int min_work_start <- 36;
-	int max_work_start <- 60;
-	int min_work_end <- 84;
-	int max_work_end <- 132;
-	float min_speed <- 50.0;
-	float max_speed <- 100.0;
+	int day_time update: cycle mod 1440;
+	int min_work_start <- 360;
+	int max_work_start <- 600;
+	int min_work_end <- 840;
+	int max_work_end <- 1380;
+	float min_speed <- 5.0;
+	float max_speed <- 20.0;
 	list<building> work_buildings;
+	list<gate> gate_place;
 	//building learning_center;
 	
 	//Declaration of a graph that will represent our road network
 	graph the_graph;
 	
 	/* Get the list of point for the when the road cross the boarder. It's to get the possible entrance and exit */
-	list<point> get_all_entrance_exit_point(road road_data, Tram tram_data){
+	list<point> get_all_entrance_exit_point(road road_data, tram tram_data){
+		list<point> ret <- list(tram_data.shape);
+		write ret;
+		
 		list<point> ret <- [point(rnd(10), rnd(10)), point(rnd(10), rnd(10)), point(rnd(10), rnd(10)), point(rnd(10), rnd(10))];
 		return ret;
 	}
@@ -65,16 +69,20 @@ global {
 			{
 				color <- # blue;
 			}
-			write "height";
 			height <- 10 + rnd(90);
 		}
 
+		create tram from: shape_tram ;
 		//work_buildings <- building where (each.type = 'Residential');
 		work_buildings <- list(building);
 		//industrial_buildings <- building where (each.type = 'Industrial');
-		//create road from: shape_file_roads;
-		//the_graph <- as_edge_graph(road);
+		create road from: shape_file_roads;
+		the_graph <- as_edge_graph(road);
 		create people number: nb_people;
+		
+		point max_left;
+		point max_1_top;
+		point max_2_top;
 		
 		
 		//create ML_people number:nb_people;
@@ -88,14 +96,28 @@ global {
 }
 
 //  ------- CRÉATION DE L'ESPACE ------------
-species Tram{
+species tram{
 	string type;
 	rgb color <- # red;
 	//int height;
 	aspect base
 	{
 		//draw shape color: color depth: height;
-		draw shape color: color border:#white;
+		//draw shape color: color border:#white;
+		draw circle(5) color: color border: color-50;
+		//TODO draw string
+		draw texture: "T2" color: #white;
+	}
+}
+
+species gate
+{
+	rgb color <- #red;
+	
+	aspect base
+	{
+		draw circle(10) color: color border: color-50;
+		draw texture: "Gate";
 	}
 }
 
@@ -299,9 +321,11 @@ experiment road_traffic type: gui
 		display city_display type:opengl synchronized:true camera_pos: {292.3925,360.1845,286.8195} camera_look_pos: {292.3975,360.1842,-0.0015} camera_up_vector: {0.9991,0.0428,0.0}
 		{
 			species building aspect: base refresh: true;
-//			species road aspect: base ;
+			species road aspect: base ;
 			species people aspect: base;
+			species tram aspect: base;
 		}
 	}
 
 }
+//TODO new shape file with 3 point for the gate 
