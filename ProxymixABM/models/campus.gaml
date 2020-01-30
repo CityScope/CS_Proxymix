@@ -39,7 +39,7 @@ global {
 	float Need_to_move <- 0.01 parameter: "Percent people that need to move" category: "Interaction";
 	float rot <- 0.0 parameter: "Rotate" category: "debug";
 	float long <- 265.0 parameter: "Long" category: "debug";
-	float larg <- 280.0 parameter: "Larg" category: "debug";
+	float larg <- 290.0 parameter: "Larg" category: "debug";
 	float amplitude_wander <- 180.0 parameter: "Amplitude" category: "debug wander";
 	float speed_wander <- 0.5 parameter: "Speed" category: "debug wander";
 	
@@ -372,7 +372,7 @@ species people skills: [moving]
 species fond {
 	aspect base {
 		//draw shape color:#white texture: string("../includes/Fond Plan.png"); //empty:true;
-		draw rectangle(long,larg) color:#white rotate:rot texture:"../includes/Fond Plan.png";
+		draw square(larg) color:#white rotate:rot texture:"../includes/Fond Plan1.png";
 	}
 }
 
@@ -431,7 +431,7 @@ experiment road_traffic type: gui
 	};
 	output
 	{	
-		display city_display type:opengl background:#black synchronized:true ambient_light:(((day_time+2*60) mod 720)/10)  camera_pos: {287.9218,412.1887,421.1217} camera_look_pos: {317.3753,412.4798,0.0} camera_up_vector: {0.9975,-0.0099,0.0698}
+		display city_display type:opengl background:#black synchronized:true ambient_light:(((day_time+2*60) mod 720)/10)  camera_pos: {279.8083,432.1905,441.7286} camera_look_pos: {310.7344,432.4962,-0.4492} camera_up_vector: {0.9975,-0.0099,0.0698} keystone: [{0.0,0.0,0.0},{-0.009849174003025984,0.9561517994158923,0.0},{1.0196983480060533,0.8867254818243895,0.0},{1.0,0.0,0.0}]
 		{
 			//image 'background' file:"../includes/Fond Plan.png" ;
 
