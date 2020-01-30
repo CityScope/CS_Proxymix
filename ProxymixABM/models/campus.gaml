@@ -16,12 +16,13 @@ model Campus
 
 global {
 	//Load of the different shapefiles used by the model
-	file shape_file_buildings <- shape_file('../includes/campus_new2.shp', 0);
+	file shape_file_buildings <- shape_file('../includes/campus_new2(1).shp', 0);
 	file shape_file_roads <- shape_file('../includes/route(1).shp', 0);
 	file shape_file_bounds <- shape_file('../includes/environ.shp', 0);
-	file shape_tram <- shape_file('../includes/sation_T2_polygone.shp', 0);
-	file shape_gate <- shape_file('../includes/point_start.shp', 0);
+	file shape_tram <- shape_file('../includes/sation_T2_polygone(1).shp', 0);
+	file shape_gate <- shape_file('../includes/point_start_polygone.shp', 0);
 	file environ_square <- shape_file('../includes/environ5_shp.shp', 0);
+	file learning_center <- shape_file('../includes/LC.shp', 0);
 	
 		
     float step <- 1 #s parameter: "Time speed" category: "Model"; 
@@ -34,10 +35,14 @@ global {
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
 	bool draw_old_path <- false parameter: "Draw old path" category: "Interaction";
 	int size_old_path <- 10 parameter: "Size old path" category: "Interaction";
+	float population_LC <- 0.3 parameter: "Percent luck to go in the learning center" category: "Interaction";
+	float Need_to_move <- 0.01 parameter: "Percent people that need to move" category: "Interaction";
+	float rot <- 0.0 parameter: "Rotate" category: "debug";
+	float long <- 265.0 parameter: "Long" category: "debug";
+	float larg <- 280.0 parameter: "Larg" category: "debug";
+	float amplitude_wander <- 180.0 parameter: "Amplitude" category: "debug wander";
+	float speed_wander <- 0.5 parameter: "Speed" category: "debug wander";
 	
-    
-    int nb_cols <- int(50);
-	int nb_rows <- int(30);
 	
 	//Definition of the shape of the world as the bounds of the shapefiles to show everything contained
 	// by the area delimited by the bounds
@@ -56,6 +61,7 @@ global {
 	list<gate> gate_place;
 	list<tram> tram_station;
 	list<geometry> clean_lines;
+	list<learning_center_shp> LC;
 	
 	//clean or not the data
 	bool clean_data <- true ;
@@ -100,6 +106,9 @@ global {
 
 		create tram from: shape_tram ;
 		tram_station <- list(tram);
+		create learning_center_shp from: learning_center ;
+		LC <- list(learning_center_shp);
+		
 		create gate from: shape_gate;
 		gate_place <- list(gate);
 		//work_buildings <- building where (each.type = 'Residential');
@@ -136,8 +145,12 @@ global {
 							location <- any_location_in(one_of(tram_station));
 							entry_point <- location;
 							objectif <- "working";
-							the_target <- any_location_in(one_of(work_buildings));
+							if(flip(population_LC)){
+								the_target <- any_location_in(one_of(LC));	
+							}else{
+								the_target <- any_location_in(one_of(work_buildings));
 							}
+						}
 						nb_current_agent <- nb_current_agent + new_people; 
 					}
 					if ((day_time mod 1) = 0){ // people arrive by road every min
@@ -146,7 +159,11 @@ global {
 							location <- any_location_in(one_of(gate_place));
 							objectif <- "working";
 							entry_point <- location;
-							the_target <- any_location_in(one_of(work_buildings));
+							if(flip(population_LC)){
+								the_target <- any_location_in(one_of(LC));	
+							}else{
+								the_target <- any_location_in(one_of(work_buildings));
+							}
 						}
 						nb_current_agent <- nb_current_agent + new_people;
 					} 
@@ -160,6 +177,25 @@ global {
 }
 
 //  ------- CRÉATION DE L'ESPACE ------------
+
+species learning_center_shp{
+	string type;
+	rgb color;
+	int height;
+	bool empty;
+	aspect base
+	{
+		color <- # transparent;
+		empty <- true;
+		
+		if(show_buildings){
+			color <- #gray;
+			empty <- false;
+		}
+		draw shape color: color empty:empty;// depth: height;
+	}
+}
+
 species tram{
 	string type;
 	rgb color <- #purple;
@@ -264,7 +300,6 @@ species people skills: [moving]
 		if(moving){
 			nb_current_agent <- nb_current_agent -1;
 			killed_people <- killed_people +1;
-			write "die";
 			do die;
 		}
 	}
@@ -276,7 +311,6 @@ species people skills: [moving]
  		if (moveOnGraph){
  			moving <- true;
  			do goto( target: the_target ,on: the_graph);
- 			do wander;
  			
  			
  		}else{
@@ -289,15 +323,31 @@ species people skills: [moving]
             the_target <- nil;
         }
         
-        loop while:(lentgh(old_path) > 10)
+        loop while:(length(old_path) > size_old_path){
+        	old_path >> first(old_path);
+        }
+        if(moving){
+        	if(flip(0.8)){
+        		do wander amplitude:amplitude_wander speed:speed_wander;
+        	}
+        }else{
+        	if(flip(0.5)){
+	        	do wander amplitude:amplitude_wander speed:speed_wander;
+ 			}		
+        }
+        old_path << location;
 		
 
 	}
 
 	reflex switchLocation when: the_target = nil 
 	{
-		if(flip(0.001)){
-			the_target <- any_location_in(one_of(work_buildings));
+		if(flip(Need_to_move)){
+			if(flip(population_LC)){
+				the_target <- any_location_in(one_of(LC));	
+			}else{
+				the_target <- any_location_in(one_of(work_buildings));
+			}
 		}
 	}
 	
@@ -311,6 +361,9 @@ species people skills: [moving]
 			draw(objectif) color:#black rotate:90 font:font("Default", 10 , #bold);// rotate;
 			
 		}
+		if (draw_old_path){
+			draw line(old_path) color:#blue;
+		}
 	}
 
 }
@@ -318,7 +371,8 @@ species people skills: [moving]
 
 species fond {
 	aspect base {
-		draw shape color:#white texture: string("../includes/Fond Plan.png"); //empty:true;
+		//draw shape color:#white texture: string("../includes/Fond Plan.png"); //empty:true;
+		draw rectangle(long,larg) color:#white rotate:rot texture:"../includes/Fond Plan.png";
 	}
 }
 
@@ -377,12 +431,13 @@ experiment road_traffic type: gui
 	};
 	output
 	{	
-		display city_display type:opengl background:#black synchronized:true ambient_light:(((day_time+2*60) mod 720)/10)  camera_pos: {273.1913,413.8754,423.148} camera_look_pos: {302.7283,416.754,-1.148} camera_up_vector: {0.9929,-0.0968,0.0698}
+		display city_display type:opengl background:#black synchronized:true ambient_light:(((day_time+2*60) mod 720)/10)  camera_pos: {287.9218,412.1887,421.1217} camera_look_pos: {317.3753,412.4798,0.0} camera_up_vector: {0.9975,-0.0099,0.0698}
 		{
 			//image 'background' file:"../includes/Fond Plan.png" ;
 
 			species fond aspect: base refresh: true;		
 			species building aspect: base refresh: true;
+			species learning_center_shp aspect: base refresh: true;
 			species road aspect: base refresh: true;
 			species people aspect: base refresh: true;
 			species tram aspect: base refresh: true;
