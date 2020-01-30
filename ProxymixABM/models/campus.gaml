@@ -5,50 +5,76 @@
 * Tags: Tag1, Tag2, TagN
 ***/
 
+/*
+ * Question: A* -> présence de poid variable afin de privilégié des chemins même si plus long
+ *  Question : possible épaisseur de route ? comment marche le jump d'un batiment / point au graph
+ * write tram or road on circle
+ */
+
 model Campus
 
-/* Insert your model definition here */
 
 global {
 	//Load of the different shapefiles used by the model
-	file shape_file_buildings <- shape_file('../includes/campus.shp', 0);
-	file shape_file_roads <- shape_file('../includes/route.shp', 0);
+	file shape_file_buildings <- shape_file('../includes/campus_new2.shp', 0);
+	file shape_file_roads <- shape_file('../includes/route(1).shp', 0);
 	file shape_file_bounds <- shape_file('../includes/environ.shp', 0);
-	file shape_tram <- shape_file('../includes/station_T2.shp', 0);
+	file shape_tram <- shape_file('../includes/sation_T2_polygone.shp', 0);
+	file shape_gate <- shape_file('../includes/point_start.shp', 0);
+	file environ_square <- shape_file('../includes/environ5_shp.shp', 0);
 	
 		
     float step <- 1 #s parameter: "Time speed" category: "Model"; 
     
+    
+    bool moveOnGraph <- true parameter: "Move on Graph:" category: "Model";
+    bool show_road <- false parameter: "Draw roads:" category: "Vizu";
+    bool show_buildings <- false parameter: "Draw buildings:" category: "Vizu";
+    bool show_objectif <- false parameter: "Show objectifs:" category: "Vizu";
+	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
+	bool draw_old_path <- false parameter: "Draw old path" category: "Interaction";
+	int size_old_path <- 10 parameter: "Size old path" category: "Interaction";
+	
+    
     int nb_cols <- int(50);
 	int nb_rows <- int(30);
-	bool draw_grid <- false;
 	
 	//Definition of the shape of the world as the bounds of the shapefiles to show everything contained
 	// by the area delimited by the bounds
 	geometry shape <- envelope(shape_file_bounds);
-	int nb_people <- 2;
-	int day_time update: cycle mod 1440;
-	int min_work_start <- 360;
-	int max_work_start <- 600;
-	int min_work_end <- 840;
-	int max_work_end <- 1380;
-	float min_speed <- 5.0;
-	float max_speed <- 20.0;
+	int nb_people <- 100;
+	int nb_current_agent <- 0;
+	int new_people;
+	int killed_people <- 0;
+	
+	int day_time update: cycle mod 1800; // day in min with only two hour for 24-6
+	int min_work_end <- 60;
+	int max_work_end <- 1600;
+	float min_speed <- 2.0;
+	float max_speed <- 5.0;
 	list<building> work_buildings;
 	list<gate> gate_place;
-	//building learning_center;
+	list<tram> tram_station;
+	list<geometry> clean_lines;
+	
+	//clean or not the data
+	bool clean_data <- true ;
+	
+	//tolerance for reconnecting nodes
+	float tolerance <- 10.0 ;
+	
+	//if true, split the lines at their intersection
+	bool split_lines <- true ;
+	
+	//if true, keep only the main connected components of the network
+	bool reduce_to_main_connected_components <- true ;
+	
+	string legend <- not clean_data ? "Raw data" : ("Clean data : tolerance: " + tolerance + "; split_lines: " + split_lines + " ; reduce_to_main_connected_components:" + reduce_to_main_connected_components );
+	
 	
 	//Declaration of a graph that will represent our road network
 	graph the_graph;
 	
-	/* Get the list of point for the when the road cross the boarder. It's to get the possible entrance and exit */
-	list<point> get_all_entrance_exit_point(road road_data, tram tram_data){
-		list<point> ret <- list(tram_data.shape);
-		write ret;
-		
-		list<point> ret <- [point(rnd(10), rnd(10)), point(rnd(10), rnd(10)), point(rnd(10), rnd(10)), point(rnd(10), rnd(10))];
-		return ret;
-	}
 	
 	/* Get a random set of building that will be visited by the people */
 	list<building> get_visited_building(list<building> all_buildings){
@@ -73,22 +99,60 @@ global {
 		}
 
 		create tram from: shape_tram ;
+		tram_station <- list(tram);
+		create gate from: shape_gate;
+		gate_place <- list(gate);
 		//work_buildings <- building where (each.type = 'Residential');
 		work_buildings <- list(building);
 		//industrial_buildings <- building where (each.type = 'Industrial');
-		create road from: shape_file_roads;
+		
+		
+		//clean data, with the given options
+		clean_lines <- clean_data ? clean_network(shape_file_roads.contents,tolerance,split_lines,reduce_to_main_connected_components) : shape_file_roads.contents;
+		
+		create road from: clean_lines;
+		
+		list<list<point>> connected_components ;
+		list<rgb> colors;
 		the_graph <- as_edge_graph(road);
-		create people number: nb_people;
 		
-		point max_left;
-		point max_1_top;
-		point max_2_top;
-		
+		create fond from: environ_square{
+			//location<-{world.shape.width/2,world.shape.height/2};	
+		}		
 		
 		//create ML_people number:nb_people;
 		//ask ML_people {location <- any_location_in(one_of(ML_element));}
 		//create ML_element from: ML_file;// with: [layer::string(get("layer"))];
 		//map layers <- list(ML_element) group_by each.layer;
+	}
+	
+	reflex add_people {
+		if (nb_current_agent < nb_people){
+			if (day_time < (60*20)){ // if before 20:00
+				if (day_time > (30)){ // if after 06:00
+					if ((day_time mod 10) = 0){ // tram arrive all 10 min
+						new_people <- (20 + rnd(20));
+						create people number: new_people {
+							location <- any_location_in(one_of(tram_station));
+							entry_point <- location;
+							objectif <- "working";
+							the_target <- any_location_in(one_of(work_buildings));
+							}
+						nb_current_agent <- nb_current_agent + new_people; 
+					}
+					if ((day_time mod 1) = 0){ // people arrive by road every min
+						new_people <- rnd(10);
+						create people number: new_people {
+							location <- any_location_in(one_of(gate_place));
+							objectif <- "working";
+							entry_point <- location;
+							the_target <- any_location_in(one_of(work_buildings));
+						}
+						nb_current_agent <- nb_current_agent + new_people;
+					} 
+				}
+			}
+		}
 	}
 	
 
@@ -98,25 +162,29 @@ global {
 //  ------- CRÉATION DE L'ESPACE ------------
 species tram{
 	string type;
-	rgb color <- # red;
+	rgb color <- #purple;
 	//int height;
 	aspect base
 	{
 		//draw shape color: color depth: height;
-		//draw shape color: color border:#white;
-		draw circle(5) color: color border: color-50;
+		draw shape color: color border:#white;
+		//draw text: "T2" color: #white size: 5 ;
+		
+		draw("T2") color:#white rotate:90 font:font("Default", 10 , #bold);// rotate;
+		
+		//draw circle(5) color: color border: color-50;
 		//TODO draw string
-		draw texture: "T2" color: #white;
+		//draw texture: "T2" color: #white;
 	}
 }
 
 species gate
 {
-	rgb color <- #red;
+	rgb color <- #green;
 	
 	aspect base
 	{
-		draw circle(10) color: color border: color-50;
+		draw circle(5) color: color border: color-50;
 		draw texture: "Gate";
 	}
 }
@@ -124,11 +192,19 @@ species gate
 species building
 {
 	string type;
-	rgb color <- # gray;
+	rgb color;
 	int height;
+	bool empty;
 	aspect base
 	{
-		draw shape color: color;// depth: height;
+		color <- # transparent;
+		empty <- true;
+		
+		if(show_buildings){
+			color <- #gray;
+			empty <- false;
+		}
+		draw shape color: color empty:empty;// depth: height;
 	}
 
 }
@@ -136,9 +212,14 @@ species building
 
 species road
 {
-	rgb color <- # black;
+	rgb color;
 	aspect base
 	{
+		color <- # transparent;
+		if (show_road) {
+			color <- #grey;
+			
+		}
 		draw shape color: color;
 	}
 
@@ -148,155 +229,107 @@ species people skills: [moving]
 {
 	float speed <- min_speed + rnd(max_speed - min_speed);
 	rgb color <- rnd_color(255);
+	path currentPath;
+	point entry_point;
+	bool toKill <- false;
+	bool moving <- false;
 	
-	//list<building> place_visited <- one_of(residential_buildings);
-	//building working_place <- one_of(industrial_buildings);
+	list<point> old_path;
 	
-	building living_place <- one_of(work_buildings);
-	building working_place <- one_of(work_buildings);
-	
-	//point location <- any_location_in(living_place) + { 0, 0, living_place.height };
-	point location <- any_location_in(living_place) + { 0, 0, living_place.height };
-	int start_work <- min_work_start + rnd(max_work_start - min_work_start);
-	int end_work <- min_work_end + rnd(max_work_end - min_work_end);
+	int end_work <- day_time + min_work_end + rnd(max_work_end - min_work_end);
 	string objectif;
 	point the_target <- nil;
-	reflex time_to_work when: day_time = start_work
-	{
-		objectif <- 'working';
-		the_target <- any_location_in(working_place);
-	}
 
-	reflex time_to_go_home when: day_time = end_work
+
+	reflex time_to_go_home when: day_time >= end_work
 	{
-		objectif <- 'go home';
-		the_target <- any_location_in(living_place);
+		if(the_target=nil){
+			objectif <- 'go home';
+			the_target <- entry_point;
+			toKill <- true;
+		}
+	}
+	
+	reflex go_out when: day_time >=1700
+	{
+		if(the_target != entry_point){
+			objectif <- 'go home';
+			the_target <- entry_point;
+			toKill <- true;
+			}
+	}
+	
+	reflex fired when: toKill
+	{
+		if(moving){
+			nb_current_agent <- nb_current_agent -1;
+			killed_people <- killed_people +1;
+			write "die";
+			do die;
+		}
 	}
 
 	reflex move when: the_target != nil
 	{
-		do goto( target: the_target ,on: the_graph);
-		switch the_target
-		{
-			match location
-			{
-				the_target <- nil;
-				location <- { location.x, location.y, objectif = 'go home' ? living_place.height : working_place.height };
-			}
+		
 
-		}
+ 		if (moveOnGraph){
+ 			moving <- true;
+ 			do goto( target: the_target ,on: the_graph);
+ 			do wander;
+ 			
+ 			
+ 		}else{
+ 			moving <- true;
+ 			do goto target:the_target speed:speed;
+ 		}
+
+		if (location = the_target) {
+			moving <- false;
+            the_target <- nil;
+        }
+        
+        loop while:(lentgh(old_path) > 10)
+		
 
 	}
 
+	reflex switchLocation when: the_target = nil 
+	{
+		if(flip(0.001)){
+			the_target <- any_location_in(one_of(work_buildings));
+		}
+	}
+	
 	aspect base
 	{
-		draw sphere(3) color: color;
-	}
-
-}
-
-species ML_element
-{
-	string layer;
-	aspect {
-		draw shape color: rgb(38,38,38) border:#white empty:true;
-	}
-	
-	init {
-		shape <- polygon(shape.points);
-		ask ML_element where (each.layer="Walls"){
-			ask cell overlapping self {
-				is_wall <- true;
-				}
+		draw sphere(1) color: color;
+		if (current_path != nil and draw_trajectory = true) {
+			draw current_path.shape color: #red width: 2;
 		}
-//		ask ML_element {
-//			loop i over: self.shape.points{
-//				ask cell overlapping i {
-//					is_wall <- true;
-//				}
-//			}
-//		}
-	}
-	
-}
-
-
-// ------- CRÉATION DES INDIVIDUS ----------
-species ML_people skills:[moving]{     
-    
-    //variable definition
-    point target;
-   	path currentPath;
-    
-    //Déplacements :
-    reflex stay when: target = nil {
-        if flip(0.05) {
-            target <- any_location_in (one_of(ML_element));
-        }
-    }
-        
-    reflex move when: target != nil{
-    	currentPath<-path_between(cell where (each.is_wall=false),location,target);
-    	do follow path: currentPath;
-        //do goto target: target;
-        if (location = target) {
-            target <- nil;
-        } 
-    }
-    aspect default {
-    	if (target != location){
-    		draw circle(500) color: rgb(0,125,255) border: rgb(0,125,255); 
-    	}
-    	if (target = nil){
-    		draw circle(500) color: rgb(255,255,255) border: rgb(255, 255, 255); 
-    	}
-		if (current_path != nil and target != nil) {
-			draw current_path.shape color: #red width:1;
+		if (show_objectif){
+			draw(objectif) color:#black rotate:90 font:font("Default", 10 , #bold);// rotate;
+			
 		}
 	}
+
 }
 
-// ----------- CREATION DE LA GRILLE --------
-grid cell width: nb_cols height: nb_rows neighbors: 8 {
-	bool is_wall <- false;
-	bool is_exit <- false;
-	rgb color <- #white;
-	aspect default{
-		if (draw_grid){
-		  draw shape color:is_wall? #red:#black border:rgb(75,75,75) empty:true;	
-		}
-	}	
-}
 
-experiment test type: gui {
-
-	
-	// Define parameters here if necessary
-	// parameter "My parameter" category: "My parameters" var: one_global_attribute;
-	
-	// Define attributes, actions, a init section and behaviors if necessary
-	// init { }
-	
-	
-	output {
-		display map type:java2D draw_env:false background:rgb(0,0,0) autosave:false synchronized:true refresh:every(10#cycle)
-		{
-			species ML_element;
-			species ML_people;
-			species cell aspect:default position:{0,0,-0.01};
-		}
+species fond {
+	aspect base {
+		draw shape color:#white texture: string("../includes/Fond Plan.png"); //empty:true;
 	}
 }
+
 
 experiment road_traffic type: gui
 {   float minimun_cycle_duration <- 0.025;
-	parameter 'Shapefile for the buildings:' var: shape_file_buildings category: 'GIS';
+//	parameter 'Shapefile for the buildings:' var: shape_file_buildings category: 'GIS';
 //	parameter 'Shapefile for the roads:' var: shape_file_roads category: 'GIS';
-	parameter 'Shapefile for the bounds:' var: shape_file_bounds category: 'GIS';
-	parameter 'Earliest hour to start work' var: min_work_start category: 'People';
-	parameter 'Latest hour to start work' var: max_work_start category: 'People';
-	parameter 'Earliest hour to end work' var: min_work_end category: 'People';
-	parameter 'Latest hour to end work' var: max_work_end category: 'People';
+//	parameter 'Shapefile for the bounds:' var: shape_file_bounds category: 'GIS';
+//	parameter 'Earliest hour to end work' var: min_work_end category: 'People';
+//	parameter 'Latest hour to end work' var: max_work_end category: 'People';
 	parameter 'minimal speed' var: min_speed category: 'People';
 	parameter 'maximal speed' var: max_speed category: 'People';
 	parameter 'Number of people agents' var: nb_people category: 'People' min: 0 max: 1000 on_change:
@@ -306,7 +339,33 @@ experiment road_traffic type: gui
 		{
 			if (nb_people > nb)
 			{
-				create people number: nb_people - nb;
+				
+				if (nb_current_agent < nb_people){
+					if (day_time < (60*20)){ // if before 20:00
+						if (day_time > (30)){ // if after 06:00
+							if ((day_time mod 10) = 0){ // tram arrive all 10 min
+								new_people <- (20 + rnd(20));
+								create people number: new_people {
+									location <- any_location_in(one_of(tram_station));
+									entry_point <- location;
+									objectif <- "working";
+									the_target <- any_location_in(one_of(work_buildings));
+									}
+								nb_current_agent <- nb_current_agent + new_people; 
+							}
+							if ((day_time mod 1) = 0){ // people arrive by road every min
+								new_people <- rnd(10);
+								create people number: new_people {
+									location <- any_location_in(one_of(gate_place));
+									objectif <- "working";
+									entry_point <- location;
+									the_target <- any_location_in(one_of(work_buildings));
+								}
+								nb_current_agent <- nb_current_agent + new_people;
+							} 
+						}
+					}
+				}
 			} else
 			{
 				ask (nb - nb_people) among people
@@ -318,12 +377,16 @@ experiment road_traffic type: gui
 	};
 	output
 	{	
-		display city_display type:opengl synchronized:true camera_pos: {292.3925,360.1845,286.8195} camera_look_pos: {292.3975,360.1842,-0.0015} camera_up_vector: {0.9991,0.0428,0.0}
+		display city_display type:opengl background:#black synchronized:true ambient_light:(((day_time+2*60) mod 720)/10)  camera_pos: {273.1913,413.8754,423.148} camera_look_pos: {302.7283,416.754,-1.148} camera_up_vector: {0.9929,-0.0968,0.0698}
 		{
+			//image 'background' file:"../includes/Fond Plan.png" ;
+
+			species fond aspect: base refresh: true;		
 			species building aspect: base refresh: true;
-			species road aspect: base ;
-			species people aspect: base;
-			species tram aspect: base;
+			species road aspect: base refresh: true;
+			species people aspect: base refresh: true;
+			species tram aspect: base refresh: true;
+			species gate aspect: base refresh: true;
 		}
 	}
 
