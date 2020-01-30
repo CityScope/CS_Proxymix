@@ -31,12 +31,12 @@ global {
     bool moveOnGraph <- true parameter: "Move on Graph:" category: "Model";
     bool show_road <- false parameter: "Draw roads:" category: "Vizu";
     bool show_buildings <- false parameter: "Draw buildings:" category: "Vizu";
-    bool show_objectif <- false parameter: "Show objectifs:" category: "Vizu";
+   // bool show_objectif <- false parameter: "Show objectifs:" category: "Vizu";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
 	bool draw_old_path <- false parameter: "Draw old path" category: "Interaction";
 	int size_old_path <- 10 parameter: "Size old path" category: "Interaction";
-	float population_LC <- 0.3 parameter: "Percent luck to go in the learning center" category: "Interaction";
-	float Need_to_move <- 0.01 parameter: "Percent people that need to move" category: "Interaction";
+	float population_LC <- 0.3 parameter: "Percent luck to go in the learning center" category: "debug";
+	float Need_to_move <- 0.01 parameter: "Percent people that need to move" category: "debug";
 	float rot <- 0.0 parameter: "Rotate" category: "debug";
 	float long <- 265.0 parameter: "Long" category: "debug";
 	float larg <- 290.0 parameter: "Larg" category: "debug";
@@ -135,6 +135,10 @@ global {
 		//map layers <- list(ML_element) group_by each.layer;
 	}
 	
+	reflex update_current_agent{
+		nb_current_agent <- length(people); 
+	}
+	
 	reflex add_people {
 		if (nb_current_agent < nb_people){
 			if (day_time < (60*20)){ // if before 20:00
@@ -169,6 +173,11 @@ global {
 					} 
 				}
 			}
+		}else{
+			ask (nb_current_agent - nb_people) among people
+				{
+					do die;
+				}
 		}
 	}
 	
@@ -357,10 +366,10 @@ species people skills: [moving]
 		if (current_path != nil and draw_trajectory = true) {
 			draw current_path.shape color: #red width: 2;
 		}
-		if (show_objectif){
-			draw(objectif) color:#black rotate:90 font:font("Default", 10 , #bold);// rotate;
+		/*if (show_objectif){
+			draw(objectif) color:#black font:font("Default", 100#px , #bold);//rotate:90  rotate;
 			
-		}
+		}*/
 		if (draw_old_path){
 			draw line(old_path) color:#blue;
 		}
@@ -442,6 +451,71 @@ experiment road_traffic type: gui
 			species people aspect: base refresh: true;
 			species tram aspect: base refresh: true;
 			species gate aspect: base refresh: true;
+			
+			event 'm' action: {
+				if moveOnGraph = false{
+					moveOnGraph <- true;}
+				else {
+					moveOnGraph <- false;
+				}
+			};
+			event 'b' action: {
+				if show_buildings = false{
+					show_buildings <- true;}
+				else {
+					show_buildings <- false;
+				}
+			};
+			event 'r' action: {
+				if show_road = false{
+					show_road <- true;}
+				else {
+					show_road <- false;
+				}
+			};
+		/* 	event 'o' action: {
+				if show_objectif = false{
+					show_objectif <- true;}
+				else {
+					show_objectif <- false;
+				}
+			};
+		*/	event 't' action: {
+				if draw_trajectory = false{
+					draw_trajectory <- true;}
+				else {
+					draw_trajectory <- false;
+				}
+			};
+			event 'p' action: {
+				if draw_old_path = false{
+					draw_old_path <- true;}
+				else {
+					draw_old_path <- false;
+				}
+			};
+			event 'z' action: {
+				if (nb_people < 1000){
+					nb_people <- nb_people + 50;
+					}
+			};
+			event 'a' action: {
+				if (nb_people >= 50){
+					nb_people <- nb_people - 50;
+					}
+			};
+			event 's' action: {
+				if (size_old_path < 100){
+					size_old_path <- size_old_path + 2;
+					}
+			};
+			event 'q' action: {
+				if (size_old_path >= 2){
+					size_old_path <- size_old_path - 2;
+					}
+			};
+			
+			
 		}
 	}
 
