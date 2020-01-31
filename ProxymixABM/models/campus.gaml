@@ -29,6 +29,7 @@ global {
     
     
     bool moveOnGraph <- true parameter: "Move on Graph:" category: "Model";
+    bool toolbar <- false parameter: "ToolBar:" category: "debug";
     bool show_road <- false parameter: "Draw roads:" category: "Vizu";
     bool show_buildings <- false parameter: "Draw buildings:" category: "Vizu";
    // bool show_objectif <- false parameter: "Show objectifs:" category: "Vizu";
@@ -440,7 +441,7 @@ experiment road_traffic type: gui
 	};
 	output
 	{	
-		display city_display type:opengl background:#black synchronized:true ambient_light:(((day_time+2*60) mod 720)/10)  camera_pos: {279.8083,432.1905,441.7286} camera_look_pos: {310.7344,432.4962,-0.4492} camera_up_vector: {0.9975,-0.0099,0.0698} keystone: [{0.0,0.0,0.0},{-0.009849174003025984,0.9561517994158923,0.0},{1.0196983480060533,0.8867254818243895,0.0},{1.0,0.0,0.0}]
+		display city_display type:opengl toolbar:toolbar background:#black synchronized:true ambient_light:(((day_time+2*60) mod 720)/10)  camera_pos: {279.8083,432.1905,441.7286} camera_look_pos: {310.7344,432.4962,-0.4492} camera_up_vector: {0.9975,-0.0099,0.0698} keystone: [{0.0,0.0,0.0},{-0.009849174003025984,0.9561517994158923,0.0},{1.0196983480060533,0.8867254818243895,0.0},{1.0,0.0,0.0}]
 		{
 			//image 'background' file:"../includes/Fond Plan.png" ;
 
