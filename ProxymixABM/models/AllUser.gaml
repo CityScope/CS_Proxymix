@@ -11,7 +11,7 @@ model BatiSimple
 global {
 	file ML_file <- dxf_file("../includes/LC_final.dxf", #m);
 	geometry shape <- envelope(ML_file);
-	int nb_people <- 50;
+	int nb_people <- 100;
     float step <- 1 #sec;
     int current_hour update: (time / #hour) mod 18;
     int nb_cols <- int(200);
@@ -33,21 +33,34 @@ global {
 			}
 		}
 		create People number:nb_people{
-			id <- "Etudiant";
+			id <- "Etudiant1";
+			}
+		create People number:50{
+			id <- "Etudiant2";
 			}
 		create People number:nb_people{
 			id <- "Admin";
 			}
+		create People number:20{
+			id <- "Prof";
+			}
 		ask People{
-			if (self.id = 'Etudiant'){
+			if (self.id = 'Etudiant1'){
 			myoffice <- one_of(ML_element where (each.layer="Locaux_Etudiants"));
 			//location <- any_location_in(one_of(ML_element where (each.layer="Administratif" and not(((cell overlapping each) accumulate each.is_wall) contains false))));
 			location <- any_location_in(one_of(ML_element where (each.layer="Entree_Sortie")));
-			myDayTrip[rnd(10, 20)]<-any_location_in (myoffice.shape);
+			myDayTrip[rnd(10, 80)]<-any_location_in (myoffice.shape);
 			myDayTrip[rnd(200, 250)]<-any_location_in (one_of(ML_element where (each.layer="Restauration")));
 			myDayTrip[rnd(400, 500)]<-any_location_in (myoffice.shape);
 			myDayTrip[rnd(800, 900)]<-any_location_in (one_of(ML_element where (each.layer="Amphitheatre")));
-			myDayTrip[rnd(1000, 1200)]<-any_location_in (one_of(ML_element where (each.layer="Entree_Sortie")));
+			myDayTrip[rnd(1200, 1400)]<-any_location_in (one_of(ML_element where (each.layer="Entree_Sortie")));
+			}
+			if (self.id = 'Etudiant2'){
+			myoffice <- one_of(ML_element where (each.layer="Locaux_Etudiants"));
+			//location <- any_location_in(one_of(ML_element where (each.layer="Administratif" and not(((cell overlapping each) accumulate each.is_wall) contains false))));
+			location <- any_location_in(one_of(ML_element where (each.layer="Entree_Sortie")));
+			myDayTrip[rnd(300, 500)]<-any_location_in (myoffice.shape);
+			myDayTrip[rnd(1200, 1400)]<-any_location_in (one_of(ML_element where (each.layer="Entree_Sortie")));
 			}
 			if (self.id = 'Admin'){
 			myoffice <- one_of(ML_element where (each.layer="Administratif"));
@@ -56,7 +69,15 @@ global {
 			myDayTrip[rnd(200, 250)]<-any_location_in (one_of(ML_element where (each.layer="Restauration")));
 			myDayTrip[rnd(400, 500)]<-any_location_in (myoffice.shape);
 			myDayTrip[rnd(800, 900)]<-any_location_in (one_of(ML_element where (each.layer="Amphitheatre")));
-			myDayTrip[rnd(1000, 1200)]<-any_location_in (one_of(ML_element where (each.layer="Entree_Sortie")));
+			myDayTrip[rnd(1200, 1400)]<-any_location_in (one_of(ML_element where (each.layer="Entree_Sortie")));
+			}
+			if (self.id = 'Prof'){
+			myoffice <- one_of(ML_element where (each.layer="Locaux_Etudiants"));
+			location <- any_location_in(one_of(ML_element where (each.layer="Entree_Sortie")));
+			myDayTrip[rnd(10, 20)]<-any_location_in (myoffice.shape);
+			myDayTrip[rnd(200, 250)]<-any_location_in (one_of(ML_element where (each.layer="Restauration")));
+			myDayTrip[rnd(400, 500)]<-any_location_in (one_of(ML_element where (each.layer="Magasins")));
+			myDayTrip[rnd(700, 800)]<-any_location_in (one_of(ML_element where (each.layer="Entree_Sortie")));
 			}
 		}
 	}
@@ -172,19 +193,31 @@ species People skills:[moving]{
 	 		do goto target: target speed: 2000;
 	 	}
 
-	 	
-    	if (target = location and target!=nil and curTrip < 4){
+	 	if (target = location and target!=nil and id = 'Etudiant2' and curTrip < 1){
+    		//write 'curTrip +1';
+			curTrip<-(curTrip+1);
+			target<-nil;
+		}
+		if (target = location and target!=nil and id = 'Prof' and curTrip < 3){
+    		//write 'curTrip +1';
+			curTrip<-(curTrip+1);
+			target<-nil;
+		}
+    	if (target = location and target!=nil and id != 'Etudiant2' and id!="Prof" and curTrip < 4){
     		//write 'curTrip +1';
 			curTrip<-(curTrip+1);
 			target<-nil;
 		}
     }
     aspect default {
-    	if (id = 'Etudiant'){
+    	if (id = 'Etudiant1' or id = 'Etudiant2'){
     		draw circle(500) color: rgb(255,255,255) border: rgb(255, 255, 255); 
     	}
-    	else{
+    	if(id = 'Admin'){
     		draw circle(500) color: rgb(0,125,255) border: rgb(0,125,255);
+    	}
+    	if(id = 'Prof'){
+    		draw circle(500) color: rgb(58, 137, 35) border: rgb(58, 137, 35);
     	}
 		if (draw_path = true and current_path != nil and target != nil and target != location) {
 			draw current_path.shape color: #red width:1;
