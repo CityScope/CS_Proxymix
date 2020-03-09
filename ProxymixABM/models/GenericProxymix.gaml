@@ -17,7 +17,7 @@ global {
 	int current_hour update: (time / #hour) mod 18;
 	float step <- 1 #sec;
 	bool moveOnGrid <- false parameter: "Move on Grid:" category: "Model";
-	bool drawSimulatedGraph <- false parameter: "Draw Simulated Graph:" category: "Vizu";
+	bool drawDirectGraph <- false parameter: "Draw Simulated Graph:" category: "Vizu";
 	bool draw_grid <- false parameter: "Draw Grid:" category: "Vizu";
 	bool showML_element <- true parameter: "Draw ML element:" category: "Vizu";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
@@ -25,17 +25,15 @@ global {
 	bool instantaneaousGraph <- true parameter: "Instantaneous Graph:" category: "Interaction";
 	bool saveGraph <- false parameter: "Save Graph:" category: "Interaction";
 	int saveCycle <- 750;
-	int distance <- 300 parameter: "Distance:" category: "Interaction" min: 100 max: 1000 step:100;
 	
 	
+	int distance <- 300 parameter: "Infection distance:" category: "Corona" min: 100 max: 1000 step:100;
 	//Rate for the infection success 
 	float beta <- 0.1 parameter: "Rate for the infection success" category: "Corona" min:0.0 max:0.1;
-	//Mortality rate for the host
-	float nu <- 0.001 parameter: "Mortality rate for the host" category: "Corona" min:0.0 max:0.1;
 	//Rate for resistance 
 	float delta <- 0.001 parameter: "Rate for resistance " category: "Corona" min:0.0 max:0.1;
-	int initI <- 10 parameter: "Initial Infected people" category: "Corona";
-	int infectionUpdateTime <- 10 parameter: "Refresh infected status every:" category: "Corona" min:1 max:1000;
+	int initI <- 1 parameter: "Initial Infected people" category: "Corona";
+	int infectionUpdateTime <- 10;// parameter: "Refresh infected status every:" category: "Corona" min:1 max:1000;
 	
 	
 	
@@ -80,10 +78,10 @@ global {
 			}
 		}
 		
-		ask StructuralElement where (each.layer="Toilets" or each.layer="Elevators"  or each.layer="Meeting rooms" ){
-			/*create PhysicalElement{
+		ask StructuralElement where (each.layer="Toilets" or each.layer="Elevators"  or each.layer="Meeting rooms" or each.layer="Labs" or each.layer="Offices"){
+			create PhysicalElement{
 				location<-any_location_in(myself.shape);
-			}*/
+			}
 		}
 		
 		//--------------- ML PEOPLE CREATION-----------------------------//
@@ -139,7 +137,7 @@ global {
 
 		}
 		
-		ask 5  among people{
+		ask initI  among people{
 			is_susceptible <-  false;
             is_infected <-  true;
             is_immune <-  false; 
@@ -157,13 +155,13 @@ global {
 		}
 	}
 	
-	reflex updateGraph when: (drawSimulatedGraph = true and instantaneaousGraph=true) {
+	reflex updateGraph when: (drawDirectGraph = true and instantaneaousGraph=true) {
 		simulated_graph <- graph<people, people>(people as_distance_graph (distance ));
 	}
 	
 	
 	
-	reflex updateAggregatedGraph when: (drawSimulatedGraph = true and instantaneaousGraph=false){
+	reflex updateAggregatedGraph when: (drawDirectGraph = true and instantaneaousGraph=false){
 		graph simulated_graph_tmp <- graph(people as_distance_graph (distance));
 		if (simulated_graph = nil) {
 			simulated_graph <- simulated_graph_tmp;
@@ -226,19 +224,18 @@ species PhysicalElement
 	int cleaningFrequency<-1+rnd(3600);
 	
 	reflex clean{
-		dirtyness<-dirtyness+0.1;
-		if(cycle mod cleaningFrequency=0){
-		dirtyness<-0;	
+		ask (people where (each.is_infected=true) at_distance distance) {
+    	  myself.dirtyness<-myself.dirtyness+0.1;		   		
 		}
 	}
 
 	aspect default
 	{ 
-		draw square(50#m) color: blend(#red, #green, dirtyness/255);
+		draw cross(100,20) color: blend(#red, #green, dirtyness/255);
 	}	
 
 	init {
-		dirtyness<-rnd(255);
+		dirtyness<-0.0;
 	}
 }
 
@@ -293,7 +290,30 @@ species people skills:[moving]{
     }
     
      //Reflex to make the agent infected if it is susceptible
-     reflex become_infected when: (is_susceptible and cycle mod infectionUpdateTime = 0){
+     reflex become_infected_by_direct_contact when: (is_susceptible and cycle mod infectionUpdateTime = 0){
+    	float rate  <- 0.0;
+    	//computation of the infection according to the possibility of the disease to spread locally or not
+    		int nb_infectedElement  <- 0;
+    		float infected_value  <- 0.0;
+    		loop hst over: (PhysicalElement at_distance distance) {
+    			nb_infectedElement <- nb_infectedElement + 1;
+    			infected_value <- infected_value + hst.dirtyness;
+    		}
+    		if(nb_infectedElement!=0){
+    		  rate <- infected_value / (nb_infectedElement);	
+    		}else{
+    			rate<-0.0;
+    		}
+    	if (flip(rate)) {
+        	is_susceptible <-  false;
+            is_infected <-  true;
+            is_immune <-  false;
+            color <-  #red;    
+        }
+    }
+    
+    //Reflex to make the agent infected if it is susceptible
+     reflex become_infected_by_indirect_contact when: (is_susceptible and cycle mod infectionUpdateTime = 0){
     	float rate  <- 0.0;
     	//computation of the infection according to the possibility of the disease to spread locally or not
     		int nb_hosts  <- 0;
@@ -319,6 +339,7 @@ species people skills:[moving]{
             color <-  #red;    
         }
     }
+    
     //Reflex to make the agent recovered if it is infected and if it success the probability
     reflex become_immune when: (is_infected and flip(delta) and (cycle mod infectionUpdateTime = 0)) {
     	is_susceptible <- false;
@@ -382,7 +403,7 @@ experiment Proxymix type: gui autorun:true
 			species people aspect:corona;
 			species cell aspect:default position:{0,0,-0.01};
 			graphics "simulated_graph" {
-				if (simulated_graph != nil and drawSimulatedGraph = true) {
+				if (simulated_graph != nil and drawDirectGraph = true) {
 					loop eg over: simulated_graph.edges {
 						geometry edge_geom <- geometry(eg);
 						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#white;
@@ -390,14 +411,30 @@ experiment Proxymix type: gui autorun:true
 
 				}
 			}	
-			chart "Susceptible" type: series background: #black style: exploded color:#white position:{1,0} {
+			chart "Susceptible" type: series background: rgb(50,50,50) style: exploded color:#white position:{0.75,0.4} size:{0.25,0.25} y_tick_line_visible:false x_tick_line_visible:false{
 				data "susceptible" value: people count (each.is_susceptible) color: #green;
 				data "infected" value: people count (each.is_infected) color: #red;
 				data "immune" value: people count (each.is_immune) color: #blue;
 			}
-			event ["g"] action:{drawSimulatedGraph<-!drawSimulatedGraph;};		
+			event ["g"] action:{drawDirectGraph<-!drawDirectGraph;};	
+			
+			graphics "Legend" {
+				    //draw cross(100,20) color: #green at: {0, -world.shape.height*0.1};
+					//draw "Indirect Interaction" color: #green  at: {0+100, -world.shape.height*0.1+100} font:font("Helvetica", 20 , #bold);	
+			}
+				
 		}
 	}	
+}
+
+experiment MultiSimulation type: gui parent:Proxymix{
+
+	init {
+		create simulation with: [initI:: 5, beta:: 0.05, delta::0.01];
+		create simulation with: [initI:: 10, beta:: 0.05, delta::0.001];
+		create simulation with: [initI:: 20, beta:: 0.05, delta::0.001];
+		
+	}
 }
 
 
