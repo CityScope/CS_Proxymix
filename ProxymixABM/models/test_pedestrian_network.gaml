@@ -13,26 +13,17 @@ global {
 	file ML_file <- dxf_file("../includes/ML_" + curFloor+".dxf",#m);
 	graph network;
 	
-	float P_shoulder_length <- 0.45 parameter: true;
-	float P_body_depth <- 0.28 parameter: true;
 	bool P_use_body_geometry <- false parameter: true ;
-	float P_proba_detour <- 0.5 parameter: true ;
 	bool P_avoid_other <- true parameter: true ;
-	float P_obstacle_consideration_distance <- 1.0 parameter: true ;
+	float P_obstacle_consideration_distance <- 1000.0 parameter: true ;
 	
 	
 	string P_pedestrian_model among: ["simple", "SFM"] <- "simple" parameter: true ;
-	float P_obstacle_distance_repulsion_coeff <- 5.0 category: "simple model" parameter: true ;
-	float P_overlapping_coefficient <- 2.0 category: "simple model" parameter: true ;
-	float P_perception_sensibility <- 1.0 category: "simple model" parameter: true ;
 	
-	float P_A_SFM parameter: true <- 4.5 category: "SFM" ;
-	float P_relaxion_SFM parameter: true <- 0.54 category: "SFM" ;
-	float P_gama_SFM parameter: true <- 0.35 category: "SFM" ;
-	float P_n_SFM <- 2.0 parameter: true category: "SFM" ;
-	float P_n_prime_SFM <- 3.0 parameter: true category: "SFM";
-	float P_lambda_SFM <- 2.0 parameter: true category: "SFM" ;
+	bool display_free_space <- false parameter: true category:"Visualization";
+	bool display_pedestrian_path <- false parameter: true category:"Visualization";
 	
+	float step <- 0.1;
 	geometry shape <- envelope(ML_file);
 	init {
 		//--------------- ML ELEMENT CREATION-----------------------------//
@@ -62,26 +53,25 @@ global {
 			create pedestrian_path from: file("../includes/pedestrian_path"  +curFloor+ ".shp") ;
 			
 			ask pedestrian_path {
-				do initialize obstacles:[StructuralElement] distance: 20.0;
+				do initialize obstacles:[StructuralElement] distance: 200.0;
 			}
 			network <- as_edge_graph(pedestrian_path);
 		
-			create people number: 100 {
+		
+			create people number: 1000 {
 				location <- any_location_in(one_of(pedestrian_path).free_space);
 				pedestrian_model <- P_pedestrian_model;
-				obstacle_distance_repulsion_coeff <- P_obstacle_distance_repulsion_coeff;
-				obstacle_consideration_distance <- P_obstacle_consideration_distance;
-				overlapping_coefficient <- P_overlapping_coefficient;
-				perception_sensibility <- P_perception_sensibility ;
-				shoulder_length <- P_shoulder_length;
+				obstacle_distance_repulsion_coeff <- 100.0;
+				obstacle_consideration_distance <- 500.0;
+				overlapping_coefficient <- 0.5 ;
+				perception_sensibility <- 1.0 ;
+				shoulder_length <- 10.0;
+				body_depth <- 10.0;
 				avoid_other <- P_avoid_other;
-				proba_detour <- P_proba_detour;
-				A_SFM <- P_A_SFM;
-				relaxion_SFM <- P_relaxion_SFM;
-				gama_SFM <- P_gama_SFM;
-				n_SFM <- P_n_SFM;
-				n_prime_SFM <- P_n_prime_SFM;
-				lambda_SFM <- P_lambda_SFM;
+				proba_detour <- 0.5;
+				tolerance_target <- 100.0;
+				min_repulsion_dist <- 10.0;
+				other_people_distance_repulsion <- 500.0;
 				
 				obstacle_species <- [people, StructuralElement];
 			}
@@ -91,14 +81,17 @@ global {
 
 species pedestrian_path skills: [pedestrian_road] {
 	aspect default {
-		//if(free_space != nil) {draw free_space color: #lightpink border: #black;}
-		draw shape color: #red;
+		if (display_pedestrian_path) {
+			if(display_free_space and free_space != nil) {draw free_space color: #lightpink border: #black;}
+			draw shape color: #red;
+		}
+		
 	}
 }
 
 species people skills: [escape_pedestrian] {
 	rgb color <- rnd_color(255);
-	float speed <- gauss(5,1.5) #km/#h min: 2 #km/#h;
+	float speed <- gauss(5,1.5) * 10 #km/#h min: 2 * 10 #km/#h;
 	
 	//comportement de choix de la cible
 	reflex choose_target when: final_target = nil  {
@@ -114,8 +107,7 @@ species people skills: [escape_pedestrian] {
 	}	
 	
 	aspect default {
-		//draw triangle(P_shoulder_length) rotate: heading + 90 color: color depth: 1;
-		draw triangle(100) rotate: heading + 90 color: color depth: 1;
+		draw circle(15.0) color: color;
 		
 	}
 	
