@@ -16,9 +16,14 @@ global {
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 18;
 	float step <- 1 #sec;
+	int periodstep<-360;
+	int dayStep<-3600;
 	bool moveOnGrid <- false parameter: "Move on Grid:" category: "Model";
 	bool drawDirectGraph <- false parameter: "Draw Simulated Graph:" category: "Vizu";
 	bool draw_grid <- false parameter: "Draw Grid:" category: "Vizu";
+	bool showPeople <- true parameter: "Draw Agent:" category: "Vizu";
+	
+	
 	bool showML_element <- true parameter: "Draw ML element:" category: "Vizu";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
 	
@@ -121,14 +126,14 @@ global {
 			 real_graph <<node(self);
 			 location <- one_of(StructuralElement where (each.layer="Elevators_Primary"));
 			 location <- any_location_in(myoffice.shape);
-			 myDayTrip[rnd(3600*3)]<-any_location_in (myoffice.shape);
-			 myDayTrip[3600*3+rnd(3600)]<-any_location_in(one_of(StructuralElement where (each.layer="Coffee")));
-			 myDayTrip[3600*4+rnd(3600)]<-any_location_in (myoffice.shape);
-			 myDayTrip[3600*5+rnd(3600)]<-any_location_in(one_of(StructuralElement where (each.layer="Elevators_Primary")));
-			 myDayTrip[3600*6+rnd(3600)]<-any_location_in (myoffice.shape);
-			 myDayTrip[3600*6+rnd(3600*2)]<-any_location_in(one_of(StructuralElement where (each.layer="Toilets")));
-			 myDayTrip[3600*8+rnd(3600)]<-any_location_in (myoffice.shape);
-			 myDayTrip[3600*10+rnd(3600)]<-any_location_in(one_of(StructuralElement where (each.layer="Elevators_Primary"))); 
+			 myDayTrip[rnd(periodstep*3)]<-any_location_in (myoffice.shape);
+			 myDayTrip[periodstep*3+rnd(periodstep)]<-any_location_in(one_of(StructuralElement where (each.layer="Coffee")));
+			 myDayTrip[periodstep*4+rnd(periodstep)]<-any_location_in (myoffice.shape);
+			 myDayTrip[periodstep*5+rnd(periodstep)]<-any_location_in(one_of(StructuralElement where (each.layer="Elevators_Primary")));
+			 myDayTrip[periodstep*6+rnd(periodstep)]<-any_location_in (myoffice.shape);
+			 myDayTrip[periodstep*6+rnd(periodstep*2)]<-any_location_in(one_of(StructuralElement where (each.layer="Toilets")));
+			 myDayTrip[periodstep*8+rnd(periodstep)]<-any_location_in (myoffice.shape);
+			 myDayTrip[periodstep*10+rnd(periodstep)]<-any_location_in(one_of(StructuralElement where (each.layer="Elevators_Primary"))); 
 			 
 			 is_susceptible <- true;
         	 is_infected <-  false;
@@ -206,7 +211,7 @@ species StructuralElement
 			draw shape color: rgb(38,38,38) border:#white empty:false;	
 				}	
 		else {
-			 draw shape color: rgb(0,0,0) border:#white empty:false;
+			 draw shape color: rgb(0,0,0) border:#white empty:false depth:100;
 				}
 	}  
 	  
@@ -231,7 +236,7 @@ species PhysicalElement
 
 	aspect default
 	{ 
-		draw cross(100,20) color: blend(#red, #green, dirtyness/255);
+		draw square(100) color: blend(#red, #green, dirtyness/255);
 	}	
 
 	init {
@@ -271,7 +276,7 @@ species people skills:[moving]{
 
 	
 	 reflex move{
-	 	if((time mod 36000) = myDayTrip.keys[curTrip]){	
+	 	if((time mod dayStep) = myDayTrip.keys[curTrip]){	
 	 		tmpTime <- time;
 	 		the_target<-myDayTrip[int(tmpTime)] ;
 	 		currentPath<-path_between(cell where (each.is_wall=false),location,the_target);
@@ -350,7 +355,7 @@ species people skills:[moving]{
     
 	
 	aspect default {
-		draw circle(20) color: color_per_title[people_type] border: color_per_title[people_type]-50; 
+		draw cylinder(20,100) color: color_per_title[people_type] border: color_per_title[people_type]-50; 
 		if (current_path != nil and draw_trajectory=true) {
 			draw current_path.shape color: #red width:2;
 		}
@@ -358,7 +363,9 @@ species people skills:[moving]{
 	
 	
 	aspect corona {
-		draw circle(20) color: color ; 
+		if(showPeople){
+		  draw cylinder(20,100) color: color ; 	
+		}
 		if (current_path != nil and draw_trajectory=true) {
 			draw current_path.shape color: #red width:2;
 		}
@@ -381,9 +388,15 @@ grid cell width: nb_cols height: nb_rows neighbors: 8 {
 	bool is_wall <- false;
 	bool is_exit <- false;
 	rgb color <- #white;
+	int nbCollision;
 	aspect default{
-		if (draw_grid){
+		/*if (draw_grid){
 		  draw shape color:is_wall? #red:#black border:rgb(75,75,75) empty:false;	
+		}*/
+		if (draw_grid){
+			if(nbCollision>0){
+			  draw shape color:rgb(nbCollision)empty:false;		
+			}
 		}
 	}	
 }
@@ -401,22 +414,30 @@ experiment Proxymix type: gui autorun:true
 			species StructuralElement;
 			species PhysicalElement;
 			species people aspect:corona;
-			species cell aspect:default position:{0,0,-0.01};
+			species cell aspect:default;// position:{0,0,0.01};
 			graphics "simulated_graph" {
 				if (simulated_graph != nil and drawDirectGraph = true) {
 					loop eg over: simulated_graph.edges {
 						geometry edge_geom <- geometry(eg);
 						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#white;
+						ask (cell overlapping edge_geom){
+							nbCollision<-nbCollision+1;
+						}
 					}
 
 				}
 			}	
-			chart "Susceptible" type: series background: rgb(50,50,50) style: exploded color:#white position:{0.75,0.4} size:{0.25,0.25} y_tick_line_visible:false x_tick_line_visible:false{
+			/*chart "Susceptible" type: series background: rgb(50,50,50) style: exploded color:#white position:{1,0}  y_tick_line_visible:false x_tick_line_visible:false{
 				data "susceptible" value: people count (each.is_susceptible) color: #green;
 				data "infected" value: people count (each.is_infected) color: #red;
 				data "immune" value: people count (each.is_immune) color: #blue;
-			}
-			event ["g"] action:{drawDirectGraph<-!drawDirectGraph;};	
+			}*/
+			event ["p"] action:{showPeople<-!showPeople;};
+			event ["g"] action:{drawDirectGraph<-!drawDirectGraph;};
+			event ["i"] action:{ask cell{nbCollision<-0;}};
+			event ["m"] action:{showML_element<-!showML_element;};
+			event ["h"] action:{draw_grid<-!draw_grid;};
+					
 			
 			graphics "Legend" {
 				    //draw cross(100,20) color: #green at: {0, -world.shape.height*0.1};
