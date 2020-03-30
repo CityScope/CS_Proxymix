@@ -32,7 +32,7 @@ global {
 	int saveCycle <- 750;
 	
 	
-	int distance <- 300 parameter: "Infection distance:" category: "Corona" min: 100 max: 1000 step:100;
+	int socialDistance <- 200 parameter: "Social distance:" category: "Corona" min: 100 max: 1000 step:100;
 	//Rate for the infection success 
 	float beta <- 0.1 parameter: "Rate for the infection success" category: "Corona" min:0.0 max:0.1;
 	//Rate for resistance 
@@ -52,7 +52,7 @@ global {
 	map<string,rgb> color_per_title <- ["Visitor"::rgb(234,242,56),"Staff"::rgb(0,230,167), "Student"::rgb(255,66,109), "Other"::rgb(234,242,56), "Visitor/Affiliate"::rgb(234,242,56), "Faculty/PI"::rgb(37,211,250)];
 	
 	graph<people, people> real_graph;
-	graph<people, people> simulated_graph;
+	graph<people, people> social_distance_graph;
 
 
 	int nb_cols <- int(75*1.5);
@@ -161,24 +161,24 @@ global {
 	}
 	
 	reflex updateGraph when: (drawDirectGraph = true and instantaneaousGraph=true) {
-		simulated_graph <- graph<people, people>(people as_distance_graph (distance ));
+		social_distance_graph <- graph<people, people>(people as_distance_graph (socialDistance));
 	}
 	
 	
 	
 	reflex updateAggregatedGraph when: (drawDirectGraph = true and instantaneaousGraph=false){
-		graph simulated_graph_tmp <- graph(people as_distance_graph (distance));
-		if (simulated_graph = nil) {
-			simulated_graph <- simulated_graph_tmp;
+		graph simulated_graph_tmp <- graph(people as_distance_graph (socialDistance));
+		if (social_distance_graph = nil) {
+			social_distance_graph <- simulated_graph_tmp;
 		} else {
 			loop e over: simulated_graph_tmp.edges {
 				people s <- simulated_graph_tmp source_of e;
 				people t <- simulated_graph_tmp target_of e;
-				if not (s in simulated_graph.vertices) or not (t in simulated_graph.vertices) {
-					simulated_graph << edge(s::t);
+				if not (s in social_distance_graph.vertices) or not (t in social_distance_graph.vertices) {
+					social_distance_graph << edge(s::t);
 				} else {
-					if (simulated_graph edge_between (s::t)) = nil and (simulated_graph edge_between (t::s)) = nil {
-						simulated_graph << edge(s::t);
+					if (social_distance_graph edge_between (s::t)) = nil and (social_distance_graph edge_between (t::s)) = nil {
+						social_distance_graph << edge(s::t);
 					}
 
 				}
@@ -190,12 +190,12 @@ global {
 	}
 	
 	reflex saveCurrentGraph when:saveGraph and cycle=saveCycle {
-		save ("header: if needed graphc created at cycle:" + cycle) to: "../results/generated_graph"+string(distance)+".txt" rewrite: true;
-		graph simulated_graph_tmp <- graph(people as_distance_graph (distance));
+		save ("header: if needed graphc created at cycle:" + cycle) to: "../results/generated_graph"+string(socialDistance)+".txt" rewrite: true;
+		graph simulated_graph_tmp <- graph(people as_distance_graph (socialDistance));
 		loop e over: simulated_graph_tmp.edges {
 				people s <- simulated_graph_tmp source_of e;
 				people t <- simulated_graph_tmp target_of e;
-				save (s.people_username +"," + t.people_username) to: "../results/generated_graph"+string(distance)+".txt" rewrite: false;			
+				save (s.people_username +"," + t.people_username) to: "../results/generated_graph"+string(socialDistance)+".txt" rewrite: false;			
 			}
 	}	
 }
@@ -229,7 +229,7 @@ species PhysicalElement
 	int cleaningFrequency<-1+rnd(3600);
 	
 	reflex clean{
-		ask (people where (each.is_infected=true) at_distance distance) {
+		ask (people where (each.is_infected=true) at_distance socialDistance) {
     	  myself.dirtyness<-myself.dirtyness+0.1;		   		
 		}
 	}
@@ -295,12 +295,12 @@ species people skills:[moving]{
     }
     
      //Reflex to make the agent infected if it is susceptible
-     reflex become_infected_by_direct_contact when: (is_susceptible and cycle mod infectionUpdateTime = 0){
+     reflex become_infected_by_indirect_contact when: (is_susceptible and cycle mod infectionUpdateTime = 0){
     	float rate  <- 0.0;
     	//computation of the infection according to the possibility of the disease to spread locally or not
     		int nb_infectedElement  <- 0;
     		float infected_value  <- 0.0;
-    		loop hst over: (PhysicalElement at_distance distance) {
+    		loop hst over: (PhysicalElement at_distance socialDistance) {
     			nb_infectedElement <- nb_infectedElement + 1;
     			infected_value <- infected_value + hst.dirtyness;
     		}
@@ -318,12 +318,12 @@ species people skills:[moving]{
     }
     
     //Reflex to make the agent infected if it is susceptible
-     reflex become_infected_by_indirect_contact when: (is_susceptible and cycle mod infectionUpdateTime = 0){
+     reflex become_infected_by_direct_contact when: (is_susceptible and cycle mod infectionUpdateTime = 0){
     	float rate  <- 0.0;
     	//computation of the infection according to the possibility of the disease to spread locally or not
     		int nb_hosts  <- 0;
     		int nb_hosts_infected  <- 0;
-    		loop hst over: (people at_distance distance) {
+    		loop hst over: (people at_distance socialDistance) {
     			nb_hosts <- nb_hosts + 1;
     			if (hst.is_infected) {
     				nb_hosts_infected <- nb_hosts_infected + 1;
@@ -364,7 +364,7 @@ species people skills:[moving]{
 	
 	aspect corona {
 		if(showPeople){
-		  draw cylinder(20,100) color: color ; 	
+		  draw circle(20) color: color ; 	
 		}
 		if (current_path != nil and draw_trajectory=true) {
 			draw current_path.shape color: #red width:2;
@@ -395,7 +395,7 @@ grid cell width: nb_cols height: nb_rows neighbors: 8 {
 		}*/
 		if (draw_grid){
 			if(nbCollision>0){
-			  draw shape color:rgb(nbCollision)empty:false;		
+			  draw shape color:rgb(nbCollision)empty:false border:#white;		
 			}
 		}
 	}	
@@ -413,11 +413,11 @@ experiment Proxymix type: gui autorun:true
 		{   
 			species StructuralElement;
 			species PhysicalElement;
-			species people aspect:corona;
 			species cell aspect:default;// position:{0,0,0.01};
+			species people aspect:corona position:{0,0,0};
 			graphics "simulated_graph" {
-				if (simulated_graph != nil and drawDirectGraph = true) {
-					loop eg over: simulated_graph.edges {
+				if (social_distance_graph != nil and drawDirectGraph = true) {
+					loop eg over: social_distance_graph.edges {
 						geometry edge_geom <- geometry(eg);
 						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#white;
 						ask (cell overlapping edge_geom){
