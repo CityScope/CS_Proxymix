@@ -10,7 +10,7 @@ model Proxymix
 
 global {
 	int curFloor<-3;
-	file ML_file <- dxf_file("../includes/ML_3.dxf",#m);
+	file ML_file <- dxf_file("../includes/FactoryGAMA.dxf",#m);
 	file JsonFile <- json_file("../includes/project-network.json");
     map<string, unknown> collaborationFile <- JsonFile.contents;
 	int nb_people <- 100;
@@ -60,7 +60,7 @@ global {
 	
 	init {
 		//--------------- ML ELEMENT CREATION-----------------------------//
-		create StructuralElement from: dxf_file("../includes/ML_3.dxf",#m) with: [layer::string(get("layer"))]{
+		create StructuralElement from: ML_file with: [layer::string(get("layer"))]{
 		  if (layer="0"){
 		    do die;	
 		  }
