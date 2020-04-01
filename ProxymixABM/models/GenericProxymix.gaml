@@ -11,12 +11,12 @@ model Proxymix
 global {
 	file ML_file <- dxf_file("../includes/FactoryGAMA.dxf",#m);
 	int nb_people <- 100;
-	float step <- 60 #sec;
+	float step <- 10 #sec;
 	int periodstep<-360;
 	int dayStep<-3600;
 	bool moveOnGrid <- false parameter: "Move on Grid:" category: "Model";
-	bool drawDirectGraph <- false parameter: "Draw Simulated Graph:" category: "Vizu";
-	bool draw_grid <- false parameter: "Draw Grid:" category: "Vizu";
+	bool drawDirectGraph <- true parameter: "Draw Simulated Graph:" category: "Vizu";
+	bool draw_grid <- true parameter: "Draw Grid:" category: "Vizu";
 	bool showPeople <- true parameter: "Draw Agent:" category: "Vizu";
 	bool showML_element <- true parameter: "Draw ML element:" category: "Vizu";
 	bool draw_trajectory <- false parameter: "Draw Trajectory:" category: "Interaction";
@@ -29,12 +29,10 @@ global {
 
 	//compute the environment size from the dxf file envelope
 	geometry shape <- envelope(ML_file);
-	map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), "E14"::rgb(175,175,175), "E15"::rgb(175,175,175), "Elevators"::rgb(200,200,200), "Facade_Glass"::#darkgray, 
-	"Facade_Wall"::rgb(175,175,175), "Glass"::rgb(150,150,150), "Labs"::rgb(75,75,75), "Meeting rooms"::rgb(125,125,125), "Misc"::rgb(161,196,90), "Offices"::rgb(175,175,175), 
-	"Railing"::rgb(125,124,120), "Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Void"::rgb(0,0,0), "Walls"::rgb(175,175,175)];
+
 	
 	
-	map<string,rgb> standard_color_per_layer <- ["Offices"::rgb(161,196,90),"Elevators"::rgb(200,200,200),"Meeting rooms"::rgb(125,125,125),"Coffee"::rgb(175,175,175),
+	map<string,rgb> standard_color_per_layer <- ["Offices"::rgb(161,196,90),"Entrance"::rgb(0,200,200),"Elevators"::rgb(200,200,200),"Meeting rooms"::rgb(125,125,125),"Coffee"::rgb(175,175,175),
 	"Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Walls"::rgb(175,175,175), "Supermarket"::rgb(175,175,175)];
 	
 	
@@ -43,7 +41,7 @@ global {
 	graph<people, people> social_distance_graph;
 	
 	
-	list<int> activities <-[0,6*3600,7*3600,12*3600];
+	list<int> activities <-[1*3600,6*3600,7*3600,8*3600,10*3600];
 
 
 	int nb_cols <- int(75*1.5);
@@ -60,7 +58,8 @@ global {
 		loop la over: layers.keys
 		{
 			ask layers[la]
-			{   if(standard_color_per_layer.keys contains la){
+			{ 
+				if(standard_color_per_layer.keys contains la){
 				   color <- standard_color_per_layer[la];
 				}else{
 					color <-#gray;
@@ -75,11 +74,12 @@ global {
 		}
 		
 		create people number:nb_people{
-			 myoffice <- one_of(StructuralElement);
-			 myLunch <- one_of(StructuralElement);
-			 if(myoffice != nil){
-			 	//location <- myoffice.shape.location;
-			 } 
+			
+			 myoffice <- one_of(StructuralElement where (each.layer="Meeting rooms"));
+			 myLunch <- one_of(StructuralElement where (each.layer="Supermarket"));
+			 myEntrance <- one_of(StructuralElement where (each.layer="Entrance"));
+			 myExit <- one_of(StructuralElement where (each.layer="Entrance"));
+			 location<-any_location_in(myEntrance);
 		}
 
 
@@ -97,12 +97,8 @@ species StructuralElement
 	int floor;
 	aspect default
 	{ if(showML_element){
-		if (layer!="0_Void"){
-			draw shape color: rgb(38,38,38) border:#white empty:false;	
-				}	
-		else {
-			 draw shape color: rgb(0,0,0) border:#white empty:false depth:100;
-				}
+			draw shape color: color border:#white empty:false;	
+
 	}  
 	  
 	}
@@ -121,6 +117,8 @@ species people skills:[moving] control: fsm{
 	int start_work;
 	int end_work;
 	string objective;
+	StructuralElement myEntrance;
+	StructuralElement myExit;
 	StructuralElement myoffice;
 	StructuralElement myLunch;
 	path currentPath;	
@@ -153,10 +151,14 @@ species people skills:[moving] control: fsm{
 		the_target<-any_location_in(myoffice);
 	 	currentPath<-path_between(cell where (each.is_wall=false),location,the_target);	
 		}
-		transition  to:gohome when:time = activities[4]{}
+		transition  to:gohome when:time = activities[3]{}
 	}
-	state gohome final:true{
-		
+	state gohome{
+		enter{
+		the_target<-any_location_in(myExit);
+	 	currentPath<-path_between(cell where (each.is_wall=false),location,the_target);	
+		}
+		transition  to:working when:time = activities[4]{}
 	}
 
 	
@@ -189,7 +191,7 @@ grid cell width: nb_cols height: nb_rows neighbors: 8 {
 		}*/
 		if (draw_grid){
 			if(nbCollision>0){
-			  draw shape color:rgb(nbCollision)empty:false border:#white;		
+			  draw shape color:rgb(nbCollision)empty:false border:rgb(nbCollision);		
 			}
 		}
 	}	
@@ -207,7 +209,7 @@ experiment Proxymix type: gui autorun:true
 		{   
 			species StructuralElement;
 			//species PhysicalElement;
-			//species cell aspect:default;// position:{0,0,0.01};
+			species cell aspect:default;// position:{0,0,0.01};
 			species people aspect:default;
 			graphics "simulated_graph" {
 				if (social_distance_graph != nil and drawDirectGraph = true) {
