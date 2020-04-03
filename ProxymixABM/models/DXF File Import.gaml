@@ -9,7 +9,7 @@ model DXFAgents
 
 global
 {
-	file the_dxf_file <- dxf_file("../includes/ML_3.dxf",#m);
+	file the_dxf_file <- dxf_file("../includes/MediaLab/ML_3.dxf",#cm);
 	geometry shape <- envelope(the_dxf_file);
 	init
 	{

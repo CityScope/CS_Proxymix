@@ -9,7 +9,7 @@ model Proxymix
 
 
 global {
-	file ML_file <- dxf_file("../includes/FactoryGAMA.dxf",#m);
+	file ML_file <- dxf_file("../includes/FactoryGAMA.dxf",#cm);
 	int nb_people <- 100;
 	float step <- 10 #sec;
 	int periodstep<-360;
@@ -25,7 +25,7 @@ global {
 	int saveCycle <- 750;
 	
 	
-	int socialDistance <- 200 parameter: "Social distance:" category: "Corona" min: 100 max: 1000 step:100;
+	int socialDistance <- 2 parameter: "Social distance:" category: "Corona" min: 1 max: 10 step:1;
 
 	//compute the environment size from the dxf file envelope
 	geometry shape <- envelope(ML_file);
@@ -167,14 +167,14 @@ species people skills:[moving] control: fsm{
 	 	  //do goto target:the_target speed:10.0 on:cell where (each.is_wall=false) recompute_path:false;	
 	 	  do follow path: currentPath;	
 	 	}else{
-	 	  do goto target:the_target speed:10.0;
+	 	  do goto target:the_target speed:0.1;
 	 	}
     }
         	
 	aspect default {
-		draw circle(50) color: color; 
+		draw circle(0.5) color: color; 
 		if (current_path != nil and draw_trajectory=true) {
-			draw current_path.shape color: #red width:2;
+			draw current_path.shape color: #red width:0.02;
 		}
 	}
 }
