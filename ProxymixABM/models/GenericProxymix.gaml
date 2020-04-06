@@ -15,7 +15,7 @@ global {
 	int current_hour update: 6 + (time / #hour) mod 24;
 	int periodstep<-360;
 	int dayStep<-3600;
-	bool moveOnGrid <- true parameter: "Move on Grid:" category: "Model";
+	bool moveOnGrid <- false parameter: "Move on Grid:" category: "Model";
 	bool drawDirectGraph <- false parameter: "Draw Simulated Graph:" category: "Vizu";
 	bool draw_wall_grid <- false parameter: "Draw Wall Grid:" category: "Vizu";
 	bool draw_heatmap <- false parameter: "Draw Heatmap:" category: "Vizu";
@@ -68,7 +68,7 @@ global {
 		}
 		
 		create people number:nb_people{
-			 color<-#white;
+			 color<-#orange;
 			 myEntrance <- one_of(StructuralElement where (each.layer="Entrance"));
 			 myoffice <- one_of(StructuralElement where (each.layer="Offices"));
 			 myLunch <- one_of(StructuralElement where (each.layer="Supermarket"));
@@ -108,8 +108,6 @@ species people skills:[moving] control: fsm{
 	string type;
 	rgb color;
 	point the_target;
-	int start_work;
-	int end_work;
 	string objective;
 	StructuralElement myEntrance;
 	StructuralElement myExit;
@@ -157,19 +155,20 @@ species people skills:[moving] control: fsm{
 
 	
 	 reflex move{
-	 	if(moveOnGrid){
-	 	  //do goto target:the_target speed:10.0 on:cell where (each.is_wall=false) recompute_path:false;	
+	 	if(moveOnGrid){	
 	 	  do follow path: currentPath;	
 	 	}else{
 	 	  do goto target:the_target speed:0.1;
 	 	}
     }
-        	
-	aspect default {
-		draw circle(0.5) color: color; 
-		if (current_path != nil and draw_trajectory=true) {
+  	aspect default {
+		if(showPeople){
+		  draw circle(0.5) color: color; 
+		  if (current_path != nil and draw_trajectory=true) {
 			draw current_path.shape color: #red width:0.02;
+		  }	
 		}
+		
 	}
 }
 
@@ -199,7 +198,7 @@ experiment Proxymix type: gui autorun:true
 	//float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;
-		display map type:opengl draw_env:false background:rgb(0,0,0) synchronized:true refresh:every(10#cycle)
+		display map type:opengl draw_env:false background:#white synchronized:true refresh:every(10#cycle)
 		{   
 			species StructuralElement;
 			species cell aspect:default;// position:{0,0,0.01};
@@ -229,10 +228,10 @@ experiment Proxymix type: gui autorun:true
 				    
 				    draw string ("Time: " + string(current_hour) + "h") color:#white at:{0,25#px} font:font("Helvetica", 20 , #bold);
 				    
-					float verticalSpace <- world.shape.width * 0.05;
+					float verticalSpace <- world.shape.width * 0.025;
 					float squareSize<-world.shape.width*0.02;
 					loop i from:0 to:length(standard_color_per_layer)-1{
-						point curPos<-{(i mod 2) * world.shape.width*0.1,((i mod 2 = 1)  ? i*verticalSpace : (i+1)*verticalSpace)};
+						point curPos<-{(i mod 2) * world.shape.width*0.1,((i mod 2 = 1)  ? i*verticalSpace : (i+1)*verticalSpace)+ world.shape.height/4};
 						draw square(squareSize) color: standard_color_per_layer.values[i] at: curPos;
 						draw standard_color_per_layer.keys[i] color: standard_color_per_layer.values[i] at: {curPos.x-30#px,curPos.y+verticalSpace} perspective: true font:font("Helvetica", 20 , #bold);
 					}
