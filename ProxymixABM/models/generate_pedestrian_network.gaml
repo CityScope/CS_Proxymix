@@ -9,8 +9,7 @@ model generatepedestriannetwork
 
 global {
 	bool build_pedestrian_network <- false;
-	int curFloor<-3;
-	file ML_file <- dxf_file("../includes/MediaLab/ML_" + curFloor+".dxf",#cm);
+	file ML_file <- dxf_file("../includes/Standard_Factory_Gama.dxf",#cm);
 	graph network;
 	
 	bool P_use_body_geometry <- false parameter: true ;
@@ -23,13 +22,13 @@ global {
 	bool display_free_space <- false parameter: true category:"Visualization";
 	bool display_pedestrian_path <- false parameter: true category:"Visualization";
 	
-	float step <- 0.1;
+	float step <- 1.0;
 	geometry shape <- envelope(ML_file);
 	init {
 		//--------------- ML ELEMENT CREATION-----------------------------//
 		create StructuralElement from: ML_file with: [layer::string(get("layer"))]{
 		 //est-ce qu'il y a d'autres elements à conserver ?
-		  if (layer!= "Walls"){
+		  if (layer != "Walls"){
 		    do die;	
 		  }
 		}
@@ -50,16 +49,16 @@ global {
 			create walking_area from: walking_area_g.geometries;
 			
 		if (build_pedestrian_network) {
-			
+			display_pedestrian_path <- true;
 			//option par defaut.... voir si cela convient ou non
-			list<geometry> pp  <- generate_pedestrian_network([],walking_area,false,false,0.0,0.0,true,0.05,0.0,0.0);
+			list<geometry> pp  <- generate_pedestrian_network([],walking_area,false,false,0.0,0.0,true,0.03,0.0,0.0);
 			list<geometry> cn <- clean_network(pp, 0.01,true,true);
 			
 			create pedestrian_path from: cn;
-			save pedestrian_path type: shp to:"../includes/MediaLab/pedestrian_path"  +curFloor+ ".shp";
+			save pedestrian_path type: shp to:"../includes/pedestrian_path.shp"; 
 		} else {
 			
-			create pedestrian_path from: shape_file("../includes/MediaLab/pedestrian_path"  +curFloor+ ".shp") ;
+			create pedestrian_path from: shape_file("../includes/pedestrian_path.shp") ;
 			geometry walking_area_g <- copy(shape);
 			ask StructuralElement {
 				walking_area_g <- walking_area_g - (shape + 0.01);
@@ -74,7 +73,7 @@ global {
 			network <- as_edge_graph(pedestrian_path);
 		
 		
-			create people number: 1000 {
+			create people number: 500 {
 				location <- any_location_in(one_of(pedestrian_path).free_space);
 				pedestrian_model <- P_pedestrian_model;
 				avoid_other <- P_avoid_other;
@@ -125,7 +124,7 @@ species people skills: [escape_pedestrian] {
 	}	
 	
 	aspect default {
-		draw circle(0.15) color: color;
+		draw circle(2.0) color: color;
 		
 	}
 	
