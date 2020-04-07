@@ -71,8 +71,9 @@ global {
 			create walking_area from: walking_area_g.geometries;
 			
 			ask pedestrian_path {
-				do initialize obstacles:[StructuralElement] distance: 2.0;
+				do initialize obstacles:[StructuralElement] distance: 1.0;
 				free_space <- free_space inter walking_area_g;
+				free_space <- free_space.geometries with_max_of each.area;
 			}
 			network <- as_edge_graph(pedestrian_path);
 		
@@ -128,7 +129,7 @@ species people skills: [escape_pedestrian] {
 	}	
 	
 	aspect default {
-		draw circle(2.0) color: color;
+		draw circle(0.3) color: color;
 		
 	}
 	
