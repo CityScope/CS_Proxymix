@@ -38,7 +38,7 @@ global {
 						places << g.location;
 					} 
 					if empty(places) {
-						places << any_location_in(self);
+						places << location;
 					} 
 					available_places <- copy(places);
 				}
@@ -87,7 +87,8 @@ global {
 			goto_entrance <- true;
 			location <- any_location_in (one_of(entrances));
 			date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 90 #mn);
-			agenda_day[lunch_time] <- activity first_with (each.name = "Supermarket");
+			
+			if flip(0.3) {agenda_day[lunch_time] <- activity first_with (each.name = "Supermarket");}
 			lunch_time <- lunch_time add_seconds rnd(120, 15 #mn);
 			agenda_day[lunch_time] <- activity first_with (each.name = "Coffee");
 			lunch_time <- lunch_time add_seconds rnd(5#mn, 30 #mn);
@@ -144,15 +145,15 @@ species room {
 		return nb_affected < length(places);
 	}
 	point get_target(people p){
-		point place <- one_of(available_places);
+		point place <- (available_places farthest_to p.location);
 		available_places >> place;
 		return place;
 	}
 	
 	aspect default {
 		draw shape color: standard_color_per_type[type];
-		//loop e over: entrances {draw square(0.1) at: e color: #magenta border: #black;}
-		//loop p over: places {draw square(0.1) at: p color: #cyan border: #black;}
+		loop e over: entrances {draw square(0.1) at: e color: #magenta border: #black;}
+		loop p over: places {draw square(0.1) at: p color: #cyan border: #black;}
 	}
 }
 
@@ -160,7 +161,7 @@ species activity {
 	list<room> activity_places;
 	
 	room get_place(people p) {
-		return activity_places closest_to p;
+		return (activity_places where each.is_available()) closest_to self;
 	}
 	
 }
@@ -190,7 +191,7 @@ species people skills: [moving] {
 	}
 	reflex define_activity when: not empty(agenda_day) and 
 		(current_date = agenda_day.keys[0]){
-		if(target_room != nil) {target_room.available_places << location;}
+		if(target_room != nil and target = nil) {target_room.available_places << location;}
 		current_activity <- agenda_day.values[0];
 		agenda_day >> first(agenda_day);
 		target_room <- current_activity.get_place(self);
@@ -199,13 +200,17 @@ species people skills: [moving] {
 	}
 	
 	reflex goto_activity when: target != nil{
-		do goto target: target on: pedestrian_network;
+		if goto_entrance {do goto target: target on: pedestrian_network;}
+		else {do goto target: target; }
 		if(location = target) {
 			if (goto_entrance) {
 				point loc <- target_room.get_target(self);
 				if loc != nil {
 					target <- loc;
 					goto_entrance <- false;
+				} else {
+					target_room <- current_activity.get_place(self);
+					target <- target_room.entrances closest_to self;
 				}
 			} else {
 				target <- nil;

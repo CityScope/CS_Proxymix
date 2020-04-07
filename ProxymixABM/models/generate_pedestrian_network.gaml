@@ -28,9 +28,13 @@ global {
 		//--------------- ML ELEMENT CREATION-----------------------------//
 		create StructuralElement from: ML_file with: [layer::string(get("layer"))]{
 		 //est-ce qu'il y a d'autres elements à conserver ?
-		  if (layer != "Walls"){
+		  if not(layer in ["Walls","Offices", "Supermarket", "Meeting rooms","Coffee","Storage" ]){
 		    do die;	
 		  }
+		  if (layer = "Walls") {
+		  	shape <- simplification(shape + 0.001, 0.1) ;
+		  }
+		  
 		}
 		map layers <- list(StructuralElement) group_by each.layer;
 		loop la over: layers.keys
@@ -43,7 +47,7 @@ global {
 		
 		geometry walking_area_g <- copy(shape);
 			ask StructuralElement {
-				walking_area_g <- walking_area_g - (shape + 0.01);
+				walking_area_g <- walking_area_g - (shape );
 				walking_area_g <- walking_area_g.geometries with_max_of each.area;
 			}
 			create walking_area from: walking_area_g.geometries;
@@ -51,7 +55,7 @@ global {
 		if (build_pedestrian_network) {
 			display_pedestrian_path <- true;
 			//option par defaut.... voir si cela convient ou non
-			list<geometry> pp  <- generate_pedestrian_network([],walking_area,false,false,0.0,0.0,true,0.03,0.0,0.0);
+			list<geometry> pp  <- generate_pedestrian_network([],walking_area,false,false,0.0,0.0,true,0.1,0.0,0.0);
 			list<geometry> cn <- clean_network(pp, 0.01,true,true);
 			
 			create pedestrian_path from: cn;
