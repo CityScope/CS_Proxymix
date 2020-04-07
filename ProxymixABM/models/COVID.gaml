@@ -63,6 +63,11 @@ global {
 			if contour != nil {
 				entrances <- points_on (contour, 2.0);
 			}
+			ask places {
+				point pte <- myself.entrances closest_to self;
+				dists <- self distance_to pte;
+			}
+					
 		}
 		map<string, list<room>> rooms_type <- room group_by each.type;
 		entrances <-list(building_entrance);
@@ -100,7 +105,7 @@ global {
 			agenda_day[lunch_time] <- activity first_with (each.name = "Coffee");
 			lunch_time <- lunch_time add_seconds rnd(5#mn, 30 #mn);
 			agenda_day[lunch_time] <- first(working);
-			agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(59),rnd(59))] <- first(going_home);
+			agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(30),rnd(59))] <- first(going_home);
 			
 		}
 		
@@ -117,7 +122,7 @@ global {
 		if (current_date.hour >= 12 and current_date.minute > 5 and empty(people where (each.target != nil)))  {
 			step <- 5 #mn;
 		} 
-		if (current_date.hour = 17){
+		if (current_date.hour = 18){
 			step <- 1#s;
 		}
 		if (not empty(people where (each.target != nil))) {
@@ -154,34 +159,23 @@ species room {
 		loop g over: to_squares(shape, 1.5, true) where (each.location overlaps shape){
 						create place_in_room {
 							location <- g.location;
-							order <- int(self);
 							myself.places << self;
 						}
 					} 
 					if empty(places) {
 						create place_in_room {
 							location <- myself.location;
-							order <- int(self);
 							myself.places << self;
 						}
 					} 
-					/*map<point,float> dists; 
-					loop pt over: places {
-						point pte <- entrances with_min_of (each distance_to pt);
-						dists[pt] <- pte distance_to pt;
-					}
-					list<float> ds <- dists.values sort_by each;
-					places <- [];
-					loop d over: ds {
-						places << dists.keys first_with (dists[each] = d);
-					}*/
+				
 					available_places <- copy(places);
 	}
 	bool is_available {
 		return nb_affected < length(places);
 	}
 	place_in_room get_target(people p){
-		place_in_room place <- (available_places with_max_of each.order);
+		place_in_room place <- (available_places with_max_of each.dists);
 		available_places >> place;
 		return place;
 	}
@@ -228,7 +222,7 @@ species going_home parent: activity  {
 }
 
 species place_in_room {
-	int order;
+	float dists;
 }
 
 species people skills: [moving] {
