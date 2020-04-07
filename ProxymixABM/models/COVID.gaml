@@ -32,25 +32,32 @@ global {
 			string type <- se get "layer";
 			if (type = "Walls") {
 				create wall with: [shape::polygon(se.points)];
-			} else if type in ["Offices", "Supermarket", "Meeting rooms","Coffee","Storage", "Entrance" ] {
+			} else if type = "Entrance" {
+				create building_entrance  with: [shape::polygon(se.points), type::type] {
+					do intialization;
+				}
+			} else if type in ["Offices", "Supermarket", "Meeting rooms","Coffee","Storage"] {
 				create room with: [shape::polygon(se.points), type::type] {
-					loop g over: to_squares(shape, 1.5, true) where (each.location overlaps shape){
-						places << g.location;
-					} 
-					if empty(places) {
-						places << location;
-					} 
-					available_places <- copy(places);
+					do intialization;
+					
 				}
 				
 			}
 		} 
 		ask room {
+			list<wall> ws <- wall overlapping self;
+			loop w over: ws {
+				if w covers self {
+					do die;
+				}
+			}
+		}
+		ask room + building_entrance{
 			geometry contour <- shape.contour;
 			ask wall at_distance 1.0 {
 				contour <- contour - (shape + 0.3);
 			}
-			ask room at_distance 1.0 {
+			ask (room + building_entrance) at_distance 1.0 {
 				contour <- contour - (shape + 0.3);
 			} 
 			if contour != nil {
@@ -58,7 +65,7 @@ global {
 			}
 		}
 		map<string, list<room>> rooms_type <- room group_by each.type;
-		entrances <- rooms_type["Entrance"];
+		entrances <-list(building_entrance);
 		loop ty over: rooms_type.keys  - ["Offices", "Entrance"]{
 			create activity {
 				name <-  ty;
@@ -86,14 +93,14 @@ global {
 			
 			goto_entrance <- true;
 			location <- any_location_in (one_of(entrances));
-			date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 90 #mn);
+			date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 40 #mn);
 			
 			if flip(0.3) {agenda_day[lunch_time] <- activity first_with (each.name = "Supermarket");}
-			lunch_time <- lunch_time add_seconds rnd(120, 15 #mn);
+			lunch_time <- lunch_time add_seconds rnd(120, 10 #mn);
 			agenda_day[lunch_time] <- activity first_with (each.name = "Coffee");
 			lunch_time <- lunch_time add_seconds rnd(5#mn, 30 #mn);
 			agenda_day[lunch_time] <- first(working);
-			agenda_day[date(current_date.year,current_date.month,current_date.day,rnd(17,19), rnd(59),rnd(59))] <- first(going_home);
+			agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(59),rnd(59))] <- first(going_home);
 			
 		}
 		
@@ -113,9 +120,12 @@ global {
 		if (current_date.hour = 17){
 			step <- 1#s;
 		}
+		if (not empty(people where (each.target != nil))) {
+			step <- 1#s;
+		}
 	}
 	
-	reflex end_simulation when: current_date.hour = 20 {
+	reflex end_simulation when: after(starting_date add_hours 13) {
 		do pause;
 	}
 	
@@ -137,15 +147,41 @@ species room {
 	int nb_affected;
 	string type;
 	list<point> entrances;
-	list<people> people_inside;
-	list<point> places;
-	list<point> available_places;
+	list<place_in_room> places;
+	list<place_in_room> available_places;
 	
+	action intialization {
+		loop g over: to_squares(shape, 1.5, true) where (each.location overlaps shape){
+						create place_in_room {
+							location <- g.location;
+							order <- int(self);
+							myself.places << self;
+						}
+					} 
+					if empty(places) {
+						create place_in_room {
+							location <- myself.location;
+							order <- int(self);
+							myself.places << self;
+						}
+					} 
+					/*map<point,float> dists; 
+					loop pt over: places {
+						point pte <- entrances with_min_of (each distance_to pt);
+						dists[pt] <- pte distance_to pt;
+					}
+					list<float> ds <- dists.values sort_by each;
+					places <- [];
+					loop d over: ds {
+						places << dists.keys first_with (dists[each] = d);
+					}*/
+					available_places <- copy(places);
+	}
 	bool is_available {
 		return nb_affected < length(places);
 	}
-	point get_target(people p){
-		point place <- (available_places farthest_to p.location);
+	place_in_room get_target(people p){
+		place_in_room place <- (available_places with_max_of each.order);
 		available_places >> place;
 		return place;
 	}
@@ -153,7 +189,13 @@ species room {
 	aspect default {
 		draw shape color: standard_color_per_type[type];
 		loop e over: entrances {draw square(0.1) at: e color: #magenta border: #black;}
-		loop p over: places {draw square(0.1) at: p color: #cyan border: #black;}
+		loop p over: available_places {draw square(0.1) at: p.location color: #cyan border: #black;}
+	}
+}
+
+species building_entrance parent: room {
+	place_in_room get_target(people p){
+		return place_in_room closest_to p;
 	}
 }
 
@@ -161,7 +203,12 @@ species activity {
 	list<room> activity_places;
 	
 	room get_place(people p) {
-		return (activity_places where each.is_available()) closest_to self;
+		if flip(0.3) {
+			return one_of(activity_places with_max_of length(each.available_places));
+		} else {
+			return (activity_places where not empty(each.available_places)) closest_to p;
+		}
+		
 	}
 	
 }
@@ -175,6 +222,13 @@ species working parent: activity {
 
 species going_home parent: activity  {
 	string name <- "going home";
+	room get_place(people p) {
+		return building_entrance closest_to p;
+	}
+}
+
+species place_in_room {
+	int order;
 }
 
 species people skills: [moving] {
@@ -183,36 +237,50 @@ species people skills: [moving] {
 	activity current_activity;
 	point target;
 	room target_room;
+	bool has_place <- false;
+	place_in_room target_place;
 	bool goto_entrance <- false;
+	bool go_oustide_room <- false;
 	rgb color <- rnd_color(255);
 	float speed <- min(2,gauss(4,1)) #km/#h;
 	aspect default {
 		draw circle(0.3) color:color border: #black;
 	}
 	reflex define_activity when: not empty(agenda_day) and 
-		(current_date = agenda_day.keys[0]){
-		if(target_room != nil and target = nil) {target_room.available_places << location;}
+		(after(agenda_day.keys[0])){
+		if(target_place != nil and (has_place) ) {target_room.available_places << target_place;}
 		current_activity <- agenda_day.values[0];
 		agenda_day >> first(agenda_day);
-		target_room <- current_activity.get_place(self);
 		target <- target_room.entrances closest_to self;
-		goto_entrance <- true;
+		target_room <- current_activity.get_place(self);
+		go_oustide_room <- true;
+		goto_entrance <- false;
+		target_place <- nil;
 	}
 	
 	reflex goto_activity when: target != nil{
 		if goto_entrance {do goto target: target on: pedestrian_network;}
 		else {do goto target: target; }
 		if(location = target) {
-			if (goto_entrance) {
-				point loc <- target_room.get_target(self);
-				if loc != nil {
-					target <- loc;
+			if (go_oustide_room) {
+				target <- target_room.entrances closest_to self;
+				go_oustide_room <- false;
+				goto_entrance <- true;
+			}
+			else if (goto_entrance) {
+				target_place <- target_room.get_target(self);
+				if target_place != nil {
+					target <- target_place.location;
 					goto_entrance <- false;
 				} else {
-					target_room <- current_activity.get_place(self);
-					target <- target_room.entrances closest_to self;
+					room tr <- current_activity.get_place(self);
+					if (tr != nil ) {
+						target_room <- tr;
+						target <- target_room.entrances closest_to self;
+					}
 				}
 			} else {
+				has_place <- true;
 				target <- nil;
 				if (current_activity.name = "going home") {
 					do die;
@@ -228,6 +296,7 @@ experiment COVID type: gui {
 	output {
 		display map synchronized: true {
 			species room;
+			species building_entrance;
 			species wall;
 			species people;
 		}
