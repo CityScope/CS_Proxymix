@@ -8,12 +8,17 @@
 model COVID
 
 global {
+		
+	//define the path to the dataset folder
+	string dataset_path <- "./../includes/";
+	string fileName;
+	//define the bounds of the studied area
+	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",#cm);
 	
-	file ML_file <- dxf_file("../includes/Standard_Factory_Gama.dxf",#cm);
 	shape_file pedestrian_path_shape_file <- shape_file("../includes/pedestrian_path.shp");
 	date starting_date <- date([2020,4,6,7]);
 	int nb_people <- 300;
-	geometry shape <- envelope(ML_file);
+	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
 	map<string,rgb> standard_color_per_type <- 
 	["Offices"::#blue,"Meeting rooms"::#darkblue,
@@ -28,7 +33,7 @@ global {
 	init {
 		create pedestrian_path from: pedestrian_path_shape_file;
 		pedestrian_network <- as_edge_graph(pedestrian_path);
-		loop se over: ML_file {
+		loop se over: the_dxf_file {
 			string type <- se get "layer";
 			if (type = "Walls") {
 				create wall with: [shape::polygon(se.points)];
@@ -287,6 +292,8 @@ species people skills: [moving] {
 
 
 experiment COVID type: gui {
+	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
+	
 	output {
 		display map synchronized: true {
 			species room;

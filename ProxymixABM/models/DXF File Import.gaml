@@ -9,7 +9,11 @@ model DXFAgents
 
 global
 {
-	file the_dxf_file <- dxf_file("../includes/MediaLab/ML_3.dxf",#cm);
+	//define the path to the dataset folder
+	string dataset_path <- "./../includes/";
+	string fileName;
+	//define the bounds of the studied area
+	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",#cm);
 	geometry shape <- envelope(the_dxf_file);
 	init
 	{
@@ -40,7 +44,7 @@ species dxf_element
 }
 
 experiment DXFAgents type: gui
-{   
+{   parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
 	output
 	{	layout #split;
 		display map type: opengl
