@@ -13,7 +13,9 @@ global {
 	string dataset_path <- "./../includes/";
 	string fileName;
 	//define the bounds of the studied area
-	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",#cm);
+	
+	float unity;
+	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",unity);
 	
 	shape_file pedestrian_path_shape_file <- shape_file("../includes/pedestrian_path.shp");
 	date starting_date <- date([2020,4,6,7]);
@@ -33,10 +35,11 @@ global {
 	init {
 		create pedestrian_path from: pedestrian_path_shape_file;
 		pedestrian_network <- as_edge_graph(pedestrian_path);
-		loop se over: the_dxf_file {
+		loop se over: the_dxf_file  {
 			string type <- se get "layer";
+			
 			if (type = "Walls") {
-				create wall with: [shape::polygon(se.points)];
+				create wall with: [shape::clean(polygon(se.points))];
 			} else if type = "Entrance" {
 				create building_entrance  with: [shape::polygon(se.points), type::type] {
 					do intialization;
@@ -49,6 +52,11 @@ global {
 				
 			}
 		} 
+		ask wall {
+			if not empty((room + building_entrance) inside self ) {
+				shape <- shape.contour;
+			}
+		}
 		ask room {
 			list<wall> ws <- wall overlapping self;
 			loop w over: ws {
@@ -58,12 +66,17 @@ global {
 			}
 		}
 		ask room + building_entrance{
-			geometry contour <- shape.contour;
-			ask wall at_distance 1.0 {
-				contour <- contour - (shape + 0.3);
-			}
-			ask (room + building_entrance) at_distance 1.0 {
-				contour <- contour - (shape + 0.3);
+			geometry contour <- nil;
+			float dist <-0.3;
+			loop while: contour = nil {
+				contour <- copy(shape.contour);
+				ask wall at_distance 1.0 {
+					contour <- contour - (shape +dist);
+				}
+				ask (room + building_entrance) at_distance 1.0 {
+					contour <- contour - (shape + dist);
+				}
+				dist <- dist * 0.5;	
 			} 
 			if contour != nil {
 				entrances <- points_on (contour, 2.0);
@@ -85,7 +98,7 @@ global {
 		create working;
 		create going_home with:[activity_places:: entrances];
 		
-		available_offices <- rooms_type["Offices"] where each.is_available();
+		available_offices <- rooms_type["Offices"] where each.is_available(); 
 	}	
 	
 	
@@ -293,7 +306,7 @@ species people skills: [moving] {
 
 experiment COVID type: gui {
 	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
-	
+	parameter "unity" var: unity category: "file" <- #cm;
 	output {
 		display map synchronized: true {
 			species room;
