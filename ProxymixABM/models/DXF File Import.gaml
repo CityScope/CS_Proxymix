@@ -53,3 +53,23 @@ experiment DXFAgents type: gui
 		}
 	}
 }
+
+experiment ValideDXFAgents type: gui
+{   
+	init
+	{   
+        create simulation with: [fileName::"MediaLab/ML_3"];
+		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon"];
+		create simulation with: [fileName::"Learning_Center_Lyon"];	
+		//create simulation with: [fileName::"ENSAL-RDC"];	
+		//create simulation with: [fileName::"ENSAL-1"];	
+	}
+	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
+	output
+	{	layout #split;
+		display map type: opengl
+		{
+			species dxf_element;
+		}
+	}
+}
