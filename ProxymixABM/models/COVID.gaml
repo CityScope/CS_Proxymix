@@ -316,3 +316,22 @@ experiment COVID type: gui {
 		}
 	}
 }
+
+experiment COVIDMulti type: gui {
+	
+	init{
+		//create simulation with: [fileName::"MediaLab/ML_3"];
+		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon"];
+		//create simulation with: [fileName::"Learning_Center_Lyon"];	
+	}
+	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
+	parameter "unity" var: unity category: "file" <- #cm;
+	output {
+		display map synchronized: true {
+			species room;
+			species building_entrance;
+			species wall;
+			species people;
+		}
+	}
+}
