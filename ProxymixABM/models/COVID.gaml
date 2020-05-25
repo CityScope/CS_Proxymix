@@ -15,8 +15,8 @@ global {
 	string fileName;
 	//define the bounds of the studied area
 	
-	float unity <- #cm;
-	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",unity);
+	float unit <- #cm;
+	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",unit);
 	
 	shape_file pedestrian_path_shape_file <- shape_file("../includes/pedestrian_path.shp");
 	date starting_date <- date([2020,4,6,7]);
@@ -299,7 +299,7 @@ species people skills: [moving] {
 
 experiment COVID type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
-	parameter "unity" var: unity category: "file" <- #cm;
+	parameter "unit" var: unit category: "file" <- #cm;
 	output {
 		display map synchronized: true parent:floorPlan type:opengl{
 			species room;
@@ -310,15 +310,15 @@ experiment COVID type: gui parent: DXFDisplay{
 	}
 }
 
-experiment COVIDMulti type: gui {
+/*experiment COVIDMulti type: gui {
 	
 	init{
 		//create simulation with: [fileName::"MediaLab/ML_3"];
-		create simulation with: [fileName::"Standard_Factory_Gama",unity::#cm ];
+		create simulation with: [fileName::"Standard_Factory_Gama",unit::#cm ];
 		//create simulation with: [fileName::"Learning_Center_Lyon"];	
 	}
 	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
-	parameter "unity" var: unity category: "file" <- #cm;
+	parameter "unit" var: unit category: "file" <- #cm;
 	output {
 		display map synchronized: true {
 			species room;
@@ -327,4 +327,4 @@ experiment COVIDMulti type: gui {
 			species people;
 		}
 	}
-}
+}*/
