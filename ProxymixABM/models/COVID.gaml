@@ -15,7 +15,7 @@ global {
 	string fileName;
 	//define the bounds of the studied area
 	
-	float unity;
+	float unity <- #cm;
 	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",unity);
 	
 	shape_file pedestrian_path_shape_file <- shape_file("../includes/pedestrian_path.shp");
@@ -310,11 +310,11 @@ experiment COVID type: gui parent: DXFDisplay{
 	}
 }
 
-/*experiment COVIDMulti type: gui {
+experiment COVIDMulti type: gui {
 	
 	init{
 		//create simulation with: [fileName::"MediaLab/ML_3"];
-		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon"];
+		create simulation with: [fileName::"Standard_Factory_Gama",unity::#cm ];
 		//create simulation with: [fileName::"Learning_Center_Lyon"];	
 	}
 	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
@@ -327,4 +327,4 @@ experiment COVID type: gui parent: DXFDisplay{
 			species people;
 		}
 	}
-}*/
+}
