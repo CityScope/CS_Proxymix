@@ -6,7 +6,7 @@
 ***/
 
 model COVID
-import "DXF_Validator.gaml"
+import "./ToolKit/DXF_Loader.gaml"
 
 global {
 		
