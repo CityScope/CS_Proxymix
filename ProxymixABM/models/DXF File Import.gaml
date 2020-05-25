@@ -17,14 +17,18 @@ global
 	geometry shape <- envelope(the_dxf_file);
 	map<string,rgb> standard_color_per_layer <- 
 	["Offices"::#blue,"Meeting rooms"::#darkblue,
-	"Entrance"::#yellow,"Elevators"::#orange,
+	"Entrance"::#red,"Elevators"::#orange,
 	"Coffee"::#green,"Supermarket"::#darkgreen,
 	"Storage"::#brown, "Furnitures"::#maroon, 
 	"Toilets"::#purple,  
 	"Walls"::#gray, "Doors"::#lightgray,
 	"Stairs"::#white];
 	init
-	{
+	{   list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get "layer"));
+		list<string> missing_type_elements <- standard_color_per_layer.keys - existing_types;
+		if (not empty(missing_type_elements)) {
+			do error("Some elements (layers) are missing in the dxf file:  " + missing_type_elements);
+		}
 		create dxf_element from: the_dxf_file with: [layer::string(get("layer"))];
 		map layers <- list(dxf_element) group_by each.layer;
 		loop la over: layers.keys
@@ -70,13 +74,14 @@ experiment DXFAgents type: gui
 		display map type: opengl
 		{
 			species dxf_element;
-			overlay position: { 5, 5 } size: { 240 #px, 680 #px } background: # black transparency: 0.0 border: #black {
-			  float verticalSpace <- world.shape.width * 0.025;
+			graphics 'legend' {
+			  point legendPos<-{world.shape.width*1.1,0};
+			  float verticalSpace <- world.shape.width * 0.05;
 			  float squareSize<-world.shape.width*0.02;
 			  loop i from:0 to:length(standard_color_per_layer)-1{
-                point curPos<-{(i mod 2) * world.shape.width*0.1,((i mod 2 = 1)  ? i*verticalSpace : (i+1)*verticalSpace)+ world.shape.height/4};
-				draw square(squareSize) color: standard_color_per_layer.values[i] at: curPos;
-				draw standard_color_per_layer.keys[i] color: standard_color_per_layer.values[i] at: {curPos.x-30#px,curPos.y+verticalSpace} perspective: true font:font("Helvetica", 20 , #bold);
+                point curPos<-{(i mod 2) * world.shape.width*0.2,((i mod 2 = 1)  ? i*verticalSpace : (i+1)*verticalSpace)+ world.shape.height/4};
+				draw square(squareSize) color: standard_color_per_layer.values[i] at: legendPos+ curPos;
+				draw string(standard_color_per_layer.keys[i]) + ": " +length (dxf_element where (each.layer= standard_color_per_layer.keys[i]))color: standard_color_per_layer.values[i] at: {curPos.x-30#px,curPos.y+verticalSpace}+legendPos perspective: true font:font("Helvetica", 20 , #bold);
 			  }
 			}
 		}
