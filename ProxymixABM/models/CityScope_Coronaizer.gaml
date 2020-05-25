@@ -174,7 +174,3 @@ experiment Coronaizer type:gui autorun:true{
 	  }
 	}		
 }
-
-
-
-
