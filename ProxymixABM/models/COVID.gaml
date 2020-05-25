@@ -6,6 +6,7 @@
 ***/
 
 model COVID
+import "./ToolKit/DXF_Loader.gaml"
 
 global {
 		
@@ -22,14 +23,6 @@ global {
 	int nb_people <- 300;
 	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
-	map<string,rgb> standard_color_per_type <- 
-	["Offices"::#blue,"Meeting rooms"::#darkblue,
-	"Entrance"::#yellow,"Elevators"::#orange,
-	"Coffee"::#green,"Supermarket"::#darkgreen,
-	"Storage"::#brown, "Furnitures"::#maroon, 
-	"Toilets"::#purple, "Toilets_Details"::#magenta, 
-	"Walls"::#gray, "Doors"::#lightgray,
-	"Stairs"::#white,"Path"::#red];
 	list<room> available_offices;
 	list<room> entrances;
 	init {
@@ -204,7 +197,7 @@ species room {
 	}
 	
 	aspect default {
-		draw shape color: standard_color_per_type[type];
+		draw shape color: standard_color_per_layer[type];
 		loop e over: entrances {draw square(0.1) at: e color: #magenta border: #black;}
 		loop p over: available_places {draw square(0.1) at: p.location color: #cyan border: #black;}
 	}
@@ -309,11 +302,11 @@ species people skills: [moving] {
 
 
 
-experiment COVID type: gui {
+experiment COVID type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
 	parameter "unity" var: unity category: "file" <- #cm;
 	output {
-		display map synchronized: true {
+		display map synchronized: true parent:floorPlan type:opengl{
 			species room;
 			species building_entrance;
 			species wall;
@@ -322,7 +315,7 @@ experiment COVID type: gui {
 	}
 }
 
-experiment COVIDMulti type: gui {
+/*experiment COVIDMulti type: gui {
 	
 	init{
 		//create simulation with: [fileName::"MediaLab/ML_3"];
@@ -339,4 +332,4 @@ experiment COVIDMulti type: gui {
 			species people;
 		}
 	}
-}
+}*/
