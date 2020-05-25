@@ -1,7 +1,7 @@
 /***
 * Name: Proxymix
 * Author: Arnaud Grignard , Nicolas Ayoub
-* Description: 
+* Description: This is the original Proxymix for the Media Lab Project
 ***/
 
 model Proxymix
@@ -10,8 +10,8 @@ model Proxymix
 
 global {
 	int curFloor<-3;
-	file ML_file <- dxf_file("../includes/MediaLab/ML_3.dxf",#m);
-	file JsonFile <- json_file("../includes/MediaLab/project-network.json");
+	file ML_file <- dxf_file("./../../includes/MediaLab/ML_3.dxf",#m);
+	file JsonFile <- json_file("./../../includes/MediaLab/project-network.json");
     map<string, unknown> collaborationFile <- JsonFile.contents;
 	int nb_people <- 100;
 	int current_hour update: (time / #hour) mod 18;
@@ -46,7 +46,7 @@ global {
 	init {
 		//--------------- ML ELEMENT CREATION-----------------------------//
 		loop i from:3 to:curFloor{
-			create ML_element from: dxf_file("../includes/MediaLab/ML_"+i+".dxf",#m) with: [layer::string(get("layer"))]{
+			create ML_element from: dxf_file("./../../includes/MediaLab/ML_"+i+".dxf",#m) with: [layer::string(get("layer"))]{
 				floor<-i;
 				if (layer="0"){
 				  do die;	
@@ -74,7 +74,7 @@ global {
 		
 		//--------------- ML PEOPLE CREATION-----------------------------//
 		
-		create ML_people from:csv_file( "../includes/MediaLab/mlpeople_floors.csv",true) with:
+		create ML_people from:csv_file( "./../../includes/MediaLab/mlpeople_floors.csv",true) with:
 			[   people_status::string(get("ML_STATUS")),
 				people_username::string(get("USERNAME")),  
 				people_type::string(get("PERSON_TYPE")), 

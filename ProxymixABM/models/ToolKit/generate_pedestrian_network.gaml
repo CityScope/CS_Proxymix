@@ -9,7 +9,7 @@ model generatepedestriannetwork
 
 global {
 	bool build_pedestrian_network <- false;
-	file ML_file <- dxf_file("../includes/Standard_Factory_Gama.dxf",#cm);
+	file ML_file <- dxf_file("./../../includes/Standard_Factory_Gama.dxf",#cm);
 	graph network;
 	
 	bool P_use_body_geometry <- false parameter: true ;
