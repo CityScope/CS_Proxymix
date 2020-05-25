@@ -26,8 +26,10 @@ global
 	init
 	{   list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get "layer"));
 		list<string> missing_type_elements <- standard_color_per_layer.keys - existing_types;
-		if (not empty(missing_type_elements)) {
-			do error("Some elements (layers) are missing in the dxf file:  " + missing_type_elements);
+		list<string> useless_type_elements <- existing_types - standard_color_per_layer.keys;
+		if (not empty(missing_type_elements) or not empty(useless_type_elements)) {
+			do error("Missing elements in the dxf file:  " + missing_type_elements);
+			do error("Optional element in the dxf file:  " + useless_type_elements);
 		}
 		create dxf_element from: the_dxf_file with: [layer::string(get("layer"))];
 		map layers <- list(dxf_element) group_by each.layer;
