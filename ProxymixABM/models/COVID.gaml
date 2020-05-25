@@ -6,6 +6,7 @@
 ***/
 
 model COVID
+import "DXF_Validator.gaml"
 
 global {
 		
@@ -22,29 +23,9 @@ global {
 	int nb_people <- 300;
 	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
-	map<string,rgb> standard_color_per_type <- 
-	["Offices"::#blue,"Meeting rooms"::#darkblue,
-	"Entrance"::#yellow,"Elevators"::#orange,
-	"Coffee"::#green,"Supermarket"::#darkgreen,
-	"Storage"::#brown, "Furnitures"::#maroon, 
-	"Toilets"::#purple, "Toilets_Details"::#magenta, 
-	"Walls"::#gray, "Doors"::#lightgray,
-	"Stairs"::#white,"Path"::#red];
 	list<room> available_offices;
 	list<room> entrances;
 	init {
-		list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get "layer"));
-		list<string> missing_type_elements <- standard_color_per_type.keys - existing_types;
-		list<string> useless_type_elements <- (existing_types -  standard_color_per_type.keys);
-		if (not empty(missing_type_elements) or not empty(useless_type_elements)) {
-			if (not empty(missing_type_elements)) {
-					do error("Some elements (layers) are missing in the dxf file:  " + missing_type_elements +  
-				(empty(useless_type_elements) ? "" :("\n\n and some elements (layers)  will not be used by the model:" + useless_type_elements)));
-			} else {
-				do tell("Some elements (layers) will not be used by the model:" + useless_type_elements);
-			}
-		
-		}
 		create pedestrian_path from: pedestrian_path_shape_file;
 		pedestrian_network <- as_edge_graph(pedestrian_path);
 		loop se over: the_dxf_file  {
@@ -211,7 +192,7 @@ species room {
 	}
 	
 	aspect default {
-		draw shape color: standard_color_per_type[type];
+		draw shape color: standard_color_per_layer[type];
 		loop e over: entrances {draw square(0.1) at: e color: #magenta border: #black;}
 		loop p over: available_places {draw square(0.1) at: p.location color: #cyan border: #black;}
 	}
@@ -316,11 +297,11 @@ species people skills: [moving] {
 
 
 
-experiment COVID type: gui {
+experiment COVID type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
 	parameter "unity" var: unity category: "file" <- #cm;
 	output {
-		display map synchronized: true {
+		display map synchronized: true parent:floorPlan type:opengl{
 			species room;
 			species building_entrance;
 			species wall;

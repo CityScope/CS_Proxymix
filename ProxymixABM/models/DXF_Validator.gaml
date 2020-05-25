@@ -14,6 +14,7 @@ global
 	string fileName;
 	//define the bounds of the studied area
 	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",#cm);
+	bool validator<-true;
 	geometry shape <- envelope(the_dxf_file);
 	map<string,rgb> standard_color_per_layer <- 
 	["Offices"::#blue,"Meeting rooms"::#darkblue,
@@ -24,17 +25,19 @@ global
 	"Walls"::#gray, "Doors"::#lightgray,
 	"Stairs"::#white];
 	init
-	{   list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get "layer"));
-		list<string> missing_type_elements <- standard_color_per_layer.keys - existing_types;
-		list<string> useless_type_elements <- (existing_types -  standard_color_per_layer.keys);
-		if (not empty(missing_type_elements) or not empty(useless_type_elements)) {
-			if (not empty(missing_type_elements)) {
-					do error("Some elements (layers) are missing in the dxf file:  " + missing_type_elements +  
-				(empty(useless_type_elements) ? "" :("\n\n and some elements (layers)  will not be used by the model:" + useless_type_elements)));
-			} else {
-				do tell("Some elements (layers) will not be used by the model:" + useless_type_elements);
+	{   if(validator){
+			list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get "layer"));
+			list<string> missing_type_elements <- standard_color_per_layer.keys - existing_types;
+			list<string> useless_type_elements <- (existing_types -  standard_color_per_layer.keys);
+			if (not empty(missing_type_elements) or not empty(useless_type_elements)) {
+				if (not empty(missing_type_elements)) {
+						do error("In "+ fileName + " Some elements (layers) are missing in the dxf file:  " + missing_type_elements +  
+					(empty(useless_type_elements) ? "" :("\n\n and some elements (layers)  will not be used by the model:" + useless_type_elements)));
+				} else {
+					do tell("Some elements (layers) will not be used by the model:" + useless_type_elements);
+				}
+			
 			}
-		
 		}
 		create dxf_element from: the_dxf_file with: [layer::string(get("layer"))];
 		map layers <- list(dxf_element) group_by each.layer;
@@ -66,7 +69,7 @@ species dxf_element
 	rgb color;
 	bool useless;
 	aspect default
-		{
+	{
 		draw shape color: color;
 	}
 	init {
@@ -74,11 +77,11 @@ species dxf_element
 	}
 }
 
-experiment DXFAgents type: gui
-{   parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
+experiment DXFDisplay type: gui
+{   parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon"];
 	output
 	{	layout #split;
-		display map type: opengl
+		display floorPlan type: opengl
 		{
 			species dxf_element;
 			graphics 'legend' {
@@ -96,17 +99,33 @@ experiment DXFAgents type: gui
 	}
 }
 
-experiment ValideDXFAgents type: gui
+experiment MultiDXFValidator type: gui
 {   
 	init
 	{   
-        create simulation with: [fileName::"MediaLab/ML_3"];
-		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon"];
-		create simulation with: [fileName::"Learning_Center_Lyon"];	
-		//create simulation with: [fileName::"ENSAL-RDC"];	
-		//create simulation with: [fileName::"ENSAL-1"];	
+        create simulation with: [fileName::"MediaLab/ML_3",validator::true];
+		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon",validator::true];
+		create simulation with: [fileName::"Learning_Center_Lyon",validator::true];	
 	}
-	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
+	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon"];
+	output
+	{	layout #split;
+		display map type: opengl
+		{
+			species dxf_element;
+		}
+	}
+}
+
+
+experiment DXFWorkInProgress type: gui
+{   
+	init
+	{   
+        create simulation with: [fileName::"ENSAL-RDC",validator::true];
+		create simulation with: [fileName::"ENSAL-1",validator::true];
+	}
+	parameter 'fileName:' var: fileName category: 'file' <- "ENSAL-RDC" among: ["ENSAL-RDC","ENSAL-1"];
 	output
 	{	layout #split;
 		display map type: opengl
