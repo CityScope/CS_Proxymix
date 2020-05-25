@@ -310,7 +310,7 @@ experiment COVID type: gui parent: DXFDisplay{
 	}
 }
 
-experiment COVIDMulti type: gui {
+/*experiment COVIDMulti type: gui {
 	
 	init{
 		//create simulation with: [fileName::"MediaLab/ML_3"];
@@ -327,4 +327,4 @@ experiment COVIDMulti type: gui {
 			species people;
 		}
 	}
-}
+}*/

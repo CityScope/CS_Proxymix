@@ -10,7 +10,7 @@ model DXFAgents
 global
 {
 	//define the path to the dataset folder
-	string dataset_path <- "./../includes/";
+	string dataset_path <- "./../../includes/";
 	string fileName;
 	//define the bounds of the studied area
 	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",#cm);
@@ -77,11 +77,11 @@ species dxf_element
 	}
 }
 
-experiment DXFDisplay type: gui
-{   parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon"];
+experiment DXFDisplay type: gui virtual:true
+{   parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon"];
 	output
 	{	layout #split;
-		display floorPlan type: opengl
+		display floorPlan type: opengl virtual:true
 		{
 			species dxf_element;
 			graphics 'legend' {
@@ -96,41 +96,5 @@ experiment DXFDisplay type: gui
 			}
 		}
 		
-	}
-}
-
-experiment MultiDXFValidator type: gui
-{   
-	init
-	{   
-        create simulation with: [fileName::"MediaLab/ML_3",validator::true];
-		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon",validator::true];
-		create simulation with: [fileName::"Learning_Center_Lyon",validator::true];	
-	}
-	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon"];
-	output
-	{	layout #split;
-		display map type: opengl
-		{
-			species dxf_element;
-		}
-	}
-}
-
-
-experiment DXFWorkInProgress type: gui
-{   
-	init
-	{   
-        create simulation with: [fileName::"ENSAL-RDC",validator::true];
-		create simulation with: [fileName::"ENSAL-1",validator::true];
-	}
-	parameter 'fileName:' var: fileName category: 'file' <- "ENSAL-RDC" among: ["ENSAL-RDC","ENSAL-1"];
-	output
-	{	layout #split;
-		display map type: opengl
-		{
-			species dxf_element;
-		}
 	}
 }
