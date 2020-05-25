@@ -26,11 +26,6 @@ global {
 	list<room> available_offices;
 	list<room> entrances;
 	init {
-		list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get "layer"));
-		list<string> missing_type_elements <- standard_color_per_type.keys - existing_types;
-		if (not empty(missing_type_elements)) {
-			do error("Some elements (layers) are missing in the dxf file:  " + missing_type_elements);
-		}
 		create pedestrian_path from: pedestrian_path_shape_file;
 		pedestrian_network <- as_edge_graph(pedestrian_path);
 		loop se over: the_dxf_file  {
