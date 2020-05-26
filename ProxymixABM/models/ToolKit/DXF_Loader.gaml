@@ -11,9 +11,9 @@ global
 {
 	//define the path to the dataset folder
 	string dataset_path <- "./../../includes/";
-	string fileName;
+	string useCase;
 	//define the bounds of the studied area
-	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",#cm);
+	file the_dxf_file <- dxf_file(dataset_path + useCase +"/building.dxf",#cm);
 	bool validator<-true;
 	geometry shape <- envelope(the_dxf_file);
 	map<string,rgb> standard_color_per_layer <- 
@@ -31,7 +31,7 @@ global
 			list<string> useless_type_elements <- (existing_types -  standard_color_per_layer.keys);
 			if (not empty(missing_type_elements) or not empty(useless_type_elements)) {
 				if (not empty(missing_type_elements)) {
-						do error("In "+ fileName + " Some elements (layers) are missing in the dxf file:  " + missing_type_elements +  
+						do error("In "+ useCase + " Some elements (layers) are missing in the dxf file:  " + missing_type_elements +  
 					(empty(useless_type_elements) ? "" :("\n\n and some elements (layers)  will not be used by the model:" + useless_type_elements)));
 				} else {
 					do tell("Some elements (layers) will not be used by the model:" + useless_type_elements);
@@ -78,7 +78,7 @@ species dxf_element
 }
 
 experiment DXFDisplay type: gui virtual:true
-{   parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon"];
+{   parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
 	output
 	{	layout #split;
 		display floorPlan type: opengl virtual:true

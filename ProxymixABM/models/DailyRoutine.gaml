@@ -9,16 +9,10 @@ model COVID
 import "./ToolKit/DXF_Loader.gaml"
 
 global {
-		
-	//define the path to the dataset folder
-	string dataset_path <- "./../includes/";
-	string fileName;
-	//define the bounds of the studied area
-	
+			
 	float unit <- #cm;
-	file the_dxf_file <- dxf_file(dataset_path + fileName +".dxf",unit);
 	
-	shape_file pedestrian_path_shape_file <- shape_file("../includes/pedestrian_path.shp");
+	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp");
 	date starting_date <- date([2020,4,6,7]);
 	int nb_people <- 300;
 	geometry shape <- envelope(the_dxf_file);
@@ -298,7 +292,7 @@ species people skills: [moving] {
 
 
 experiment COVID type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL"];
+	parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
 	parameter "unit" var: unit category: "file" <- #cm;
 	output {
 		display map synchronized: true parent:floorPlan type:opengl{
@@ -313,12 +307,11 @@ experiment COVID type: gui parent: DXFDisplay{
 experiment COVIDMulti type: gui {
 	
 	init{
-		create simulation with: [fileName::"MediaLab/ML_3", unit::#cm];
-		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon",unit::#cm ];
-		//create simulation with: [fileName::"ENSAL",unit::#cm ];	
-		create simulation with: [fileName::"Learning_Center_Lyon",unit::#cm ];
+		create simulation with: [useCase::"MediaLab/ML_3", unit::#cm];
+		create simulation with: [useCase::"Grand-Hotel-Dieu_Lyon",unit::#cm ];
+		create simulation with: [useCase::"Learning_Center_Lyon",unit::#cm ];
 	}
-	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama","MediaLab/ML_3", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL"];
+	parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
 	parameter "unit" var: unit category: "file" <- #cm;
 	output {
 		display map synchronized: true {
