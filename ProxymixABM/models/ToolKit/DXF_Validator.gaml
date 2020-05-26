@@ -36,8 +36,15 @@ experiment WorkInProgressDXF type: gui
 {   
 	init
 	{   
+<<<<<<< HEAD
+        create simulation with: [fileName::"ENSAL",validator::true];
+		create simulation with: [fileName::"ENSAL-1",validator::true];
+	}
+	parameter 'fileName:' var: fileName category: 'file' <- "Learning_Center_Lyon" among: ["Learning_Center_Lyon","ENSAL","ENSAL-1"];
+=======
 	}
 	parameter 'fileName:' var: fileName category: 'file' <- "Learning_Center_Lyon" among: ["Learning_Center_Lyon"];
+>>>>>>> b1642dc9e7d2e24c21182d4fc2afa339f52eb23b
 	output
 	{	layout #split;
 		display map type: opengl
