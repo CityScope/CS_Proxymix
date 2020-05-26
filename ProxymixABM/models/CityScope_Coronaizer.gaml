@@ -7,7 +7,7 @@
 
 model CityScopeCoronaizer
 
-import "COVID.gaml"
+import "DailyRoutine.gaml"
 
 global{
 	float socialDistance <- 2#m;
@@ -131,6 +131,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
 	parameter "Draw Grid:" category: "Visualization" var:draw_grid;
 	parameter "Show People:" category: "Visualization" var:showPeople;
+	parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory"];
 	
 	output{
 	  layout #split;
@@ -174,3 +175,4 @@ experiment Coronaizer type:gui autorun:true{
 	  }
 	}		
 }
+

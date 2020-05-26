@@ -12,7 +12,7 @@ import "./ToolKit/DXF_Loader.gaml"
 
 global {
 	string dataset <- "Factory";
-	string movement_model <- "moving skill" among: ["moving skill","pedestrian skill"];
+	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
 	
 	
@@ -355,8 +355,8 @@ experiment COVID type: gui parent: DXFDisplay{
 experiment COVIDMulti type: gui {
 	
 	init{
-		create simulation with: [useCase::"MediaLab/ML_3", unit::#cm];
-		create simulation with: [useCase::"Grand-Hotel-Dieu_Lyon",unit::#cm ];
+		create simulation with: [useCase::"MediaLab", unit::#cm];
+		create simulation with: [useCase::"Hotel-Dieu",unit::#cm ];
 		create simulation with: [useCase::"Learning_Center_Lyon",unit::#cm ];
 	}
 	parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
