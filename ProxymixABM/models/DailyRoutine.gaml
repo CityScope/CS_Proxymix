@@ -298,7 +298,7 @@ species people skills: [moving] {
 
 
 experiment COVID type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
+	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL"];
 	parameter "unit" var: unit category: "file" <- #cm;
 	output {
 		display map synchronized: true parent:floorPlan type:opengl{
@@ -310,14 +310,15 @@ experiment COVID type: gui parent: DXFDisplay{
 	}
 }
 
-/*experiment COVIDMulti type: gui {
+experiment COVIDMulti type: gui {
 	
 	init{
-		//create simulation with: [fileName::"MediaLab/ML_3"];
-		create simulation with: [fileName::"Standard_Factory_Gama",unit::#cm ];
-		//create simulation with: [fileName::"Learning_Center_Lyon"];	
+		create simulation with: [fileName::"MediaLab/ML_3", unit::#cm];
+		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon",unit::#cm ];
+		//create simulation with: [fileName::"ENSAL",unit::#cm ];	
+		create simulation with: [fileName::"Learning_Center_Lyon",unit::#cm ];
 	}
-	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
+	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama","MediaLab/ML_3", "Grand-Hotel-Dieu_Lyon","Learning_Center_Lyon","ENSAL"];
 	parameter "unit" var: unit category: "file" <- #cm;
 	output {
 		display map synchronized: true {
@@ -327,4 +328,4 @@ experiment COVID type: gui parent: DXFDisplay{
 			species people;
 		}
 	}
-}*/
+}
