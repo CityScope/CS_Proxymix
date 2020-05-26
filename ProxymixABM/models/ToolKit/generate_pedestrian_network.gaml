@@ -8,9 +8,10 @@
 model generatepedestriannetwork
 
 global {
-	bool build_pedestrian_network <- false;
-	file ML_file <- dxf_file("./../../includes/Standard_Factory_Gama.dxf",#cm);
-	graph network;
+	string dataset <- "Factory";
+	float unit <- #cm;
+	
+	list<string> layer_to_consider <- ["Walls","Offices", "Supermarket", "Meeting rooms","Coffee","Storage" ];
 	
 	bool P_use_body_geometry <- false parameter: true ;
 	bool P_avoid_other <- true parameter: true ;
@@ -23,12 +24,19 @@ global {
 	bool display_pedestrian_path <- false parameter: true category:"Visualization";
 	
 	float step <- 1.0;
+	
+	
+	bool build_pedestrian_network <- true;
+	string dataset_path <- "../../includes/"+dataset+"/";
+	file ML_file <- dxf_file(dataset_path + "building.dxf",unit);
+	graph network;
+	
 	geometry shape <- envelope(ML_file);
 	init {
 		//--------------- ML ELEMENT CREATION-----------------------------//
 		create StructuralElement from: ML_file with: [layer::string(get("layer"))]{
 		 //est-ce qu'il y a d'autres elements à conserver ?
-		  if not(layer in ["Walls","Offices", "Supermarket", "Meeting rooms","Coffee","Storage" ]){
+		  if not(layer in layer_to_consider){
 		    do die;	
 		  }
 		  if (layer = "Walls") {
@@ -59,10 +67,10 @@ global {
 			list<geometry> cn <- clean_network(pp, 0.01,true,true);
 			
 			create pedestrian_path from: cn;
-			save pedestrian_path type: shp to:"../includes/pedestrian_path.shp"; 
+			save pedestrian_path type: shp to:dataset_path + "pedestrian_path.shp"; 
 		} else {
 			
-			create pedestrian_path from: shape_file("../includes/pedestrian_path.shp") ;
+			create pedestrian_path from: shape_file(dataset_path + "pedestrian_path.shp") ;
 			geometry walking_area_g <- copy(shape);
 			ask StructuralElement {
 				walking_area_g <- walking_area_g - (shape + 0.01);
@@ -73,6 +81,9 @@ global {
 			ask pedestrian_path {
 				do initialize obstacles:[StructuralElement] distance: 1.0;
 				free_space <- free_space inter walking_area_g;
+				if (free_space = nil) {
+					free_space <- copy(shape);
+				}
 				free_space <- free_space.geometries with_max_of each.area;
 			}
 			network <- as_edge_graph(pedestrian_path);
@@ -82,18 +93,7 @@ global {
 				location <- any_location_in(one_of(pedestrian_path).free_space);
 				pedestrian_model <- P_pedestrian_model;
 				avoid_other <- P_avoid_other;
-				/*obstacle_distance_repulsion_coeff <- 1.0;
-				obstacle_consideration_distance <- 500.0;
-				overlapping_coefficient <- 0.5 ;
-				perception_sensibility <- 1.0 ;
-				shoulder_length <- 10.0;
-				body_depth <- 10.0;
-				avoid_other <- P_avoid_other;
-				proba_detour <- 0.5;
-				tolerance_target <- 100.0;
-				min_repulsion_dist <- 10.0;
-				other_people_distance_repulsion <- 500.0;*/
-				
+					
 				obstacle_species <- [people, StructuralElement];
 			}
 		}
@@ -171,6 +171,10 @@ species PhysicalElement
 }
 
 experiment testpedestriannetwork type: gui {
+	float minimum_cycle_duration <- 0.01;
+	action _init_ {
+		create simulation with: [build_pedestrian_network::false];
+	}
 	output {
 		display map {
 			species StructuralElement;
