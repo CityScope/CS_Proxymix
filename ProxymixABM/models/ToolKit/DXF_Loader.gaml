@@ -24,6 +24,7 @@ global
 	"Toilets"::#purple,  
 	"Walls"::#gray, "Doors"::#lightgray,
 	"Stairs"::#white];
+	
 	init
 	{   if(validator){
 			list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get "layer"));

@@ -9,7 +9,7 @@ model COVID
 import "./ToolKit/DXF_Loader.gaml"
 
 global {
-			
+	string dataset <- "Factory";
 	float unit <- #cm;
 	
 	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp");
