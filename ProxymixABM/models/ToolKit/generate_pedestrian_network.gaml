@@ -6,12 +6,14 @@
 
 model generatepedestriannetwork
 
+
 import "DXF_Loader.gaml"
 
 global {
 	string useCase <- "Factory";
 	float unit <- #cm;
-	list<string> layer_to_consider <- ["Walls","Offices", "Supermarket", "Meeting rooms","Coffee","Storage" ];
+	
+	list<string> layer_to_consider <- [walls,offices, supermarket, meeting_rooms,coffee,storage, furnitures ];
 	
 	bool P_use_body_geometry <- false parameter: true ;
 	bool P_avoid_other <- true parameter: true ;
@@ -29,26 +31,25 @@ global {
 	bool build_pedestrian_network <- true;
 	graph network;
 	init { 
-		
+		do initiliaze_dxf;
 		ask dxf_element where not( each.layer in layer_to_consider) {
 			do die;
 		} 
-		ask dxf_element where (each.layer = "Walls") {
+		ask dxf_element where (each.layer = walls) {
 			shape <- simplification(shape + 0.001, 0.1) ;
 		}
-		
+		write length(dxf_element);
 		geometry walking_area_g <- copy(shape);
 			ask dxf_element {
 				walking_area_g <- walking_area_g - (shape );
 				walking_area_g <- walking_area_g.geometries with_max_of each.area;
 			}
 			create walking_area from: walking_area_g.geometries;
-			
 		if (build_pedestrian_network) {
 			display_pedestrian_path <- true;
 			
 			//default option
-			list<geometry> pp  <- generate_pedestrian_network([],walking_area,false,false,0.0,0.0,true,0.1,0.0,0.0);
+			list<geometry> pp  <- generate_pedestrian_network([dxf_element],walking_area,false,false,0.0,0.0,true,0.1,0.0,0.0);
 			list<geometry> cn <- clean_network(pp, 0.01,true,true);
 			
 			create pedestrian_path from: cn;

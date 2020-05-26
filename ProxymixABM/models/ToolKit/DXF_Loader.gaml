@@ -6,6 +6,8 @@
 */
 model DXFAgents
 
+import "../Constants.gaml"
+
 
 global
 {
@@ -17,17 +19,18 @@ global
 	bool validator<-true;
 	geometry shape <- envelope(the_dxf_file);
 	map<string,rgb> standard_color_per_layer <- 
-	["Offices"::#blue,"Meeting rooms"::#darkblue,
-	"Entrance"::#red,"Elevators"::#orange,
-	"Coffee"::#green,"Supermarket"::#darkgreen,
-	"Storage"::#brown, "Furnitures"::#maroon, 
-	"Toilets"::#purple,  
-	"Walls"::#gray, "Doors"::#lightgray,
-	"Stairs"::#white];
+	[offices::#blue,meeting_rooms::#darkblue,
+	entrance::#red,elevators::#orange,
+	coffee::#green,supermarket::#darkgreen,
+	storage::#brown, furnitures::#maroon, 
+	toilets::#purple,  
+	walls::#gray, doors::#lightgray,
+	stairs::#white];
 	
-	init
-	{   if(validator){
-			list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get "layer"));
+	action initiliaze_dxf
+	{  
+		 if(validator){
+			list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get layer));
 			list<string> missing_type_elements <- standard_color_per_layer.keys - existing_types;
 			list<string> useless_type_elements <- (existing_types -  standard_color_per_layer.keys);
 			if (not empty(missing_type_elements) or not empty(useless_type_elements)) {
@@ -40,7 +43,7 @@ global
 			
 			}
 		}
-		create dxf_element from: the_dxf_file with: [layer::string(get("layer"))];
+		create dxf_element from: the_dxf_file with: [layer::string(get(layer))];
 		map layers <- list(dxf_element) group_by each.layer;
 		loop la over: layers.keys
 		{
@@ -57,7 +60,7 @@ global
 		}
 		ask dxf_element{
 			if (useless){
-				write "this element cannot be used and will be removed" + name + " layer: " + layer;
+				 if(validator){write "this element cannot be used and will be removed" + name + " layer: " + layer;}
 				do die;
 			}
 		}
@@ -80,6 +83,8 @@ species dxf_element
 
 experiment DXFDisplay type: gui virtual:true
 {   parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
+	
+	
 	output
 	{	layout #split;
 		display floorPlan type: opengl virtual:true

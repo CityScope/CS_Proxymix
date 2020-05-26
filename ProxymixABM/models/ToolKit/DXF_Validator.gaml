@@ -9,7 +9,9 @@ model DXFAgents
 import "DXF_Loader.gaml"
 global
 {
-
+	init {
+		do initiliaze_dxf;
+	}
 }
 
 
