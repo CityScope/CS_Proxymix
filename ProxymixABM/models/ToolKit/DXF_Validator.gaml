@@ -17,10 +17,12 @@ experiment ValidatedDXF type: gui
 {   
 	init
 	{   
-        create simulation with: [fileName::"MediaLab/ML_3",validator::true];
-		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon",validator::true];
+        create simulation with: [fileName::"MediaLab/ML_3"];
+		create simulation with: [fileName::"Grand-Hotel-Dieu_Lyon"];
+		create simulation with: [fileName::"ENSAL"];
+		create simulation with: [fileName::"Learning_Center_Lyon"];
 	}
-	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon"];
+	parameter 'fileName:' var: fileName category: 'file' <- "Standard_Factory_Gama" among: ["Standard_Factory_Gama", "MediaLab/ML_3","Grand-Hotel-Dieu_Lyon","ENSAL", "Learning_Center_Lyon"];
 	output
 	{	layout #split;
 		display map type: opengl
@@ -34,10 +36,8 @@ experiment WorkInProgressDXF type: gui
 {   
 	init
 	{   
-        create simulation with: [fileName::"ENSAL-RDC",validator::true];
-		create simulation with: [fileName::"ENSAL-1",validator::true];
 	}
-	parameter 'fileName:' var: fileName category: 'file' <- "Learning_Center_Lyon" among: ["Learning_Center_Lyon","ENSAL-RDC","ENSAL-1"];
+	parameter 'fileName:' var: fileName category: 'file' <- "Learning_Center_Lyon" among: ["Learning_Center_Lyon"];
 	output
 	{	layout #split;
 		display map type: opengl
