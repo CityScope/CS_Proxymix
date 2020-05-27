@@ -6,10 +6,12 @@
 
 model Proxymix
 
-
+import "Constants.gaml"
+import "./ToolKit/DXF_Loader.gaml" 
 
 global {
-	file ML_file <- dxf_file("../includes/Standard_Factory_Gama.dxf",#cm);
+	float unit <- #cm;
+	file the_dxf_file <- dxf_file(dataset_path + useCase +"/building.dxf",#cm);
 	int nb_people <- 25;
 	float step <- 30 #sec;
 	int current_hour update: 6 + (time / #hour) mod 24;
@@ -26,7 +28,7 @@ global {
 	bool saveGraph <- false parameter: "Save Graph:" category: "Interaction";
 	int saveCycle <- 750;
 	int socialDistance <- 2 parameter: "Social distance:" category: "Corona" min: 1 max: 10 step:1;
-	geometry shape <- envelope(ML_file);
+	geometry shape <- envelope(the_dxf_file);
 
 	map<string,rgb> standard_color_per_layer <- 
 	["Offices"::#blue,"Meeting rooms"::#darkblue,
@@ -43,7 +45,7 @@ global {
 	
 	init {
 		//--------------- ML ELEMENT CREATION-----------------------------//
-		create StructuralElement from: ML_file with: [layer::string(get("layer"))]{
+		create StructuralElement from: the_dxf_file with: [layer::string(get("layer"))]{
 		  if (layer="Path"){
 		    do die;	
 		  }
@@ -100,6 +102,8 @@ species StructuralElement
 		shape <- polygon(shape.points);
 	}
 }
+
+
 
 species people skills:[moving] control: fsm{
 
@@ -194,7 +198,8 @@ grid cell cell_width: cellSize cell_height: cellSize neighbors: 8 {
 
 
 experiment Proxymix type: gui autorun:true
-{   
+{   parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
+	parameter "unit" var: unit category: "file" <- #cm;
 	//float minimum_cycle_duration<-0.02;
 	output
 	{	layout #split;

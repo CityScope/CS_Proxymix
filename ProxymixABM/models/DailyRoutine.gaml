@@ -14,8 +14,6 @@ global {
 	string dataset <- "Factory";
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
-	
-	
 	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp");
 	date starting_date <- date([2020,4,6,7]);
 	int nb_people <- 300;
@@ -148,7 +146,6 @@ global {
 	
 	reflex change_step {
 		if (current_date.hour >= 7 and current_date.minute > 10 and empty(people where (each.target != nil)))  {
-			
 			step <- 5#mn;
 		}
 		if (current_date.hour = 11 and current_date.minute > 30){
