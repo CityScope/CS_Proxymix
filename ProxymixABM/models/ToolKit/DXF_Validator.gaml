@@ -33,6 +33,17 @@ experiment ValidatedDXF type: gui
 	}
 }
 
+experiment dd type: gui {
+	parameter 'fileName:' var: useCase category: 'file' <- "SanSebastian" among: ["SanSebastian"];
+	output
+	{	layout #split;
+		display map type: opengl
+		{
+			species dxf_element;
+		}
+	}
+}
+
 experiment WorkInProgressDXF type: gui
 {   
 	init

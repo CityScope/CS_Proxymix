@@ -10,10 +10,29 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 
 global {
-	string useCase <- "Factory";
-	float unit <- #cm;
+	string useCase <- "ENSAL";
+		
+	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
+	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
 	
 	list<string> layer_to_consider <- [walls,offices, supermarket, meeting_rooms,coffee,storage, furnitures ];
+	
+	bool recreate_walking_area <- false;
+	
+	float simplification_dist <- 0.1;
+	float buffer_simplication <-  0.001;
+	
+	bool add_points_open_area <- false;//add points to open areas
+ 	bool random_densification <- false;//random densification (if true, use random points to fill open areas; if false, use uniform points), 
+ 	float min_dist_open_area <- 0.1;//min distance to considered an area as open area, 
+ 	float density_open_area <- 0.1; //density of points in the open areas (float)
+ 	bool clean_network <- false; 
+	float tol_cliping <- 0.1; //tolerance for the cliping in triangulation (float; distance), 
+	float tol_triangulation <- 0.0; //tolerance for the triangulation 
+	float min_dist_obstacles_filtering <- 0.0;// minimal distance to obstacles to keep a path (float; if 0.0, no filtering), 
+	float dist_reconnection <- 0.1;
+	
+	float dist_min_obst <- 0.2; //cut path closer than that;
 	
 	bool P_use_body_geometry <- false parameter: true ;
 	bool P_avoid_other <- true parameter: true ;
@@ -24,6 +43,7 @@ global {
 	
 	bool display_free_space <- false parameter: true category:"Visualization";
 	bool display_pedestrian_path <- false parameter: true category:"Visualization";
+	bool display_triangles <- false parameter: true category:"Visualization";
 	
 	float step <- 1.0;
 	
@@ -31,42 +51,104 @@ global {
 	bool build_pedestrian_network <- true;
 	graph network;
 	init { 
+		if(file_exists(parameter_path)) {
+			file csv_parameter <- csv_file(parameter_path, ",", true);
+			loop i from: 0 to: csv_parameter.contents.rows - 1 {
+				string parameter_name <- csv_parameter.contents[0,i];
+				if (parameter_name in ["add_points_open_area","random_densification","clean_network"]) {
+					bool val <- bool(csv_parameter.contents[1,i]);
+					world.shape.attributes[parameter_name] <- val;
+				}else {
+					float val <- float(csv_parameter.contents[1,i]);
+					world.shape.attributes[parameter_name] <- val;
+				}
+				
+				
+				
+			}
+		}
 		do initiliaze_dxf;
 		ask dxf_element where not( each.layer in layer_to_consider) {
 			do die;
 		} 
 		ask dxf_element where (each.layer = walls) {
-			shape <- simplification(shape + 0.001, 0.1) ;
+			shape <- simplification(shape + buffer_simplication, simplification_dist) ;
 		}
-		write length(dxf_element);
-		geometry walking_area_g <- copy(shape);
+		write "Nimber of dxf elements:" + length(dxf_element);
+		if (not recreate_walking_area) and file_exists(walking_area_path) {
+			create walking_area from: file(walking_area_path);
+		} else {
+			geometry walking_area_g <- copy(shape);
 			ask dxf_element {
 				walking_area_g <- walking_area_g - (shape );
 				walking_area_g <- walking_area_g.geometries with_max_of each.area;
 			}
 			create walking_area from: walking_area_g.geometries;
+			save walking_area type: shp to: walking_area_path;
+		}
+		write "Walking area created";
+		
 		if (build_pedestrian_network) {
 			display_pedestrian_path <- true;
+			loop t over: walking_area as list {
+				create triangles from: triangulate(t,tol_cliping,tol_triangulation );
+			}
+		
+		 	list<geometry> pp  <- generate_pedestrian_network([],walking_area,add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering);
 			
-			//default option
-			list<geometry> pp  <- generate_pedestrian_network([dxf_element],walking_area,false,false,0.0,0.0,true,0.1,0.0,0.0);
-			list<geometry> cn <- clean_network(pp, 0.01,true,true);
+			
+			list<geometry> ggs;
+			write clean_network;
+			if (clean_network) {
+				geometry wa <- union(walking_area);
+				geometry wa_b <- wa buffer (-dist_min_obst);
+				loop p over:pp {
+					if not(wa covers p) {
+						geometry g <- p inter wa_b;
+						if (g != nil and g.perimeter > dist_reconnection) {
+							if (length(g.geometries) > 1 ) {
+								loop g1 over: g.geometries where (each != nil and each.perimeter > dist_reconnection) {
+									ggs << g;
+								}
+							} else {
+								ggs << g;
+							}
+							
+						}
+					} else if (p != nil and p.perimeter > dist_reconnection){
+						ggs <<p;
+					}
+				}
+			} else {
+				ggs <- pp;
+			}
+			
+			list<geometry> cn <- clean_network(ggs, dist_reconnection,true,true);
+			
 			
 			create pedestrian_path from: cn;
-			save pedestrian_path type: shp to:dataset_path  + useCase+ "/pedestrian_path.shp"; 
+			
+			save pedestrian_path type: shp to:dataset_path  + useCase+ "/pedestrian_path.shp";  
 		} else {
 			
 			create pedestrian_path from: shape_file(dataset_path + useCase+ "/pedestrian_path.shp") ;
-			geometry walking_area_g <- copy(shape);
-			ask dxf_element {
-				walking_area_g <- walking_area_g - (shape + 0.01);
-				walking_area_g <- walking_area_g.geometries with_max_of each.area;
-			}
-			create walking_area from: walking_area_g.geometries;
+			geometry walking_area_g;
+			if (not recreate_walking_area) and file_exists(walking_area_path) {
+				create walking_area from: file(walking_area_path);
+				walking_area_g <- union(walking_area);
+			} else {	
+		 	geometry walking_area_g <- copy(shape);
+				ask dxf_element {
+					walking_area_g <- walking_area_g - (shape );
+					walking_area_g <- walking_area_g.geometries with_max_of each.area;
+				}
+				create walking_area from: walking_area_g.geometries;
+				save walking_area type: shp to: walking_area_path;
 			
+			}
 			ask pedestrian_path {
 				do initialize obstacles:[dxf_element] distance: 1.0;
-				free_space <- free_space inter walking_area_g;
+				free_space <- (free_space inter walking_area_g) union (shape + 0.1);
 				if (free_space = nil) {
 					free_space <- copy(shape);
 				}
@@ -79,7 +161,6 @@ global {
 				location <- any_location_in(one_of(pedestrian_path).free_space);
 				pedestrian_model <- P_pedestrian_model;
 				avoid_other <- P_avoid_other;
-					
 				obstacle_species <- [people, dxf_element];
 			}
 		}
@@ -97,6 +178,15 @@ species pedestrian_path skills: [pedestrian_road] {
 	}
 }
 
+species triangles {
+	rgb color <- #magenta;
+	aspect default {
+		if display_triangles {
+			draw shape color: color border: #black;
+		}
+	}
+}
+
 species people skills: [escape_pedestrian] {
 	rgb color <- rnd_color(255);
 	float speed <- gauss(3,1.5) #km/#h min: 1 #km/#h;
@@ -106,9 +196,6 @@ species people skills: [escape_pedestrian] {
 		do compute_virtual_path pedestrian_graph:network final_target: final_target ;
 		
 	}
-	
-	 
-	
 	reflex move when: final_target != nil {
 		do walk ;
 	}	
@@ -129,6 +216,7 @@ experiment generate_pedestrian_network type: gui {
 		display map {
 			species dxf_element;
 			species walking_area;
+			species triangles;
 			species pedestrian_path;
 		
 		}

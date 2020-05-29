@@ -1,0 +1,12 @@
+parameter,value
+simplification_dist,0.01
+buffer_simplication, 0.01
+add_points_open_area,false
+random_densification,false
+min_dist_open_area,0.1
+density_open_area,0.1
+clean_network,true 
+tol_cliping,0.2
+tol_triangulation,0.0
+min_dist_obstacles,0.0
+dist_reconnection,0.1

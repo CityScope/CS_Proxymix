@@ -12,10 +12,13 @@ import "../Constants.gaml"
 global
 {
 	//define the path to the dataset folder
+	
 	string dataset_path <- "./../../includes/";
 	string useCase;
+	file the_dxf_metadata <- file_exists(dataset_path + useCase +"/building.csv") ?csv_file(dataset_path + useCase +"/building.csv",",",true) : nil;
+	float unit <- (the_dxf_metadata != nil )? float(matrix(the_dxf_metadata)[1,0]) : #cm;
 	//define the bounds of the studied area
-	file the_dxf_file <- dxf_file(dataset_path + useCase +"/building.dxf",#cm);
+	file the_dxf_file <- dxf_file(dataset_path + useCase +"/building.dxf",unit);
 	bool validator<-true;
 	geometry shape <- envelope(the_dxf_file);
 	map<string,rgb> standard_color_per_layer <- 
