@@ -10,7 +10,7 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 
 global {
-	string useCase <- "ENSAL";
+	string useCase <- "SanSebastian";
 		
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
