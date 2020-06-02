@@ -34,7 +34,7 @@ experiment ValidatedDXF type: gui
 }
 
 experiment dd type: gui {
-	parameter 'fileName:' var: useCase category: 'file' <- "Learning_Center" among: ["ENSAL","Learning_Center"];
+	parameter 'fileName:' var: useCase category: 'file' <- "SanSebastian" among: ["SanSebastian"];
 	output
 	{	layout #split;
 		display map type: opengl

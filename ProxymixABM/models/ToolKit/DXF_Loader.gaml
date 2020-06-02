@@ -21,14 +21,14 @@ global
 	file the_dxf_file <- dxf_file(dataset_path + useCase +"/building.dxf",unit);
 	bool validator<-true;
 	geometry shape <- envelope(the_dxf_file);
-	map<string,rgb> standard_color_per_layer <- [walls::#gray];
-	/*[offices::#blue,meeting_rooms::#darkblue,
+	map<string,rgb> standard_color_per_layer <- 
+	[offices::#blue,meeting_rooms::#darkblue,
 	entrance::#red,elevators::#orange,
 	coffee::#green,supermarket::#darkgreen,
 	storage::#brown, furnitures::#maroon, 
 	toilets::#purple,  
 	walls::#gray, doors::#lightgray,
-	stairs::#white];*/
+	stairs::#white];
 	
 	action initiliaze_dxf
 	{  
