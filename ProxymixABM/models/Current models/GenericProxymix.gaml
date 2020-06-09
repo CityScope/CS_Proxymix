@@ -6,8 +6,9 @@
 
 model Proxymix
 
+import "../ToolKit/DXF_Loader.gaml"
+
 import "Constants.gaml"
-import "./ToolKit/DXF_Loader.gaml" 
 
 global {
 	float unit <- #cm;

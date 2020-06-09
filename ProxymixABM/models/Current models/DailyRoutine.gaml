@@ -8,7 +8,7 @@
 model COVID
 
 import "Constants.gaml"
-import "./ToolKit/DXF_Loader.gaml" 
+import "./../ToolKit/DXF_Loader.gaml" 
 
 global {
 	string dataset <- "Factory";
