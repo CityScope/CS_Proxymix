@@ -23,7 +23,7 @@ global{
 	
 	bool drawInfectionGraph <- false;
 	bool drawSocialDistanceGraph <- false;
-	bool draw_grid <- false;
+	bool draw_infection_grid <- false;
 	bool showPeople<-true;
 	
 
@@ -106,7 +106,7 @@ grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 ne
 	float firstInfectionTime<-0.0;
 	int nbInfection;
 	aspect default{
-		if (draw_grid){
+		if (draw_infection_grid){
 			if(nbInfection>0){
 			  draw shape color:blend(#white, #red, firstInfectionTime/time)  depth:nbInfection;		
 			}
@@ -127,7 +127,7 @@ experiment Coronaizer type:gui autorun:true parent:COVID{
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
 	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
-	parameter "Draw Grid:" category: "Visualization" var:draw_grid;
+	parameter "Draw Infection Grid:" category: "Visualization" var:draw_infection_grid;
 	parameter "Show People:" category: "Visualization" var:showPeople;
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory","MediaLab"];
 	

@@ -22,6 +22,8 @@ global {
 	list<room> available_offices;
 	list<room> entrances;
 	
+	bool draw_flow_grid <- false;
+	
 	
 	init {
 		validator <- false;
@@ -274,6 +276,12 @@ species people skills: [escape_pedestrian] {
 	aspect default {
 		draw circle(0.3) color:color border: #black;
 	}
+	
+	reflex updateFlowCell{
+		ask (flowCell overlapping self.location){
+			nbPeople<-nbPeople+1;
+		}
+	}
 	reflex define_activity when: not empty(agenda_day) and 
 		(after(agenda_day.keys[0])){
 		if(target_place != nil and (has_place) ) {target_room.available_places << target_place;}
@@ -334,12 +342,26 @@ species people skills: [escape_pedestrian] {
  	}
 }
 
+grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/200  {
+	rgb color <- #white;
+	int nbPeople;
+	aspect default{
+		if (draw_flow_grid){
+			if(nbPeople>1){
+			  draw shape color:blend(#red,#white, nbPeople/50)  depth:nbPeople/1000;		
+			}
+		}
+	}	
+}
+
 
 
 experiment COVID type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","Learning_Center","ENSAL","SanSebastian"];
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter 'density:' var: peopleDensity category: 'General' min:0.0 max:1.0 <- 1.0;
+	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
+	
 	
 	
 	output {
@@ -348,6 +370,7 @@ experiment COVID type: gui parent: DXFDisplay{
 			species building_entrance;
 			species wall;
 			species people;
+			species flowCell;
 			graphics 'date'{
 			 point legendPos<-{-world.shape.width*0.3,0};
 			 draw string("time: " + current_date.hour + "h: " + current_date.minute+ "m") color: #white at: legendPos perspective: true font:font("Helvetica", 20 , #bold); 
