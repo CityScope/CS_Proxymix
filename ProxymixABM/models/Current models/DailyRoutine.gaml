@@ -12,6 +12,8 @@ import "./../ToolKit/DXF_Loader.gaml"
 
 global {
 	//string dataset <- "MediaLab";
+	float separator_proba <- 0.5;
+	
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
 	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp");
@@ -176,6 +178,13 @@ global {
 
 species pedestrian_path skills: [pedestrian_road];
 
+
+species separator {
+	list<place_in_room> places_concerned; 
+	aspect default {
+		draw shape color: #lightblue;
+	}
+}
 species wall {
 	aspect default {
 		draw shape color: #gray;
@@ -190,9 +199,12 @@ species room {
 	list<place_in_room> available_places;
 	
 	action intialization {
-		loop g over: to_squares(shape, 1.5, true) where (each.location overlaps shape){
+		list<geometry> squares <-  to_squares(shape, 1.5, true) where (each.location overlaps shape);
+		map<geometry, place_in_room> pr;
+		loop g over: squares{
 			create place_in_room {
 				location <- g.location;
+				pr[g] <- self;
 				myself.places << self;
 			}
 		} 
@@ -202,6 +214,24 @@ species room {
 				myself.places << self;
 			}
 		} 
+		
+		if (length(places) > 1 and separator_proba > 0.0) {
+			graph g <- as_intersection_graph(squares, 0.01);
+			list<list<place_in_room>> ex;
+			loop e over: g.edges {
+				geometry s1 <- (g source_of e);
+				geometry s2 <- (g target_of e);
+				place_in_room pr1 <- pr[s1];
+				place_in_room pr2 <- pr[s2];
+				if not([pr1,pr2] in ex) and not([pr2,pr1] in ex) {
+					ex << [pr1,pr2];
+					if flip(separator_proba) {
+						geometry sep <- ((s1 + 0.1)  inter (s2 + 0.1)) inter self;
+						create separator with: [shape::sep,places_concerned::[pr1,pr2]];
+					}
+				}
+			}
+		}
 				
 		available_places <- copy(places);
 	}
@@ -276,6 +306,7 @@ species people skills: [escape_pedestrian] {
 	aspect default {
 		draw circle(0.3) color:color border: #black;
 	}
+	
 	
 	reflex updateFlowCell{
 		ask (flowCell overlapping self.location){
@@ -370,6 +401,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species building_entrance;
 			species wall;
 			species people;
+			species separator;
 			species flowCell;
 			graphics 'date'{
 			 point legendPos<-{-world.shape.width*0.3,0};
