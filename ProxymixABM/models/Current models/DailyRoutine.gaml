@@ -339,6 +339,9 @@ species people skills: [escape_pedestrian] {
 experiment COVID type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","Learning_Center","ENSAL","SanSebastian"];
 	parameter "unit" var: unit category: "file" <- #cm;
+	parameter 'density:' var: peopleDensity category: 'General' min:0.0 max:1.0 <- 1.0;
+	
+	
 	output {
 		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false{
 			species room;

@@ -10,8 +10,7 @@ model CityScopeCoronaizer
 import "DailyRoutine.gaml"
 
 global{
-	float socialDistance <- 2#m;
-	float quarantineRatio <- 0.0;
+	float infectionDistance <- 2#m;
 	float maskRatio <- 0.0;
 	
 	
@@ -19,7 +18,7 @@ global{
     int number_day_recovery<-10;
 	int time_recovery<-1440*number_day_recovery*60;
 	float infection_rate<-0.0005;
-	int initial_nb_infected<-1;
+	int initial_nb_infected<-5;
 	float step<-1#mn;
 	
 	bool drawInfectionGraph <- false;
@@ -42,7 +41,7 @@ global{
 			
 	}
 	
-	reflex initCovid when:cycle=1{
+	reflex initCovid when:cycle=2{
 		ask initial_nb_infected among ViralPeople{
 			is_susceptible <-  false;
 	        is_infected <-  true;
@@ -52,7 +51,7 @@ global{
 		
 	}
 	reflex updateGraph when: (drawSocialDistanceGraph = true) {
-		social_distance_graph <- graph<people, people>(people as_distance_graph (socialDistance));
+		social_distance_graph <- graph<people, people>(people as_distance_graph (infectionDistance));
 	}
 	
 	
@@ -72,7 +71,7 @@ species ViralPeople  mirrors:people{
     geometry shape<-circle(1);
 		
 	reflex infected_contact when: is_infected {
-		ask ViralPeople at_distance socialDistance {
+		ask ViralPeople at_distance infectionDistance {
 			if (flip(infection_rate)) {
         		is_susceptible <-  false;
             	is_infected <-  true;
@@ -100,7 +99,7 @@ species ViralPeople  mirrors:people{
 		}
 	}
 }
-grid cell cell_width: world.shape.width/50 cell_height:world.shape.width/50 neighbors: 8 {
+grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 neighbors: 8 {
 	bool is_wall <- false;
 	bool is_exit <- false;
 	rgb color <- #white;
@@ -115,11 +114,10 @@ grid cell cell_width: world.shape.width/50 cell_height:world.shape.width/50 neig
 	}	
 }
 
-experiment Coronaizer type:gui autorun:true{
+experiment Coronaizer type:gui autorun:true parent:COVID{
 
 	//float minimum_cycle_duration<-0.02;
-	parameter "Social distance:" category: "Policy" var:socialDistance min: 1.0 max: 100.0 step:1;
-	parameter "Quarantine Ratio:" category: "Policy" var:quarantineRatio min: 0.0 max: 1.0 step:0.1;
+	parameter "Infection distance:" category: "Policy" var:infectionDistance min: 1.0 max: 100.0 step:1;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1;
 	bool a_boolean_to_disable_parameters <- true;
 	parameter "Disable following parameters" category:"Corona" var: a_boolean_to_disable_parameters disables: [time_recovery,infection_rate,initial_nb_infected,step];
@@ -134,13 +132,8 @@ experiment Coronaizer type:gui autorun:true{
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory","MediaLab"];
 	
 	output{
-	  layout #split;
-	  display CoronaMap type:opengl background:#white draw_env:false synchronized:false{
-	  	//species building aspect:base;
-	  	//species road aspect:base;
-	  	species room refresh: false;
-		species wall refresh: false;
-		//species people;
+	  display CoronaMap type:opengl parent:map background:#black draw_env:false synchronized:false{
+
 	  	species ViralPeople aspect:base;
 	  	species cell aspect:default;
 	  	graphics "infection_graph" {
@@ -164,6 +157,15 @@ experiment Coronaizer type:gui autorun:true{
 		graphics "text" {
 	      //draw "day" + string(current_day) + " - " + string(current_hour) + "h" color: #gray font: font("Helvetica", 25, #italic) at:{world.shape.width * 0.8, world.shape.height * 0.975};
 	  	}	
+	  	
+	  	graphics "infectiousStatus"{
+	  		point infectiousLegendPos<-{0,0};
+	  		point textOffSet<-{0,20#px};
+	  		draw "S:" + nb_susceptible color: #green at: infectiousLegendPos perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw "I:" + nb_infected color: #red at: infectiousLegendPos+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw "R:" + nb_recovered color: #blue at: infectiousLegendPos+textOffSet+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
+	  		
+	  	}
 	  }	
 	 display CoronaChart refresh:every(#mn) toolbar:false {
 		//chart "Population in "+cityScopeCity type: series x_serie_labels: (current_day) x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
