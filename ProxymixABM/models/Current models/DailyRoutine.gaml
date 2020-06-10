@@ -16,7 +16,6 @@ global {
 	float unit <- #cm;
 	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp");
 	date starting_date <- date([2020,4,6,7]);
-	int nb_people <- 50;
 	float peopleDensity<-1.0;
 	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
@@ -168,10 +167,8 @@ global {
 	}
 	
 	reflex people_arriving when: not empty(available_offices) 
-	{	if(length(people)<nb_people*peopleDensity){
+	{	
 		  do create_people(rnd(0,min(5, length(available_offices))));
-		}
-		
 	}
 }
 
@@ -348,6 +345,16 @@ experiment COVID type: gui parent: DXFDisplay{
 			species building_entrance;
 			species wall;
 			species people;
+			graphics 'date'{
+			 point legendPos<-{-world.shape.width*0.3,0};
+			 draw string("time: " + current_date.hour + "h: " + current_date.minute+ "m") color: #white at: legendPos perspective: true font:font("Helvetica", 20 , #bold); 
+		    }
+		    graphics 'simulation'{
+		    	point simulegendPos<-{-world.shape.width*0.3,world.shape.height*0.05};
+		    	 draw string("nbPeople: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
+		    	 draw string("density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    
+		    }
 		}
 	}
 }
@@ -368,6 +375,8 @@ experiment COVIDMulti type: gui {
 			species building_entrance;
 			species wall;
 			species people;
+			
 		}
+		
 	}
 }
