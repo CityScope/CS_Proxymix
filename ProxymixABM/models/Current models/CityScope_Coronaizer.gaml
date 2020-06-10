@@ -114,7 +114,7 @@ grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 ne
 	}	
 }
 
-experiment Coronaizer type:gui autorun:true parent:COVID{
+experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 
 	//float minimum_cycle_duration<-0.02;
 	parameter "Infection distance:" category: "Policy" var:infectionDistance min: 1.0 max: 100.0 step:1;

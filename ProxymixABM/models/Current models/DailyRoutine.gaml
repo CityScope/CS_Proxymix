@@ -356,7 +356,7 @@ grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/20
 
 
 
-experiment COVID type: gui parent: DXFDisplay{
+experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","Learning_Center","ENSAL","SanSebastian"];
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter 'density:' var: peopleDensity category: 'General' min:0.0 max:1.0 <- 1.0;
@@ -385,7 +385,7 @@ experiment COVID type: gui parent: DXFDisplay{
 	}
 }
 
-experiment COVIDMulti type: gui {
+/*experiment COVIDDailyRoutine type: gui {
 	
 	init{
 		create simulation with: [useCase::"MediaLab", unit::#cm];
@@ -405,4 +405,4 @@ experiment COVIDMulti type: gui {
 		}
 		
 	}
-}
+}*/
