@@ -7,7 +7,9 @@
 
 model CityScopeCoronaizer
 
-import "DailyRoutine.gaml"
+
+import "COMOKIT/Biological Entity.gaml"
+import "DailyRoutine.gaml" 
 
 global{
 	float infectionDistance <- 2#m;
@@ -31,38 +33,29 @@ global{
 	int nb_cols <- int(75*1.5);
 	int nb_rows <- int(50*1.5);
 	
-
-	int nb_susceptible  <- 0 update: length(ViralPeople where (each.is_susceptible));
-	int nb_infected <- 0 update: length(ViralPeople where (each.is_infected));
-	int nb_recovered <- 0 update: length(ViralPeople where (each.is_recovered));
+	int nb_susceptible  <- 0 update: (BiologicalEntity count not(each.state in [latent, asymptomatic, presymptomatic, symptomatic]));
+	int nb_latent <- 0 update: (BiologicalEntity count (each.state = latent));
+	int nb_infected <- 0 update: (BiologicalEntity count (each.state in [asymptomatic, presymptomatic, symptomatic]));
 	graph<people, people> infection_graph <- graph<people, people>([]);
 	graph<people, people> social_distance_graph <- graph<people, people>([]);
 	
 	init{
-			
+		do init_epidemiological_parameters;
 	}
 	
 	reflex initCovid when:cycle=2{
-		ask initial_nb_infected among ViralPeople{
-			is_susceptible <-  false;
-	        is_infected <-  true;
-	        is_immune <-  false;
-	        is_recovered<-false;
+		ask initial_nb_infected among BiologicalEntity{
+			do define_new_case;
 		}
-		
 	}
 	reflex updateGraph when: (drawSocialDistanceGraph = true) {
 		social_distance_graph <- graph<people, people>(people as_distance_graph (infectionDistance));
 	}
 	
-	
-	reflex increaseRate when:cycle= 1440*7{
-		//infection_rate<-0.0;//infection_rate/2;
-	}
 }
 
 
-species ViralPeople  mirrors:people{
+/*species ViralPeople  mirrors:people{
 	point location <- target.location update: {target.location.x,target.location.y,target.location.z};
 	bool is_susceptible <- true;
 	bool is_infected <- false;
@@ -106,7 +99,7 @@ species ViralPeople  mirrors:people{
 		  draw circle(is_infected ? 0.4#m : 0.3#m) color:(is_susceptible) ? #green : ((is_infected) ? #red : #blue);	
 		}
 	}
-}
+}*/
 grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 neighbors: 8 {
 	bool is_wall <- false;
 	bool is_exit <- false;
@@ -142,7 +135,7 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	output{
 	  display CoronaMap type:opengl parent:map background:#black draw_env:false synchronized:false{
 
-	  	species ViralPeople aspect:base;
+	  	species BiologicalEntity aspect:base;
 	  	species cell aspect:default;
 	  	graphics "infection_graph" {
 				if (infection_graph != nil and drawInfectionGraph = true) {
@@ -170,8 +163,8 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	  		point infectiousLegendPos<-{0,0};
 	  		point textOffSet<-{0,20#px};
 	  		draw "S:" + nb_susceptible color: #green at: infectiousLegendPos perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw "L:" + nb_latent color: #pink at: infectiousLegendPos+textOffSet+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
 	  		draw "I:" + nb_infected color: #red at: infectiousLegendPos+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
-	  		draw "R:" + nb_recovered color: #blue at: infectiousLegendPos+textOffSet+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
 	  		
 	  	}
 	  }	
@@ -179,8 +172,8 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 		//chart "Population in "+cityScopeCity type: series x_serie_labels: (current_day) x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
 		chart "Population in " type: series x_serie_labels: ("") x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
 			data "susceptible" value: nb_susceptible color: #green;
+			data "latent" value: nb_latent color: #pink;
 			data "infected" value: nb_infected color: #red;	
-			data "recovered" value: nb_recovered color: #blue;
 		}
 	  }
 	}		

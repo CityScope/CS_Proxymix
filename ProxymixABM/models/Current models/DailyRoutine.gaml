@@ -122,6 +122,7 @@ global {
 	
 	action create_people(int nb) {
 		create people number: nb {
+			age <- rnd(18, 70); // USE DATA TO DEFINE IT
 			pedestrian_model <- SFM;
 			obstacle_species <- [people, wall];
 			working_place <- one_of (available_offices);
@@ -179,7 +180,7 @@ global {
 species pedestrian_path skills: [pedestrian_road];
 
 
-species separator {
+species separator_ag {
 	list<place_in_room> places_concerned; 
 	aspect default {
 		draw shape color: #lightblue;
@@ -227,7 +228,7 @@ species room {
 					ex << [pr1,pr2];
 					if flip(separator_proba) {
 						geometry sep <- ((s1 + 0.1)  inter (s2 + 0.1)) inter self;
-						create separator with: [shape::sep,places_concerned::[pr1,pr2]];
+						create separator_ag with: [shape::sep,places_concerned::[pr1,pr2]];
 					}
 				}
 			}
@@ -290,6 +291,7 @@ species place_in_room {
 }
 
 species people skills: [escape_pedestrian] {
+	int age;
 	room working_place;
 	map<date, activity> agenda_day;
 	activity current_activity;
@@ -401,7 +403,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species building_entrance;
 			species wall;
 			species people;
-			species separator;
+			species separator_ag;
 			species flowCell;
 			graphics 'date'{
 			 point legendPos<-{-world.shape.width*0.3,0};

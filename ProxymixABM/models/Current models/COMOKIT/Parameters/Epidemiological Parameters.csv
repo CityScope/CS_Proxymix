@@ -1,0 +1,56 @@
+ Parameter , Age , Detail , Parameter_1 , Parameter_2 
+ Transmission_human ,  , Fixed , true ,  
+ Transmission_building ,  , Fixed , true ,  
+ Successful_contact_rate_human , 0 , Fixed , 0.0340142 ,  
+ Successful_contact_rate_building ,  , Fixed , 0.0340142 ,  
+ Factor_asymptomatic , 0 , Fixed , 0.45 ,  
+ Proportion_asymptomatic , 0 , Fixed , 0.28 ,  
+ Basic_viral_release , 0 , Fixed , 0.05 ,  
+ Basic_viral_decrease ,  , Fixed , 0.1 ,  
+ Probability_true_positive , 0 , Fixed , 1 ,  
+ Probability_true_negative , 0 , Fixed , 0.91 ,  
+ Proportion_wearing_mask , 0 , Fixed , 0 ,  
+ Factor_wearing_mask , 0 , Fixed , 1 ,  
+ Incubation_period_symptomatic , 0 , Lognormal , 1.57 , 0.65 
+ Incubation_period_asymptomatic , 0 , Lognormal , 1.57 , 0.65 
+ Serial_interval , 0 , Normal , 3.96 , 4.75 
+ Proportion_hospitalisation , 0 , Fixed , 0.025 ,  
+ Proportion_hospitalisation , 20 , Fixed , 0.208 ,  
+ Proportion_hospitalisation , 45 , Fixed , 0.283 ,  
+ Proportion_hospitalisation , 55 , Fixed , 0.301 ,  
+ Proportion_hospitalisation , 65 , Fixed , 0.435 ,  
+ Proportion_hospitalisation , 75 , Fixed , 0.587 ,  
+ Proportion_hospitalisation , 85 , Fixed , 0.703 ,  
+ Proportion_icu , 0 , Fixed , 0 ,  
+ Proportion_icu , 20 , Fixed , 0.2019 ,  
+ Proportion_icu , 45 , Fixed , 0.3675 ,  
+ Proportion_icu , 55 , Fixed , 0.3721 ,  
+ Proportion_icu , 65 , Fixed , 0.4322 ,  
+ Proportion_icu , 75 , Fixed , 0.5281 ,  
+ Proportion_icu , 85 , Fixed , 0.4125 ,  
+ Proportion_death_symptomatic , 0 , Fixed , 0 ,  
+ Proportion_death_symptomatic , 20 , Fixed , 0.0476 ,  
+ Proportion_death_symptomatic , 45 , Fixed , 0.0769 ,  
+ Proportion_death_symptomatic , 55 , Fixed , 0.2321 ,  
+ Proportion_death_symptomatic , 65 , Fixed , 0.2606 ,  
+ Proportion_death_symptomatic , 75 , Fixed , 0.3387 ,  
+ Proportion_death_symptomatic , 85 , Fixed , 0.9414 ,  
+ Infectious_period_symptomatic , 0 , Lognormal , 2.8622 , 0.0685 
+ Infectious_period_symptomatic , 10 , Lognormal , 2.949688 , 0.094 
+ Infectious_period_symptomatic , 20 , Lognormal , 2.95491 , 0.047 
+ Infectious_period_symptomatic , 30 , Lognormal , 2.95491 , 0.033 
+ Infectious_period_symptomatic , 40 , Lognormal , 3.072693 , 0.04 
+ Infectious_period_symptomatic , 50 , Lognormal , 3.109061 , 0.037 
+ Infectious_period_symptomatic , 60 , Lognormal , 3.131137 , 0.039 
+ Infectious_period_symptomatic , 70 , Lognormal , 3.113515 , 0.08 
+ Infectious_period_asymptomatic , 0 , Lognormal , 2.8622 , 0.0685 
+ Infectious_period_asymptomatic , 10 , Lognormal , 2.949688 , 0.094 
+ Infectious_period_asymptomatic , 20 , Lognormal , 2.95491 , 0.047 
+ Infectious_period_asymptomatic , 30 , Lognormal , 2.95491 , 0.033 
+ Infectious_period_asymptomatic , 40 , Lognormal , 3.072693 , 0.04 
+ Infectious_period_asymptomatic , 50 , Lognormal , 3.109061 , 0.037 
+ Infectious_period_asymptomatic , 60 , Lognormal , 3.131137 , 0.039 
+ Infectious_period_asymptomatic , 70 , Lognormal , 3.113515 , 0.08 
+ Onset_to_hospitalisation , 0 , Lognormal , 1.23 , 0.79 
+ Hospitalisation_to_ICU , 0 , Normal , 7 , 5.9 
+ Stay_ICU , 0 , Normal , 8 , 5.9 
