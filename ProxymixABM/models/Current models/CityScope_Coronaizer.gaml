@@ -13,6 +13,7 @@ global{
 	float infectionDistance <- 2#m;
 	float maskRatio <- 0.0;
 	
+	float diminution_infection_rate_separator <- 0.9;
 	
 	bool a_boolean_to_disable_parameters <- true;
     int number_day_recovery<-10;
@@ -72,18 +73,25 @@ species ViralPeople  mirrors:people{
 		
 	reflex infected_contact when: is_infected {
 		ask ViralPeople at_distance infectionDistance {
-			if (flip(infection_rate)) {
-        		is_susceptible <-  false;
-            	is_infected <-  true;
-            	infected_time <- time; 
-            	ask (cell overlapping self.target){
-					nbInfection<-nbInfection+1;
-					if(firstInfectionTime=0){
-						firstInfectionTime<-time;
-					}
+			geometry line <- line([myself,self]);
+			if empty(wall overlapping line) {
+				float infectio_rate_real <- infection_rate;
+				if empty(separator overlapping line) {
+					infectio_rate_real <- infectio_rate_real * (1 - diminution_infection_rate_separator);
 				}
-				infection_graph <<edge(self,myself);
-        	}
+				if (flip(infectio_rate_real)) {
+	        		is_susceptible <-  false;
+	            	is_infected <-  true;
+	            	infected_time <- time; 
+	            	ask (cell overlapping self.target){
+						nbInfection<-nbInfection+1;
+						if(firstInfectionTime=0){
+							firstInfectionTime<-time;
+						}
+					}
+					infection_graph <<edge(self,myself);
+        		}
+			} 
 		}
 	}
 	
