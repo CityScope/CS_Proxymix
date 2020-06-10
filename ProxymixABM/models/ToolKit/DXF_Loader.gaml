@@ -89,19 +89,20 @@ experiment DXFDisplay type: gui virtual:true
 	
 	output
 	{	layout #split;
-		display floorPlan type: opengl virtual:true
+		display floorPlan type: opengl virtual:true toolbar:false
 		{
 			species dxf_element;
-			/*graphics 'legend' {
-			  point legendPos<-{world.shape.width*1.1,0};
-			  float verticalSpace <- world.shape.width * 0.05;
+			graphics 'legend' {
+			  point legendPos<-{-world.shape.width*0.3,0};
+			  float verticalSpace <- world.shape.width * 0.015;
+			  float horizontalSpace <- world.shape.width * 0.15;
 			  float squareSize<-world.shape.width*0.02;
 			  loop i from:0 to:length(standard_color_per_layer)-1{
-                point curPos<-{(i mod 2) * world.shape.width*0.2,((i mod 2 = 1)  ? i*verticalSpace : (i+1)*verticalSpace)+ world.shape.height/4};
-				draw square(squareSize) color: standard_color_per_layer.values[i] at: legendPos+ curPos;
+                point curPos<-{(i mod 2) * horizontalSpace,((i mod 2 = 1)  ? i*verticalSpace : (i+1)*verticalSpace)+ world.shape.height/4};
+				//draw square(squareSize) color: standard_color_per_layer.values[i] at: legendPos+ curPos;
 				draw string(standard_color_per_layer.keys[i]) + ": " +length (dxf_element where (each.layer= standard_color_per_layer.keys[i]))color: standard_color_per_layer.values[i] at: {curPos.x-30#px,curPos.y+verticalSpace}+legendPos perspective: true font:font("Helvetica", 20 , #bold);
 			  }
-			}*/
+			}
 		}
 		
 	}
