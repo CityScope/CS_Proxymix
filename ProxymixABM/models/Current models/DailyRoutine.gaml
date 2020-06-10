@@ -11,12 +11,13 @@ import "Constants.gaml"
 import "./../ToolKit/DXF_Loader.gaml" 
 
 global {
-	string dataset <- "Factory";
+	//string dataset <- "MediaLab";
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
 	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp");
 	date starting_date <- date([2020,4,6,7]);
-	int nb_people <- 300;
+	int nb_people <- 50;
+	float peopleDensity<-1.0;
 	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
 	list<room> available_offices;
@@ -167,8 +168,10 @@ global {
 	}
 	
 	reflex people_arriving when: not empty(available_offices) 
-	{
-		do create_people(rnd(0,min(5, length(available_offices))));
+	{	if(length(people)<nb_people*peopleDensity){
+		  do create_people(rnd(0,min(5, length(available_offices))));
+		}
+		
 	}
 }
 
@@ -337,10 +340,10 @@ species people skills: [escape_pedestrian] {
 
 
 experiment COVID type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","Learning_Center","ENSAL","SanSebastian"];
 	parameter "unit" var: unit category: "file" <- #cm;
 	output {
-		display map synchronized: true parent:floorPlan type:opengl{
+		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false{
 			species room;
 			species building_entrance;
 			species wall;
@@ -353,10 +356,11 @@ experiment COVIDMulti type: gui {
 	
 	init{
 		create simulation with: [useCase::"MediaLab", unit::#cm];
-		create simulation with: [useCase::"Hotel-Dieu",unit::#cm ];
-		create simulation with: [useCase::"Learning_Center_Lyon",unit::#cm ];
+		create simulation with: [useCase::"Learning_Center",unit::#cm ];
+		//create simulation with: [useCase::"ENSAL",unit::#cm ];
+		//create simulation with: [useCase::"SanSebastian",unit::#cm ];
 	}
-	parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
+	parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Learning_Center","ENSAL","SanSebastian"];
 	parameter "unit" var: unit category: "file" <- #cm;
 	output {
 		display map synchronized: true {

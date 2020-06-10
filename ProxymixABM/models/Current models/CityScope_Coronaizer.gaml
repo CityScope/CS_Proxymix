@@ -131,7 +131,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
 	parameter "Draw Grid:" category: "Visualization" var:draw_grid;
 	parameter "Show People:" category: "Visualization" var:showPeople;
-	parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory","MediaLab"];
 	
 	output{
 	  layout #split;

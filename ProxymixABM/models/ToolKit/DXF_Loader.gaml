@@ -84,7 +84,7 @@ species dxf_element
 }
 
 experiment DXFDisplay type: gui virtual:true
-{   parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
+{   parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL"];
 	
 	
 	output
@@ -92,7 +92,7 @@ experiment DXFDisplay type: gui virtual:true
 		display floorPlan type: opengl virtual:true
 		{
 			species dxf_element;
-			graphics 'legend' {
+			/*graphics 'legend' {
 			  point legendPos<-{world.shape.width*1.1,0};
 			  float verticalSpace <- world.shape.width * 0.05;
 			  float squareSize<-world.shape.width*0.02;
@@ -101,7 +101,7 @@ experiment DXFDisplay type: gui virtual:true
 				draw square(squareSize) color: standard_color_per_layer.values[i] at: legendPos+ curPos;
 				draw string(standard_color_per_layer.keys[i]) + ": " +length (dxf_element where (each.layer= standard_color_per_layer.keys[i]))color: standard_color_per_layer.values[i] at: {curPos.x-30#px,curPos.y+verticalSpace}+legendPos perspective: true font:font("Helvetica", 20 , #bold);
 			  }
-			}
+			}*/
 		}
 		
 	}
