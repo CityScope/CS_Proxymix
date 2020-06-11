@@ -214,7 +214,7 @@ global {
 		}
 	}
 	
-	reflex end_simulation when: after(starting_date add_hours 13) {
+	reflex end_simulation when: empty(people) {
 		do pause;
 	}
 	
