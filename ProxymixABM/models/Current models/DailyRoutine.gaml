@@ -23,6 +23,10 @@ global {
 	graph pedestrian_network;
 	list<room> available_offices;
 	
+	string density_scenario <- "num_people_building" among: ["data", "distance", "num_people_building", "num_people_room"];
+	int num_people_building <- 200;
+	float distance_people <- 2.0 #m;
+	
 	bool display_pedestrian_path <- false;// parameter: true;
 	bool display_free_space <- false;// parameter: true;
 	
@@ -41,20 +45,40 @@ global {
 		pedestrian_network <- as_edge_graph(pedestrian_path);
 		loop se over: the_dxf_file  {
 			string type <- se get layer;
-			
 			if (type = walls) {
 				create wall with: [shape::clean(polygon(se.points))];
 			} else if type = entrance {
-				create building_entrance  with: [shape::polygon(se.points), type::type] {
-					do intialization;
-				}
+				create building_entrance  with: [shape::polygon(se.points), type::type];
 			} else if type in [offices, supermarket, meeting_rooms,coffee,storage] {
-				create room with: [shape::polygon(se.points), type::type] {
-					do intialization;
-				}
-				
+				create room with: [shape::polygon(se.points), type::type] ;
 			}
 		} 
+		if (density_scenario = "num_people_building") {
+			list<room> offices_list <- room where (each.type = offices);
+			float tot_area <- offices_list sum_of each.shape.area;
+			ask offices_list {
+				num_places <- min(1,round(shape.area / tot_area * num_people_building));
+			}
+			int nb <- offices_list sum_of each.num_places;
+			if (nb > num_people_building) and (length(offices_list) > num_people_building) {
+				loop times: nb - num_people_building {
+					room r <- one_of(offices_list where (each.num_places > 1));
+					r.num_places <- r.num_places - 1;	
+				}
+			} else if (nb < num_people_building) {
+				loop times: num_people_building - nb{
+					room r <- one_of(offices_list);
+					r.num_places <- r.num_places + 1;	
+				}
+			}
+			
+		}
+		
+		
+		
+		ask room + building_entrance {
+			do intialization;
+		}
 		ask wall {
 			if not empty((room + building_entrance) inside self ) {
 				shape <- shape.contour;
@@ -104,7 +128,6 @@ global {
 		create eating_outside_act with:[activity_places:: building_entrance as list];
 		
 		available_offices <- rooms_type[offices] where each.is_available(); 
-		
 		if (movement_model = pedestrian_skill) {
 			do initialize_pedestrian_model;
 		}
@@ -255,43 +278,61 @@ species room {
 	list<point> entrances;
 	list<place_in_room> places;
 	list<place_in_room> available_places;
+	int num_places;
 	
 	action intialization {
-		list<geometry> squares <-  to_squares(shape, 1.5, true) where (each.location overlaps shape);
-		map<geometry, place_in_room> pr;
-		loop g over: squares{
-			create place_in_room {
-				location <- g.location;
-				pr[g] <- self;
-				myself.places << self;
+		list<geometry> squares;
+		if (density_scenario = "distance") or (type != offices) {
+			squares <-  to_squares(shape, distance_people, true) where (each.location overlaps shape);
+		}
+		else if density_scenario in ["num_people_building", "num_people_room"] {
+			int nb <- num_places;
+			loop while: length(squares) < num_places {
+				squares <-  num_places = 0 ? []: to_squares(shape, nb, true) where (each.location overlaps shape);
+				nb <- nb +1;
+			}
+			if (length(squares) > num_places) {
+				squares <- num_places among squares;
 			}
 		} 
-		if empty(places) {
-			create place_in_room {
-				location <- myself.location;
-				myself.places << self;
-			}
-		} 
-		
-		if (length(places) > 1 and separator_proba > 0.0) {
-			graph g <- as_intersection_graph(squares, 0.01);
-			list<list<place_in_room>> ex;
-			loop e over: g.edges {
-				geometry s1 <- (g source_of e);
-				geometry s2 <- (g target_of e);
-				place_in_room pr1 <- pr[s1];
-				place_in_room pr2 <- pr[s2];
-				if not([pr1,pr2] in ex) and not([pr2,pr1] in ex) {
-					ex << [pr1,pr2];
-					if flip(separator_proba) {
-						geometry sep <- ((s1 + 0.1)  inter (s2 + 0.1)) inter self;
-						create separator_ag with: [shape::sep,places_concerned::[pr1,pr2]];
+		if not empty(squares) {
+			map<geometry, place_in_room> pr;
+			loop g over: squares{
+				create place_in_room {
+					location <- g.location;
+					pr[g] <- self;
+					myself.places << self;
+				}
+			} 
+			
+			if empty(places) {
+				create place_in_room {
+					location <- myself.location;
+					myself.places << self;
+				}
+			} 
+			
+			if (length(places) > 1 and separator_proba > 0.0) {
+				graph g <- as_intersection_graph(squares, 0.01);
+				list<list<place_in_room>> ex;
+				loop e over: g.edges {
+					geometry s1 <- (g source_of e);
+					geometry s2 <- (g target_of e);
+					place_in_room pr1 <- pr[s1];
+					place_in_room pr2 <- pr[s2];
+					if not([pr1,pr2] in ex) and not([pr2,pr1] in ex) {
+						ex << [pr1,pr2];
+						if flip(separator_proba) {
+							geometry sep <- ((s1 + 0.1)  inter (s2 + 0.1)) inter self;
+							create separator_ag with: [shape::sep,places_concerned::[pr1,pr2]];
+						}
 					}
 				}
 			}
+					
+			available_places <- copy(places);
 		}
-				
-		available_places <- copy(places);
+	
 	}
 	bool is_available {
 		return nb_affected < length(places);
