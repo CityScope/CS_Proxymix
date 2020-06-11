@@ -74,6 +74,7 @@ species dxf_element
 	string layer;
 	rgb color;
 	bool useless;
+	list<point> entrances;
 	aspect default
 	{
 		draw shape color: color;

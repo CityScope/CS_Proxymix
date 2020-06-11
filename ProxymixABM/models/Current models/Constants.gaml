@@ -24,6 +24,7 @@ global {
 	string doors <- "Doors";
 	
 	string going_home <- "going home";
+	string eating_outside <-"eating outside";
 	
 	string moving_skill <- "moving skill";
 	string pedestrian_skill <- "pedestrian skill";

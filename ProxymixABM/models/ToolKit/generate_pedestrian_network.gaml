@@ -10,11 +10,9 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 
 global {
-	string useCase <- "ENSAL";
-		
+	string useCase <- "MediaLab";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
-	
 	list<string> layer_to_consider <- [walls,offices, supermarket, meeting_rooms,coffee,storage, furnitures ];
 	
 	bool recreate_walking_area <- false;
@@ -71,10 +69,34 @@ global {
 		ask dxf_element where not( each.layer in layer_to_consider) {
 			do die;
 		} 
-		ask dxf_element where (each.layer = walls) {
+		list<dxf_element> wall <- dxf_element where (each.layer = walls);
+		ask wall {
 			shape <- simplification(shape + buffer_simplication, simplification_dist) ;
 		}
-		write "Nimber of dxf elements:" + length(dxf_element);
+		
+		list<dxf_element> rooms <- dxf_element where (each.layer in [offices, supermarket, meeting_rooms,coffee,storage]);
+		list<dxf_element> rooms_entrances <- dxf_element where (each.layer in [entrance, offices, supermarket, meeting_rooms,coffee,storage]);
+		write "Number of dxf elements:" + length(dxf_element);
+		
+		ask rooms{
+			geometry contour <- nil;
+			float dist <-0.3;
+			loop while: contour = nil {
+				contour <- copy(shape.contour);
+				ask wall at_distance 1.0 {
+					contour <- contour - (shape +dist);
+				}
+				ask rooms_entrances at_distance 1.0 {
+					contour <- contour - (shape + dist);
+				}
+				
+				dist <- dist * 0.5;	
+			} 
+			if contour != nil {
+				entrances <- points_on (contour, 2.0);		
+			}
+		}
+		write "entrances created";
 		if (not recreate_walking_area) and file_exists(walking_area_path) {
 			create walking_area from: file(walking_area_path);
 		} else {
@@ -82,6 +104,9 @@ global {
 			ask dxf_element {
 				walking_area_g <- walking_area_g - (shape );
 				walking_area_g <- walking_area_g.geometries with_max_of each.area;
+				loop pt over: entrances {
+					walking_area_g <- walking_area_g - (square(0.5) at_location pt); 
+				}
 			}
 			create walking_area from: walking_area_g.geometries;
 			save walking_area type: shp to: walking_area_path;
@@ -98,7 +123,6 @@ global {
 			
 			
 			list<geometry> ggs;
-			write clean_network;
 			if (clean_network) {
 				geometry wa <- union(walking_area);
 				geometry wa_b <- wa buffer (-dist_min_obst);
@@ -125,8 +149,11 @@ global {
 			
 			list<geometry> cn <- clean_network(ggs, dist_reconnection,true,true);
 			
-			
-			create pedestrian_path from: cn;
+			list<geometry> fcn;
+			loop c over: cn {
+				fcn <- fcn + c.geometries;
+			}
+			create pedestrian_path from: fcn;
 			
 			save pedestrian_path type: shp to:dataset_path  + useCase+ "/pedestrian_path.shp";  
 		} else {
@@ -163,6 +190,8 @@ global {
 				avoid_other <- P_avoid_other;
 				obstacle_species <- [people, dxf_element];
 			}
+			
+			
 		}
 	}
 }
@@ -202,7 +231,6 @@ species people skills: [escape_pedestrian] {
 	
 	aspect default {
 		draw circle(0.3) color: color;
-		
 	}
 	
 }
@@ -235,7 +263,6 @@ experiment test_pedestrian_network type: gui {
 			species dxf_element;
 			species pedestrian_path;
 			species people;
-		
 		}
 	}
 }

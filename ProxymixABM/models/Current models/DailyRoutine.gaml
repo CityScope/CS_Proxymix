@@ -22,9 +22,15 @@ global {
 	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
 	list<room> available_offices;
-	list<room> entrances;
+	
+	bool display_pedestrian_path <- false;// parameter: true;
+	bool display_free_space <- false;// parameter: true;
+	
 	
 	bool draw_flow_grid <- false;
+	
+	
+	date time_first_lunch <- nil;
 	
 	
 	init {
@@ -45,7 +51,6 @@ global {
 			} else if type in [offices, supermarket, meeting_rooms,coffee,storage] {
 				create room with: [shape::polygon(se.points), type::type] {
 					do intialization;
-					
 				}
 				
 			}
@@ -86,20 +91,45 @@ global {
 					
 		}
 		map<string, list<room>> rooms_type <- room group_by each.type;
-		entrances <-list(building_entrance);
 		loop ty over: rooms_type.keys  - [offices, entrance]{
 			create activity {
 				name <-  ty;
 				activity_places <- rooms_type[ty];
 			}
 		}
+		
+	
 		create working;
-		create going_home_act with:[activity_places:: entrances];
+		create going_home_act with:[activity_places:: building_entrance as list];
+		create eating_outside_act with:[activity_places:: building_entrance as list];
 		
 		available_offices <- rooms_type[offices] where each.is_available(); 
 		
 		if (movement_model = pedestrian_skill) {
 			do initialize_pedestrian_model;
+		}
+		
+		ask building_entrance {
+			if (not empty(pedestrian_path)) {
+				list<pedestrian_path> paths <- pedestrian_path at_distance 10.0;
+				if (movement_model = "moving skill") {
+					closest_path <-  paths with_min_of (each distance_to location);
+				
+				} else {
+					closest_path <-  paths with_min_of (each.free_space distance_to location);
+				
+				}
+				if (closest_path != nil) {
+					init_place <- shape inter closest_path ;
+					if (init_place = nil) {
+						init_place <- (shape closest_points_with closest_path)[0]; 
+					}
+				}else {
+					init_place <- shape; 
+				}
+			} else {
+				init_place <- shape;
+			}
 		}
 	}	
 	
@@ -135,25 +165,42 @@ global {
 			target <- target_room.entrances closest_to self;
 			
 			goto_entrance <- true;
-			location <- any_location_in (one_of(entrances));
-			date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 40 #mn);
+			location <- any_location_in (one_of(building_entrance).init_place);
 			
-			if flip(0.3) {agenda_day[lunch_time] <- activity first_with (each.name = supermarket);}
-			lunch_time <- lunch_time add_seconds rnd(120, 10 #mn);
-			agenda_day[lunch_time] <- activity first_with (each.name = coffee);
-			lunch_time <- lunch_time add_seconds rnd(5#mn, 30 #mn);
+			date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 40 #mn);
+			time_first_lunch <-((time_first_lunch = nil) or (time_first_lunch > lunch_time)) ? lunch_time : time_first_lunch;
+			
+			if (flip(0.8)) {
+				agenda_day[lunch_time] <-first(eating_outside_act) ;
+				lunch_time <- lunch_time add_seconds rnd(30 #mn, 90 #mn);
+				if flip(0.3) {
+					agenda_day[lunch_time] <- activity first_with (each.name = coffee);
+					lunch_time <- lunch_time add_seconds rnd(2#mn, 10 #mn);
+				}
+			} else {
+				activity shopping_supermarket <- activity first_with (each.name = supermarket);
+				if flip(0.3) and  shopping_supermarket != nil{
+					agenda_day[lunch_time] <-shopping_supermarket ;
+					lunch_time <- lunch_time add_seconds rnd(120, 10 #mn);
+				}
+				if flip(0.5) {
+					agenda_day[lunch_time] <- activity first_with (each.name = coffee);
+					lunch_time <- lunch_time add_seconds rnd(5#mn, 30 #mn);
+				}	
+			}
+			
 			agenda_day[lunch_time] <- first(working);
 			agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(30),rnd(59))] <- first(going_home_act);
-			
 		}
+		
 		
 	}
 	
 	reflex change_step {
-		if (current_date.hour >= 7 and current_date.minute > 10 and empty(people where (each.target != nil)))  {
+		if (current_date.hour >= 7 and current_date.minute > 3 and empty(people where (each.target != nil)))  {
 			step <- 5#mn;
 		}
-		if (current_date.hour = 11 and current_date.minute > 30){
+		if (time_first_lunch != nil and current_date.hour = time_first_lunch.hour and current_date.minute > time_first_lunch.minute){
 			step <- 1#s;
 		}
 		if (current_date.hour >= 12 and current_date.minute > 5 and empty(people where (each.target != nil)))  {
@@ -171,13 +218,21 @@ global {
 		do pause;
 	}
 	
-	reflex people_arriving when: not empty(available_offices) 
+	reflex people_arriving when: not empty(available_offices) and every(2 #s)
 	{	
-		  do create_people(rnd(0,min(5, length(available_offices))));
+		  do create_people(rnd(0,min(3, length(available_offices))));
 	}
 }
 
-species pedestrian_path skills: [pedestrian_road];
+species pedestrian_path skills: [pedestrian_road] {
+	aspect default {
+		if (display_pedestrian_path) {
+			if(display_free_space and free_space != nil) {draw free_space color: #lightpink border: #black;}
+			draw shape color: #red;
+		}
+		
+	}
+}
 
 
 species separator_ag {
@@ -195,6 +250,8 @@ species wall {
 species room {
 	int nb_affected;
 	string type;
+	pedestrian_path closest_path;
+	geometry init_place;
 	list<point> entrances;
 	list<place_in_room> places;
 	list<place_in_room> available_places;
@@ -256,6 +313,13 @@ species building_entrance parent: room {
 	place_in_room get_target(people p){
 		return place_in_room closest_to p;
 	}
+	
+	aspect default {
+		draw shape color: standard_color_per_layer[type];
+		draw init_place color:#magenta border: #black;
+		loop e over: entrances {draw square(0.1) at: e color: #magenta border: #black;}
+		loop p over: available_places {draw square(0.1) at: p.location color: #cyan border: #black;}
+	}
 }
 
 species activity {
@@ -265,9 +329,12 @@ species activity {
 		if flip(0.3) {
 			return one_of(activity_places with_max_of length(each.available_places));
 		} else {
-			return (activity_places where not empty(each.available_places)) closest_to p;
+			list<room> rs <- (activity_places where not empty(each.available_places));
+			if empty(rs) {
+				rs <- activity_places;
+			}
+			return rs closest_to p;
 		}
-		
 	}
 	
 }
@@ -281,6 +348,13 @@ species working parent: activity {
 
 species going_home_act parent: activity  {
 	string name <- going_home;
+	room get_place(people p) {
+		return building_entrance closest_to p;
+	}
+}
+
+species eating_outside_act parent: activity  {
+	string name <- eating_outside;
 	room get_place(people p) {
 		return building_entrance closest_to p;
 	}
@@ -301,16 +375,19 @@ species people skills: [escape_pedestrian] {
 	place_in_room target_place;
 	bool goto_entrance <- false;
 	bool go_oustide_room <- false;
+	bool is_outside;
 	rgb color <- rnd_color(255);
-	float speed <- min(2,gauss(4,1)) #km/#h;
+	float speed <- min(5,gauss(4,1)) #km/#h;
 	
 	
 	aspect default {
-		draw circle(0.3) color:color border: #black;
+		if not is_outside{
+			draw circle(0.3) color:color border: #black;
+		}
 	}
 	
 	
-	reflex updateFlowCell{
+	reflex updateFlowCell when:not is_outside{
 		ask (flowCell overlapping self.location){
 			nbPeople<-nbPeople+1;
 		}
@@ -318,12 +395,14 @@ species people skills: [escape_pedestrian] {
 	reflex define_activity when: not empty(agenda_day) and 
 		(after(agenda_day.keys[0])){
 		if(target_place != nil and (has_place) ) {target_room.available_places << target_place;}
-		
+		string n <- current_activity = nil ? "" : copy(current_activity.name);
 		current_activity <- agenda_day.values[0];
+		
 		agenda_day >> first(agenda_day);
 		target <- target_room.entrances closest_to self;
 		target_room <- current_activity.get_place(self);
 		go_oustide_room <- true;
+		is_outside <- false;
 		goto_entrance <- false;
 		target_place <- nil;
 	}
@@ -349,6 +428,7 @@ species people skills: [escape_pedestrian] {
 		if(arrived) {
 			if (go_oustide_room) {
 				target <- target_room.entrances closest_to self;
+				
 				go_oustide_room <- false;
 				goto_entrance <- true;
 			}
@@ -367,6 +447,9 @@ species people skills: [escape_pedestrian] {
 			} else {
 				has_place <- true;
 				target <- nil;
+				if (species(target_room) = building_entrance) {
+					is_outside <- true;
+				}
 				if (current_activity.name = going_home) {
 					do die;
 				}
@@ -399,11 +482,12 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	
 	output {
 		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false{
-			species room;
-			species building_entrance;
-			species wall;
-			species people;
-			species separator_ag;
+			species room refresh: false;
+			species building_entrance refresh: false;
+			species wall refresh: false;
+			species pedestrian_path ;
+			species people ;
+			species separator_ag refresh: false;
 			species flowCell;
 			graphics 'date'{
 			 point legendPos<-{-world.shape.width*0.3,0};

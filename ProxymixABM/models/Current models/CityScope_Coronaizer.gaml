@@ -71,26 +71,28 @@ species ViralPeople  mirrors:people{
     float infected_time<-0.0;
     geometry shape<-circle(1);
 		
-	reflex infected_contact when: is_infected {
+	reflex infected_contact when: is_infected and not target.is_outside {
 		ask ViralPeople at_distance infectionDistance {
-			geometry line <- line([myself,self]);
-			if empty(wall overlapping line) {
-				float infectio_rate_real <- infection_rate;
-				if empty(separator_ag overlapping line) {
-					infectio_rate_real <- infectio_rate_real * (1 - diminution_infection_rate_separator);
-				}
-				if (flip(infectio_rate_real)) {
-	        		is_susceptible <-  false;
-	            	is_infected <-  true;
-	            	infected_time <- time; 
-	            	ask (cell overlapping self.target){
-						nbInfection<-nbInfection+1;
-						if(firstInfectionTime=0){
-							firstInfectionTime<-time;
-						}
+			if (not target.is_outside) {
+				geometry line <- line([myself,self]);
+				if empty(wall overlapping line) {
+					float infectio_rate_real <- infection_rate;
+					if empty(separator_ag overlapping line) {
+						infectio_rate_real <- infectio_rate_real * (1 - diminution_infection_rate_separator);
 					}
-					infection_graph <<edge(self,myself);
-        		}
+					if (flip(infectio_rate_real)) {
+		        		is_susceptible <-  false;
+		            	is_infected <-  true;
+		            	infected_time <- time; 
+		            	ask (cell overlapping self.target){
+							nbInfection<-nbInfection+1;
+							if(firstInfectionTime=0){
+								firstInfectionTime<-time;
+							}
+						}
+						infection_graph <<edge(self,myself);
+	        		}
+				}
 			} 
 		}
 	}
@@ -102,7 +104,7 @@ species ViralPeople  mirrors:people{
 	
 	
 	aspect base {
-		if(showPeople){
+		if(showPeople) and not target.is_outside{
 		  draw circle(is_infected ? 0.4#m : 0.3#m) color:(is_susceptible) ? #green : ((is_infected) ? #red : #blue);	
 		}
 	}

@@ -48,7 +48,7 @@ experiment WorkInProgressDXF type: gui
 	}
 
 	
-	parameter 'fileName:' var: useCase category: 'file' <- "Learning_Center" ;
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" ;
 
 	output
 	{	layout #split;
