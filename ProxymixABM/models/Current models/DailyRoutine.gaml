@@ -214,7 +214,7 @@ global {
 		}
 	}
 	
-	reflex end_simulation when: empty(people) {
+	reflex end_simulation when: current_date.hour > 12 and empty(people) {
 		do pause;
 	}
 	
