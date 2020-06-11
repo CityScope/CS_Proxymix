@@ -15,7 +15,7 @@ global {
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
 	list<string> layer_to_consider <- [walls,offices, supermarket, meeting_rooms,coffee,storage, furnitures ];
 	
-	bool recreate_walking_area <- false;
+	bool recreate_walking_area <- true;
 	
 	float simplification_dist <- 0.1;
 	float buffer_simplication <-  0.001;
@@ -70,8 +70,12 @@ global {
 			do die;
 		} 
 		list<dxf_element> wall <- dxf_element where (each.layer = walls);
-		ask wall {
-			shape <- simplification(shape + buffer_simplication, simplification_dist) ;
+		write "simplification_dist: " + simplification_dist + " buffer_simplication: " + buffer_simplication;
+		if build_pedestrian_network {
+			ask wall {
+				shape <- simplification(shape + buffer_simplication, simplification_dist) ;
+			}
+		
 		}
 		
 		list<dxf_element> rooms <- dxf_element where (each.layer in [offices, supermarket, meeting_rooms,coffee,storage]);
@@ -101,12 +105,19 @@ global {
 			create walking_area from: file(walking_area_path);
 		} else {
 			geometry walking_area_g <- copy(shape);
-			ask dxf_element {
+			if build_pedestrian_network {
+				
+				
+				ask dxf_element {
+				
+					loop pt over: entrances {
+						walking_area_g <- walking_area_g - (square(0.1) at_location pt); 
+					}
+				}
+			}
+			ask wall {
 				walking_area_g <- walking_area_g - (shape );
 				walking_area_g <- walking_area_g.geometries with_max_of each.area;
-				loop pt over: entrances {
-					walking_area_g <- walking_area_g - (square(0.5) at_location pt); 
-				}
 			}
 			create walking_area from: walking_area_g.geometries;
 			save walking_area type: shp to: walking_area_path;
@@ -147,12 +158,14 @@ global {
 				ggs <- pp;
 			}
 			
-			list<geometry> cn <- clean_network(ggs, dist_reconnection,true,true);
+			//list<geometry> cn <- clean_network(ggs, dist_reconnection,true,true);
 			
 			list<geometry> fcn;
-			loop c over: cn {
+			loop c over: ggs {
 				fcn <- fcn + c.geometries;
 			}
+			fcn <- clean_network(fcn, dist_reconnection,true,true);
+			
 			create pedestrian_path from: fcn;
 			
 			save pedestrian_path type: shp to:dataset_path  + useCase+ "/pedestrian_path.shp";  
@@ -164,8 +177,14 @@ global {
 				create walking_area from: file(walking_area_path);
 				walking_area_g <- union(walking_area);
 			} else {	
-		 	geometry walking_area_g <- copy(shape);
-				ask dxf_element {
+		 		geometry walking_area_g <- copy(shape);
+				/*ask dxf_element {
+				
+					loop pt over: entrances {
+						walking_area_g <- walking_area_g - (square(0.5) at_location pt); 
+					}
+				}*/
+				ask wall {
 					walking_area_g <- walking_area_g - (shape );
 					walking_area_g <- walking_area_g.geometries with_max_of each.area;
 				}
@@ -173,13 +192,22 @@ global {
 				save walking_area type: shp to: walking_area_path;
 			
 			}
+			create Wall from: wall collect each.shape;
+				
 			ask pedestrian_path {
-				do initialize obstacles:[dxf_element] distance: 1.0;
-				free_space <- (free_space inter walking_area_g) union (shape + 0.1);
+				do initialize obstacles:[Wall] distance: 1.0;
+				free_space <- (free_space);// inter walking_area_g);// union (shape + 0.001);
+				//write free_space.area;
+				
 				if (free_space = nil) {
 					free_space <- copy(shape);
-				}
-				free_space <- free_space.geometries with_max_of each.area;
+				} else {
+					geometry free_s2 <- free_space - 0.2;
+					if (free_space != nil) {
+						free_space <- free_s2;
+					} 				}
+				
+				free_space <- (free_space.geometries where (each != nil)) with_max_of each.area;
 			}
 			network <- as_edge_graph(pedestrian_path);
 		
@@ -196,6 +224,7 @@ global {
 	}
 }
 
+species Wall;
 species walking_area;
 species pedestrian_path skills: [pedestrian_road] {
 	aspect default {
@@ -223,6 +252,9 @@ species people skills: [escape_pedestrian] {
 	reflex choose_target when: final_target = nil  {
 		final_target <- any_location_in(one_of(pedestrian_path).free_space);
 		do compute_virtual_path pedestrian_graph:network final_target: final_target ;
+		if empty(targets ) {
+			write name + " -> " + current_path;
+		}
 		
 	}
 	reflex move when: final_target != nil {

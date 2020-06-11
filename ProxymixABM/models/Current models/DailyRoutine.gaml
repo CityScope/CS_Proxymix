@@ -57,7 +57,7 @@ global {
 			list<room> offices_list <- room where (each.type = offices);
 			float tot_area <- offices_list sum_of each.shape.area;
 			ask offices_list {
-				num_places <- min(1,round(shape.area / tot_area * num_people_building));
+				num_places <- max(1,round(num_people_building * shape.area / tot_area));
 			}
 			int nb <- offices_list sum_of each.num_places;
 			if (nb > num_people_building) and (length(offices_list) > num_people_building) {
@@ -157,16 +157,10 @@ global {
 	}	
 	
 	action initialize_pedestrian_model {
-		geometry walking_area_g <- copy(shape);
-		ask room + wall {
-			walking_area_g <- walking_area_g - (shape + 0.01);
-			walking_area_g <- walking_area_g.geometries with_max_of each.area;
-		}
-			
+		
 		ask pedestrian_path {
 			float dist <- max(1.0, self distance_to (wall closest_to self));
-			do initialize obstacles:[wall, room] distance: dist;
-			free_space <- free_space inter walking_area_g;
+			do initialize obstacles:[wall] distance: dist;
 			free_space <- free_space.geometries first_with (each overlaps shape);
 		}
 	}
