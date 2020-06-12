@@ -18,9 +18,10 @@ global{
 	bool a_boolean_to_disable_parameters <- true;
     int number_day_recovery<-10;
 	int time_recovery<-1440*number_day_recovery*60;
-	float infection_rate<-0.0005;
+	float infection_rate<-0.005;
 	int initial_nb_infected<-5;
 	float step<-1#mn;
+	int totalNbInfection;
 	
 	bool drawInfectionGraph <- false;
 	bool drawSocialDistanceGraph <- false;
@@ -37,6 +38,7 @@ global{
 	int nb_recovered <- 0 update: length(ViralPeople where (each.is_recovered));
 	graph<people, people> infection_graph <- graph<people, people>([]);
 	graph<people, people> social_distance_graph <- graph<people, people>([]);
+
 	
 	init{
 			
@@ -44,6 +46,7 @@ global{
 	
 	reflex initCovid when:cycle=2{
 		ask initial_nb_infected among ViralPeople{
+			has_been_infected<-true;
 			is_susceptible <-  false;
 	        is_infected <-  true;
 	        is_immune <-  false;
@@ -59,6 +62,16 @@ global{
 	reflex increaseRate when:cycle= 1440*7{
 		//infection_rate<-0.0;//infection_rate/2;
 	}
+	
+	reflex computeRo when: (cycle mod 100 = 0){
+		write "yo je suis le Ro ";
+		write "nbInfection" + totalNbInfection;
+		write "initial_nb_infected" + initial_nb_infected;
+		write "totalNbInfection/initial_nb_infected" + totalNbInfection/initial_nb_infected;
+		list<ViralPeople> tmp<-ViralPeople where (each.has_been_infected=true);
+		list<float> tmp2 <- tmp collect (each.nb_people_infected_by_me*min((time_recovery/(0.00001+time- each.infected_time))),1);
+		write "Rooooo" + mean(tmp2);
+	}
 }
 
 
@@ -70,6 +83,9 @@ species ViralPeople  mirrors:people{
     bool is_recovered<-false;
     float infected_time<-0.0;
     geometry shape<-circle(1);
+    int nb_people_infected_by_me<-0;
+    bool has_been_infected<-false;
+
 		
 	reflex infected_contact when: is_infected and not target.is_outside {
 		ask ViralPeople at_distance infectionDistance {
@@ -86,6 +102,8 @@ species ViralPeople  mirrors:people{
 		            	infected_time <- time; 
 		            	ask (cell overlapping self.target){
 							nbInfection<-nbInfection+1;
+							myself.nb_people_infected_by_me<-myself.nb_people_infected_by_me+1;
+							myself.has_been_infected<-true;
 							if(firstInfectionTime=0){
 								firstInfectionTime<-time;
 							}
