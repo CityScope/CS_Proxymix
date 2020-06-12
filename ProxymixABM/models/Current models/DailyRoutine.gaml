@@ -12,7 +12,12 @@ import "./../ToolKit/DXF_Loader.gaml"
 
 global {
 	//string dataset <- "MediaLab";
-	float separator_proba <- 0.5;
+	float normal_step <- 1#s;
+	float fast_step <- 5 #mn;
+	bool change_step <- false update: false;
+	
+	float step <- normal_step on_change: {change_step <- true;};
+	float separator_proba <- 0.0;
 	
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
@@ -24,7 +29,7 @@ global {
 	list<room> available_offices;
 	
 	string density_scenario <- "num_people_building" among: ["data", "distance", "num_people_building", "num_people_room"];
-	int num_people_building <- 200;
+	int num_people_building <- 400;
 	float distance_people <- 2.0 #m;
 	
 	bool display_pedestrian_path <- false;// parameter: true;
@@ -35,6 +40,7 @@ global {
 	
 	
 	date time_first_lunch <- nil;
+	
 	
 	
 	init {
@@ -215,21 +221,23 @@ global {
 	
 	reflex change_step {
 		if (current_date.hour >= 7 and current_date.minute > 3 and empty(people where (each.target != nil)))  {
-			step <- 5#mn;
+			step <- fast_step;
 		}
 		if (time_first_lunch != nil and current_date.hour = time_first_lunch.hour and current_date.minute > time_first_lunch.minute){
-			step <- 1#s;
+			step <- normal_step;
 		}
 		if (current_date.hour >= 12 and current_date.minute > 5 and empty(people where (each.target != nil)))  {
-			step <- 5 #mn;
+			step <- fast_step;
 		} 
 		if (current_date.hour = 18){
-			step <- 1#s;
+			step <- normal_step;
 		}
 		if (not empty(people where (each.target != nil))) {
-			step <- 1#s;
+			step <- normal_step;
 		}
+		
 	}
+	
 	
 	reflex end_simulation when: current_date.hour > 12 and empty(people) {
 		do pause;
@@ -400,7 +408,7 @@ species place_in_room {
 }
 
 species people skills: [escape_pedestrian] {
-	int age;
+	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
 	room working_place;
 	map<date, activity> agenda_day;
 	activity current_activity;

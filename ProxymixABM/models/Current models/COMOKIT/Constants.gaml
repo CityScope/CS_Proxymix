@@ -33,32 +33,10 @@ global {
 	string recovered <- "Recovered";
 	string no_need_hospitalisation <- "Not needed";
 	string need_hospitalisation <- "Need hospitalisation";
-	string need_ICU <- "Need ICU";
-
-	//The list of activities
-	string act_neighbor <- "visiting neighbor";
-	string act_friend <- "visiting friend";
-	string act_home <- "staying at home";
-	string act_working <- "working";
-	string act_studying <- "studying";
-	string act_eating <- "eating";
-	string act_shopping <- "shopping";
-	string act_leisure <- "leisure";
-	string act_outside <- "outside activity";
-	string act_sport <- "sport";
-	string act_other <- "other activity";
-	
-	//Type of model for building choice during activity
-	string random <- "random";
-	string gravity <- "gravity";
-	string closest <- "closest";
 	
 	//List of demogrphic attributes
 	string AGE <- "age";
 	string SEX <- "sex";
-	string EMP <- "is_unemployed";
-	string HID <- "household_id";
-	string IID <- "individual_id";
 	
 	//number of the column for the epidemiological parameters CSV file
 	int epidemiological_csv_column_name <- 0; //Name of the parameter
