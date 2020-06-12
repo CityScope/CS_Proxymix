@@ -69,7 +69,7 @@ global{
 		write "initial_nb_infected" + initial_nb_infected;
 		write "totalNbInfection/initial_nb_infected" + totalNbInfection/initial_nb_infected;
 		list<ViralPeople> tmp<-ViralPeople where (each.has_been_infected=true);
-		list<float> tmp2 <- tmp collect (each.nb_people_infected_by_me*min((time_recovery/(0.00001+time- each.infected_time))),1);
+		list<float> tmp2 <- tmp collect (each.nb_people_infected_by_me*max((time_recovery/(0.00001+time- each.infected_time))),1);
 		write "Rooooo" + mean(tmp2);
 	}
 }
