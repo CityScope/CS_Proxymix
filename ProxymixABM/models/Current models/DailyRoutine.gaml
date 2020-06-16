@@ -28,7 +28,7 @@ global {
 	graph pedestrian_network;
 	list<room> available_offices;
 	
-	string density_scenario <- "num_people_building" among: ["data", "distance", "num_people_building", "num_people_room"];
+	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	int num_people_building <- 400;
 	float distance_people <- 2.0 #m;
 	
@@ -517,6 +517,8 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization' among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
+	parameter 'distance_people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
+
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
