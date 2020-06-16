@@ -37,24 +37,3 @@ experiment ValidatedDXF type: gui
 	}
 }
 
-
-
-experiment WorkInProgressDXF type: gui
-{   
-	init
-	{   
-
-        //create simulation with: [useCase::"SanSebastian",validator::true];
-	}
-
-	
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" ;
-
-	output
-	{	layout #split;
-		display map type: opengl
-		{
-			species dxf_element;
-		}
-	}
-}
