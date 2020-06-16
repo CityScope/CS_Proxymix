@@ -21,13 +21,14 @@ global
 	bool validator<-true;
 	geometry shape <- envelope(the_dxf_file);
 	map<string,rgb> standard_color_per_layer <- 
-	[offices::#blue,meeting_rooms::#darkblue,
+	[offices::rgb(0,0,50),meeting_rooms::rgb(0,0,75),
 	entrance::#red,elevators::#orange,
 	coffee::#green,supermarket::#darkgreen,
 	storage::#brown, furnitures::#maroon, 
-	toilets::#purple,  
+	toilets::rgb(25,25,25),  
 	walls::#gray, doors::#lightgray,
-	stairs::#white];
+	stairs::rgb(125,125,125)];
+	bool showLegend<-false;
 	
 	action initiliaze_dxf
 	{  
@@ -92,8 +93,9 @@ experiment DXFDisplay type: gui virtual:true
 	{	layout #split;
 		display floorPlan type: opengl virtual:true toolbar:false
 		{
-			species dxf_element;
+			species dxf_element position:{0,0,-0.01};
 			graphics 'legend' {
+			if(showLegend){	
 			  point legendPos<-{-world.shape.width*0.3,0};
 			  float verticalSpace <- world.shape.width * 0.015;
 			  float horizontalSpace <- world.shape.width * 0.15;
@@ -104,6 +106,8 @@ experiment DXFDisplay type: gui virtual:true
 				draw string(standard_color_per_layer.keys[i]) + ": " +length (dxf_element where (each.layer= standard_color_per_layer.keys[i]))color: standard_color_per_layer.values[i] at: {curPos.x-30#px,curPos.y+verticalSpace}+legendPos perspective: true font:font("Helvetica", 20 , #bold);
 			  }
 			}
+			}
+			
 		}
 		
 	}

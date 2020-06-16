@@ -35,11 +35,9 @@ global {
 	bool display_pedestrian_path <- false;// parameter: true;
 	bool display_free_space <- false;// parameter: true;
 	
-	
 	bool draw_flow_grid <- false;
-	
-	
 	date time_first_lunch <- nil;
+
 	
 	
 	
@@ -347,8 +345,8 @@ species room {
 	
 	aspect default {
 		draw shape color: standard_color_per_layer[type];
-		loop e over: entrances {draw square(0.1) at: e color: #magenta border: #black;}
-		loop p over: available_places {draw square(0.1) at: p.location color: #cyan border: #black;}
+		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
+		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
 	}
 }
 
@@ -419,7 +417,7 @@ species people skills: [escape_pedestrian] {
 	bool goto_entrance <- false;
 	bool go_oustide_room <- false;
 	bool is_outside;
-	rgb color <- rnd_color(255);
+	rgb color <- #white;//rnd_color(255);
 	float speed <- min(5,gauss(4,1)) #km/#h;
 	
 	
@@ -521,50 +519,28 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
-	
-	
-	
+	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
+
 	output {
 		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false{
-			species room refresh: false;
+			species room  refresh: false;
 			species building_entrance refresh: false;
 			species wall refresh: false;
 			species pedestrian_path ;
-			species people ;
+			species people;
 			species separator_ag refresh: false;
 			species flowCell;
 			graphics 'date'{
-			 point legendPos<-{-world.shape.width*0.3,0};
-			 draw string("time: " + current_date.hour + "h: " + current_date.minute+ "m") color: #white at: legendPos perspective: true font:font("Helvetica", 20 , #bold); 
+			  point legendPos<-{world.shape.width*0,0};
+			 draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: legendPos perspective: true font:font("Helvetica", 20 , #bold); 	
 		    }
 		    graphics 'simulation'{
-		    	point simulegendPos<-{-world.shape.width*0.3,world.shape.height*0.05};
-		    	 draw string("nbPeople: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
-		    	 draw string("density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    	point simulegendPos<-{world.shape.width*0,world.shape.height*0.05};
+		    	 draw string("People: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
+		    	 draw string("Density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
 		    
 		    }
 		}
 	}
 }
 
-/*experiment COVIDDailyRoutine type: gui {
-	
-	init{
-		create simulation with: [useCase::"MediaLab", unit::#cm];
-		create simulation with: [useCase::"Learning_Center",unit::#cm ];
-		//create simulation with: [useCase::"ENSAL",unit::#cm ];
-		//create simulation with: [useCase::"SanSebastian",unit::#cm ];
-	}
-	parameter 'fileName:' var: useCase category: 'file' <- "Factory" among: ["Factory", "MediaLab","Learning_Center","ENSAL","SanSebastian"];
-	parameter "unit" var: unit category: "file" <- #cm;
-	output {
-		display map synchronized: true {
-			species room;
-			species building_entrance;
-			species wall;
-			species people;
-			
-		}
-		
-	}
-}*/
