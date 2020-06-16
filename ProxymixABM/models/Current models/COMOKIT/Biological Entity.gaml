@@ -27,7 +27,9 @@ global {
 species BiologicalEntity control:fsm mirrors: people{
 	
     geometry shape<-square(2.0);
-    
+    int nb_people_infected_by_me<-0;
+    bool has_been_infected<-false;
+    float infected_time;
 	point location <- target.location update: {target.location.x,target.location.y,target.location.z};
 	//The latent period, i.e., the time between exposure and being infectious
 	float latent_period;
@@ -35,24 +37,13 @@ species BiologicalEntity control:fsm mirrors: people{
 	float presymptomatic_period;
 	//The infectious period, used as the time between onset and not being infectious for symptomatic entity, or the time after the latent period for asymptomatic ones
 	float infectious_period;
-	//Time between symptoms onset and hospitalisation of a symptomatic entity
-	float time_symptoms_to_hospitalisation <- -1.0;
 	//Time between hospitalisation and admission to intensive care unit
-	float time_hospitalisation_to_ICU <- -1.0;
-	//Time of stay in intensive care unit
-	float time_stay_ICU;
-	//Clinical status of the entity (no need hospitalisation, needing hospitalisation, needing ICU, dead, recovered)
 	string clinical_status <- no_need_hospitalisation;
-	//Define if the entity is currently being treated in a hospital (but not ICU)
-	bool is_hospitalised <- false;
-	//Define if the entity is currently admitted in ICU
-	bool is_ICU <- false;
-	//Time attribute to represent the time done in ICU
-	float time_ICU;
+	
 	//Time attribute for the different epidemiological states of the entity
 	float tick <- 0.0;
-	//Time attribute for the time before death of the entity (i.e. the time allowed between needing ICU, and death due to not having been admitted to ICU
-	float time_before_death;
+	float tick_hours -> {(tick/#hour)};
+	
 	//Boolean to determine if the agent is infected (i.e. latent, presymptomatic, symptomatic, asymptomatic)
 	bool is_infected;
 	//Boolean to determine if the agent is infectious (i.e. presymptomatic, symptomatic, asymptomatic)
@@ -61,11 +52,7 @@ species BiologicalEntity control:fsm mirrors: people{
 	bool is_asymptomatic;
 	//Boolean to determine if the agent is symptomatic
 	bool is_symptomatic;
-	//Report status of the entity if it has been tested, or not
-	string report_status <- not_tested;
-	//Number of step of the last test
-	int last_test <- 0;
-	//Age of the entity
+	//Age of the entity 
 	int age <- target.age;
 	//Factor for the beta and the basic viral release
 	float viral_factor;
@@ -75,11 +62,8 @@ species BiologicalEntity control:fsm mirrors: people{
 	float basic_viral_release;
 	//Basic contact rate of the agent (might be age-dependent, hence its presence here)
 	float contact_rate;
-
-	//Number of times negatively tested
-	int number_negative_tests <- 0;
 	
-	
+	cell current_place update: cell(location) ;
 	//#############################################################
 	//Intervention related attributes
 	//#############################################################
@@ -92,6 +76,19 @@ species BiologicalEntity control:fsm mirrors: people{
 	bool is_wearing_mask;
 	//Bool to uniquely count positive
 	bool is_already_positive <- false;
+	
+	
+	 
+	 
+	 init {
+	 	factor_contact_rate_asymptomatic <- world.get_factor_contact_rate_asymptomatic(age);
+		factor_contact_rate_wearing_mask <- world.get_factor_contact_rate_wearing_mask(age);
+		basic_viral_release <- world.get_basic_viral_release(age);
+		contact_rate <- world.get_contact_rate_human(age);
+		proba_wearing_mask <- world.get_proba_wearing_mask(age);
+		viral_factor <- world.get_viral_factor(age);
+	}
+	
 	
 
 	//#############################################################
@@ -125,8 +122,8 @@ species BiologicalEntity control:fsm mirrors: people{
 	}
 	
 	//Action to define a new case, initialising it to latent and computing its latent period, and whether or not it will be symptomatic
-	action define_new_case{
-		state <- "latent";
+	action define_new_case(string state_) {
+		state <- state_;
 		if(world.is_asymptomatic(self.age)){
 			is_symptomatic <- false;
 			latent_period <- world.get_incubation_period_asymptomatic(self.age);
@@ -135,23 +132,40 @@ species BiologicalEntity control:fsm mirrors: people{
 			presymptomatic_period <- world.get_serial_interval(self.age);
 			latent_period <- presymptomatic_period<0?world.get_incubation_period_symptomatic(self.age)+presymptomatic_period:world.get_incubation_period_symptomatic(self.age);
 		}
+		
 	}
 	
+
+	
 	//Reflex to trigger transmission to other individuals and environmental contamination
-	reflex infect_others when: is_infectious
+	reflex infect_others when: is_infectious and not target.is_outside
 	{
-		//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
-		float reduction_factor <- 1.0;
+			//Computation of the reduction of the transmission when being asymptomatic/presymptomatic and/or wearing mask
+		float reduction_factor <- viral_factor;
 		if(is_asymptomatic)
 		{
 			reduction_factor <- reduction_factor * factor_contact_rate_asymptomatic;
+		}
+		if(is_wearing_mask)
+		{
+			reduction_factor <- reduction_factor * factor_contact_rate_wearing_mask;
+		}
+		
+		//Performing environmental contamination
+		if(current_place!=nil)and(allow_transmission_building)
+		{
+			ask current_place
+			{
+				do add_viral_load(reduction_factor*myself.basic_viral_release);
+			}
 		}
 		
 		//Perform human to human transmission
 		if allow_transmission_human {
 			float proba <- contact_rate*reduction_factor;
+			
 			list<BiologicalEntity> others <- BiologicalEntity at_distance infectionDistance;
-			others <- others where (each.state = susceptible);
+			others <- others where ((each.state = susceptible) and not each.target.is_outside);
 			ask others {
 				geometry line <- line([myself,self]);
 				if empty(wall overlapping line) {
@@ -159,7 +173,8 @@ species BiologicalEntity control:fsm mirrors: people{
 						proba <- proba * (1 - diminution_infection_rate_separator);
 					}
 					if (flip(proba)) {
-	        			do define_new_case;
+						
+	        			do define_new_case(latent);
 		            	ask (cell overlapping self.target){
 							nbInfection<-nbInfection+1;
 							if(firstInfectionTime=0){
@@ -174,25 +189,13 @@ species BiologicalEntity control:fsm mirrors: people{
 		
 	}
 	
-	
-	//Reflex to update the time before death when an entity need to be admitted in ICU, but is not in ICU
-	reflex update_time_before_death when: (clinical_status = need_ICU) and (is_ICU = false) {
-		time_before_death <- time_before_death -1;
-		if(time_before_death<=0){
-			clinical_status <- dead;
-			state <- removed;
-		}
-	}
-	//Reflex used to update the time in ICU of the entity, and change the entity status accordingly
-	reflex update_time_in_ICU when: (clinical_status = need_ICU) and (is_ICU = true) {
-		time_ICU <- time_ICU -1;
-		if(time_ICU<=0){
-			//In the case of the entity being treated in ICU, but still dying
-			if(world.is_fatal(self.age)){
-				clinical_status <- dead;
-				state <- removed;
-			}else{
-				clinical_status <- need_hospitalisation;
+	//Reflex to update disease cycle
+	reflex update_epidemiology when:(state!=removed) {
+		if(allow_transmission_building and (not is_infected)and(self.current_place!=nil))
+		{
+			if(flip(current_place.viral_load*successful_contact_rate_building))
+			{
+				do define_new_case(latent);
 			}
 		}
 	}
@@ -213,11 +216,11 @@ species BiologicalEntity control:fsm mirrors: people{
 			tick <- 0.0;
 			do set_status;
 		}
-		tick <- tick+1;
+		tick <- tick+ step;
 		
-		transition to: symptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period>=0);
-		transition to: presymptomatic when: (tick>=latent_period) and (self.is_symptomatic) and (presymptomatic_period<0);
-		transition to: asymptomatic when: (tick>=latent_period) and (self.is_symptomatic=false);
+		transition to: symptomatic when: (tick_hours>=latent_period) and (self.is_symptomatic) and (presymptomatic_period>=0);
+		transition to: presymptomatic when: (tick_hours>=latent_period) and (self.is_symptomatic) and (presymptomatic_period<0);
+		transition to: asymptomatic when: (tick_hours>=latent_period) and (self.is_symptomatic=false);
 	}
 	//State when the entity is presymptomatic
 	state presymptomatic {
@@ -226,8 +229,8 @@ species BiologicalEntity control:fsm mirrors: people{
 			do set_status;
 			presymptomatic_period <- abs(presymptomatic_period);
 		}
-		tick <- tick+1;
-		transition to: symptomatic when: (tick>=presymptomatic_period);
+		tick <- tick+step;
+		transition to: symptomatic when: (tick_hours>=presymptomatic_period);
 	}
 	//State when the entity is symptomatic
 	state symptomatic {
@@ -235,48 +238,16 @@ species BiologicalEntity control:fsm mirrors: people{
 			tick <- 0.0;
 			do set_status;
 			infectious_period <- world.get_infectious_period_symptomatic(self.age);
-			if(world.is_hospitalised(self.age)){
-				//Compute the time before hospitalisation knowing the current biological status of the agent
-				time_symptoms_to_hospitalisation <- world.get_time_onset_to_hospitalisation(self.age,self.infectious_period);
-				if(time_symptoms_to_hospitalisation>infectious_period)
-				{
-					time_symptoms_to_hospitalisation <- infectious_period;
-				}
-				//Check if the Individual will need to go to ICU
-				if(world.is_ICU(self.age))
-				{
-					//Compute the time before going to ICU once hospitalised
-					time_hospitalisation_to_ICU <- world.get_time_hospitalisation_to_ICU(self.age, self.time_symptoms_to_hospitalisation);
-					time_stay_ICU <- world.get_time_ICU(self.age);
-					if(time_symptoms_to_hospitalisation+time_hospitalisation_to_ICU>=infectious_period)
-					{
-						time_symptoms_to_hospitalisation <- infectious_period-time_hospitalisation_to_ICU;
-					}
-				}
-			}	
 		}
-		tick <- tick+1;
-		if(tick>=time_symptoms_to_hospitalisation)and(clinical_status=no_need_hospitalisation)and(time_symptoms_to_hospitalisation>0){
-			clinical_status <- need_hospitalisation;
-		}
-		
-		if(tick>=time_hospitalisation_to_ICU+time_symptoms_to_hospitalisation)and(time_hospitalisation_to_ICU>0){
-			clinical_status <- need_ICU;
-			time_before_death <- time_stay_ICU;
-			time_ICU <- time_stay_ICU;
-		}
+		tick <- tick+ step;
 		
 		
-		transition to: removed when: (tick>=infectious_period){
+		transition to: removed when: (tick_hours>=infectious_period){
 			if(clinical_status=no_need_hospitalisation){
 				clinical_status <- recovered;
 			}else{
-				//In case no hospital is taking care of the entity
-				if(is_hospitalised=false){
-					if(clinical_status=need_hospitalisation)and(time_hospitalisation_to_ICU<0){
-						clinical_status <- recovered;
-					}
-				}
+				clinical_status <- recovered;
+		
 			}
 		}
 	}
@@ -288,8 +259,8 @@ species BiologicalEntity control:fsm mirrors: people{
 			do set_status;
 			infectious_period <- world.get_infectious_period_asymptomatic(self.age);
 		}
-		tick <- tick+1;
-		transition to:removed when: (tick>=infectious_period){
+		tick <- tick+ step;
+		transition to:removed when: (tick_hours>=infectious_period){
 			clinical_status <- recovered;
 		}
 	}
