@@ -37,6 +37,8 @@ global {
 	
 	bool draw_flow_grid <- false;
 	date time_first_lunch <- nil;
+	
+	float R0;
 
 	
 	
@@ -541,6 +543,10 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 		    	 draw string("People: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
 		    	 draw string("Density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
 		    
+		    }
+		    graphics 'date'{
+			  point legendPos<-{world.shape.width*0,0};
+			  draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: legendPos perspective: true font:font("Helvetica", 20 , #bold); 	
 		    }
 		}
 	}

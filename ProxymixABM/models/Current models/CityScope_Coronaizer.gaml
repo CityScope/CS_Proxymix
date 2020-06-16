@@ -64,13 +64,13 @@ global{
 	}
 	
 	reflex computeRo when: (cycle mod 100 = 0){
-		write "yo je suis le Ro ";
+		/*write "yo je suis le Ro ";
 		write "nbInfection" + totalNbInfection;
 		write "initial_nb_infected" + initial_nb_infected;
-		write "totalNbInfection/initial_nb_infected" + totalNbInfection/initial_nb_infected;
+		write "totalNbInfection/initial_nb_infected" + totalNbInfection/initial_nb_infected;*/
 		list<ViralPeople> tmp<-ViralPeople where (each.has_been_infected=true);
 		list<float> tmp2 <- tmp collect (each.nb_people_infected_by_me*max((time_recovery/(0.00001+time- each.infected_time))),1);
-		write "Rooooo" + mean(tmp2);
+		R0<- mean(tmp2);
 	}
 }
 
@@ -187,13 +187,17 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	  	}	
 	  	
 	  	graphics "infectiousStatus"{
-	  		point infectiousLegendPos<-{0,0};
+	  		point infectiousLegendPos<-{world.shape.width*0.4,0};
 	  		point textOffSet<-{0,20#px};
 	  		draw "S:" + nb_susceptible color: #green at: infectiousLegendPos perspective: true font:font("Helvetica", 20 , #plain); 
 	  		draw "I:" + nb_infected color: #red at: infectiousLegendPos+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
 	  		draw "R:" + nb_recovered color: #blue at: infectiousLegendPos+textOffSet+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
 	  		
 	  	}
+	  	 graphics 'ro'{
+			  point roPos<-{0,world.shape.height*1.1};
+			  draw string("Ro: " + R0) color: #white at: roPos perspective: true font:font("Helvetica", 20 , #bold); 	
+		 }
 	  }	
 	 display CoronaChart refresh:every(#mn) toolbar:false {
 		//chart "Population in "+cityScopeCity type: series x_serie_labels: (current_day) x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
