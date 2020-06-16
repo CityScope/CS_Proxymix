@@ -120,6 +120,7 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	//float minimum_cycle_duration<-0.02;
 	parameter "Infection distance:" category: "Policy" var:infectionDistance min: 1.0 max: 100.0 step:1;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1;
+	parameter "Separator" category: "Policy" var: separator_proba <- 0.5 min:0.0 max:1.0;
 	bool a_boolean_to_disable_parameters <- true;
 	parameter "Disable following parameters" category:"Corona" var: a_boolean_to_disable_parameters disables: [time_recovery,infection_rate,initial_nb_infected,step];
 	parameter "Nb recovery day"   category: "Corona" var:number_day_recovery min: 1 max: 30;

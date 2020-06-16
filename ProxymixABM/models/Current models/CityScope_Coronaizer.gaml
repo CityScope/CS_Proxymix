@@ -18,7 +18,7 @@ global{
 	bool a_boolean_to_disable_parameters <- true;
     int number_day_recovery<-10;
 	int time_recovery<-1440*number_day_recovery*60;
-	float infection_rate<-0.005;
+	float infection_rate<-0.05;
 	int initial_nb_infected<-5;
 	float step<-1#mn;
 	int totalNbInfection;
