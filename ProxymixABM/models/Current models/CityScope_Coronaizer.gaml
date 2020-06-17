@@ -19,7 +19,7 @@ global{
     int number_day_recovery<-10;
 	int time_recovery<-1440*number_day_recovery*60;
 	float infection_rate<-0.05;
-	int initial_nb_infected<-5;
+	int initial_nb_infected<-10;
 	float step<-1#mn;
 	int totalNbInfection;
 	
@@ -44,7 +44,7 @@ global{
 			
 	}
 	
-	reflex initCovid when:cycle=2{
+	reflex initCovid when:cycle=10{
 		ask initial_nb_infected among ViralPeople{
 			has_been_infected<-true;
 			is_susceptible <-  false;

@@ -18,13 +18,14 @@ global
 experiment ValidatedDXF type: gui
 {   
 	init
-	{   create simulation with: [useCase::"ENSAL"];
+	{   create simulation with: [useCase::"CityScience"];
+		create simulation with: [useCase::"ENSAL"];
 		create simulation with: [useCase::"Hotel-Dieu"];
 		create simulation with: [useCase::"Factory"];
 		create simulation with: [useCase::"Learning_Center"];
 		create simulation with: [useCase::"SanSebastian"];
 	}
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
 	output
 	{	layout #split;
 		display map type: opengl background:#black toolbar:false draw_env:false

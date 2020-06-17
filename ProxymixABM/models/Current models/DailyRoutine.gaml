@@ -516,10 +516,10 @@ grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/20
 
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization' among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
-	parameter 'distance_people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter 'distance_people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 4.0#m;
 
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
