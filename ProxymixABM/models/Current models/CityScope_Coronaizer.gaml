@@ -7,6 +7,8 @@
 
 model CityScopeCoronaizer
 
+
+
 import "DailyRoutine.gaml"
 
 global{
