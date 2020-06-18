@@ -21,7 +21,7 @@ global {
 	
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
-	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp");
+	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp", gama.pref_gis_default_crs);
 	date starting_date <- date([2020,4,6,7]);
 	float peopleDensity<-1.0;
 	geometry shape <- envelope(the_dxf_file);
