@@ -17,7 +17,7 @@ global {
 	bool change_step <- false update: false;
 	
 	float step <- normal_step on_change: {change_step <- true;};
-	float separator_proba <- 0.0;
+	float separator_proba <- 0.5;
 	
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
@@ -28,7 +28,7 @@ global {
 	graph pedestrian_network;
 	list<room> available_offices;
 	
-	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	string density_scenario <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	int num_people_building <- 400;
 	float distance_people <- 2.0 #m;
 	
@@ -59,6 +59,8 @@ global {
 				create room with: [shape::polygon(se.points), type::type] ;
 			}
 		} 
+		
+		
 		if (density_scenario = "num_people_building") {
 			list<room> offices_list <- room where (each.type = offices);
 			float tot_area <- offices_list sum_of each.shape.area;
@@ -78,13 +80,16 @@ global {
 				}
 			}
 			
-		}
-		
-		
+		} 
 		
 		ask room + building_entrance {
 			do intialization;
 		}
+		
+		ask dxf_element {
+			do die;
+		}
+		
 		ask wall {
 			if not empty((room + building_entrance) inside self ) {
 				shape <- shape.contour;
@@ -101,13 +106,20 @@ global {
 		ask room + building_entrance{
 			geometry contour <- nil;
 			float dist <-0.3;
+			int cpt <- 0;
 			loop while: contour = nil {
+				cpt <- cpt + 1;
 				contour <- copy(shape.contour);
 				ask wall at_distance 1.0 {
 					contour <- contour - (shape +dist);
 				}
-				ask (room + building_entrance) at_distance 1.0 {
-					contour <- contour - (shape + dist);
+				if cpt < 10 {
+					ask (room + building_entrance) at_distance 1.0 {
+						contour <- contour - (shape + dist);
+					}
+				}
+				if cpt = 20 {
+					break;
 				}
 				dist <- dist * 0.5;	
 			} 
@@ -160,6 +172,8 @@ global {
 				init_place <- shape;
 			}
 		}
+		
+		
 	}	
 	
 	action initialize_pedestrian_model {
@@ -284,7 +298,57 @@ species room {
 	
 	action intialization {
 		list<geometry> squares;
-		if (density_scenario = "distance") or (type != offices) {
+		map<geometry, place_in_room> pr;
+		
+		list<dxf_element> chairs_dxf <-  dxf_element where (each.layer = chairs);
+		
+		if (density_scenario = "data") {
+			if empty( chairs_dxf ) {
+				do error("Data density scenario requires to have a chair layer");
+			} else {
+				
+				loop d over: chairs_dxf overlapping self{
+				create place_in_room  {
+					location <-d.location;
+					if length(place_in_room) > 1 {
+						if (place_in_room closest_to self) distance_to self < 0.2 {
+							do die;
+						}
+					}
+					if not dead(self) {
+						myself.places << self;
+					}
+					
+					}
+				}
+				room the_room <- self;
+				if (separator_proba > 0) and (length(places) > 1) {
+					list<pair<place_in_room,place_in_room>> already;
+					ask places {
+						ask myself.places at_distance 2.0 {
+							if (self distance_to myself) > 0.1 {
+								if not ((self::myself) in already) {
+									if flip(separator_proba) {
+										point cent <- mean(location, myself.location);
+										if empty(separator_ag overlapping line([location, myself.location])) {
+											geometry sep <- line([cent - {0,0.5,0}, cent + {0,0.5,0}]);
+											sep <- ((sep rotated_by ((myself towards self))) + 0.05) inter the_room;
+											create separator_ag with: [shape::sep,places_concerned::[myself,self]];
+											already <<myself::self;
+										}
+										
+									}
+								}
+								
+							}
+						}
+					}
+				} 
+			}
+			
+			
+		} 
+		else if (density_scenario = "distance") or (type != offices) {
 			squares <-  to_squares(shape, distance_people, true) where (each.location overlaps shape);
 		}
 		else if density_scenario in ["num_people_building", "num_people_room"] {
@@ -297,8 +361,7 @@ species room {
 				squares <- num_places among squares;
 			}
 		} 
-		if not empty(squares) {
-			map<geometry, place_in_room> pr;
+		if not empty(squares) and  density_scenario != "data"{
 			loop g over: squares{
 				create place_in_room {
 					location <- g.location;
@@ -313,7 +376,6 @@ species room {
 					myself.places << self;
 				}
 			} 
-			
 			if (length(places) > 1 and separator_proba > 0.0) {
 				graph g <- as_intersection_graph(squares, 0.01);
 				list<list<place_in_room>> ex;
@@ -329,11 +391,11 @@ species room {
 							create separator_ag with: [shape::sep,places_concerned::[pr1,pr2]];
 						}
 					}
-				}
+				} 
 			}
-					
-			available_places <- copy(places);
+			
 		}
+		available_places <- copy(places);
 	
 	}
 	bool is_available {
