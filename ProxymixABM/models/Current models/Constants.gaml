@@ -17,11 +17,13 @@ global {
 	string meeting_rooms <- "Meeting rooms";
 	string coffee <- "Coffee";
 	string storage <- "Storage";	
-	string furnitures <- "Furnitures";
+	string furnitures <- "Furniture";
 	string toilets <- "Toilets";
 	string elevators <- "Elevators";
 	string stairs <- "Stairs";
 	string doors <- "Doors";
+	string chairs <- "Chair";
+
 	
 	string going_home <- "going home";
 	string eating_outside <-"eating outside";

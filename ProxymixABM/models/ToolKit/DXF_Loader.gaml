@@ -27,7 +27,8 @@ global
 	storage::#brown, furnitures::#maroon, 
 	toilets::rgb(25,25,25),  
 	walls::#gray, doors::#lightgray,
-	stairs::rgb(125,125,125)];
+	stairs::rgb(125,125,125),
+	chairs::rgb(125,125,125)];
 	bool showLegend<-false;
 	
 	action initiliaze_dxf
