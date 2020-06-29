@@ -7,7 +7,6 @@
 
 model CityScopeCoronaizer
 
-
 import "COMOKIT/Biological Entity.gaml"
 import "DailyRoutine.gaml" 
 

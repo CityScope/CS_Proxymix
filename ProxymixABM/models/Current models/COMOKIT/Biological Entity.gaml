@@ -17,7 +17,6 @@ import "../CityScope_Coronaizer_COMOKIT.gaml"
 import "../DailyRoutine.gaml"
 import "Functions.gaml"
 
-
 global {
 	
 }

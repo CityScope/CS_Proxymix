@@ -25,7 +25,6 @@ global{
 	int totalNbInfection;
 	
 	bool drawInfectionGraph <- false;
-	bool drawSocialDistanceGraph <- false;
 	bool draw_infection_grid <- false;
 	bool showPeople<-true;
 	
@@ -38,7 +37,7 @@ global{
 	int nb_infected <- 0 update: length(ViralPeople where (each.is_infected));
 	int nb_recovered <- 0 update: length(ViralPeople where (each.is_recovered));
 	graph<people, people> infection_graph <- graph<people, people>([]);
-	graph<people, people> social_distance_graph <- graph<people, people>([]);
+
 
 	
 	init{
@@ -55,9 +54,7 @@ global{
 		}
 		
 	}
-	reflex updateGraph when: (drawSocialDistanceGraph = true) {
-		social_distance_graph <- graph<people, people>(people as_distance_graph (infectionDistance));
-	}
+
 	
 	
 	reflex increaseRate when:cycle= 1440*7{
@@ -153,8 +150,6 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	parameter "Nb recovery day"   category: "Corona" var:number_day_recovery min: 1 max: 30;
 	parameter "Infection Rate"   category: "Corona" var:infection_rate min:0.0 max:1.0;
 	parameter "Initial Infected"   category: "Corona" var: initial_nb_infected min:0 max:100;
-	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
-	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
 	parameter "Draw Infection Grid:" category: "Visualization" var:draw_infection_grid;
 	parameter "Show People:" category: "Visualization" var:showPeople;
@@ -174,15 +169,7 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 
 				}
 			}
-		graphics "social_graph" {
-				if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
-					loop eg over: social_distance_graph.edges {
-						geometry edge_geom <- geometry(eg);
-						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#gray;
-					}
 
-				}
-		}
 		graphics "text" {
 	      //draw "day" + string(current_day) + " - " + string(current_hour) + "h" color: #gray font: font("Helvetica", 25, #italic) at:{world.shape.width * 0.8, world.shape.height * 0.975};
 	  	}	

@@ -10,6 +10,7 @@ model COVID
 import "Constants.gaml"
 import "./../ToolKit/DXF_Loader.gaml" 
 
+
 global {
 	//string dataset <- "MediaLab";
 	float normal_step <- 1#s;
@@ -17,7 +18,7 @@ global {
 	bool change_step <- false update: false;
 	
 	float step <- normal_step on_change: {change_step <- true;};
-	float separator_proba <- 0.5;
+	float separator_proba <- 0.0;
 	
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
@@ -28,7 +29,7 @@ global {
 	graph pedestrian_network;
 	list<room> available_offices;
 	
-	string density_scenario <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	int num_people_building <- 400;
 	float distance_people <- 2.0 #m;
 	
@@ -38,6 +39,8 @@ global {
 	bool draw_flow_grid <- false;
 	date time_first_lunch <- nil;
 	
+	bool drawSocialDistanceGraph <- false;
+	graph<people, people> social_distance_graph <- graph<people, people>([]);
 	float R0;
 
 	
@@ -140,7 +143,6 @@ global {
 			}
 		}
 		
-	
 		create working;
 		create going_home_act with:[activity_places:: building_entrance as list];
 		create eating_outside_act with:[activity_places:: building_entrance as list];
@@ -261,13 +263,16 @@ global {
 	{	
 		  do create_people(rnd(0,min(3, length(available_offices))));
 	}
+	reflex updateGraph when: (drawSocialDistanceGraph = true) {
+		social_distance_graph <- graph<people, people>(people as_distance_graph (distance_people - 0.1#m));
+	}
 }
 
 species pedestrian_path skills: [pedestrian_road] {
 	aspect default {
 		if (display_pedestrian_path) {
 			if(display_free_space and free_space != nil) {draw free_space color: #lightpink border: #black;}
-			draw shape color: #red;
+			draw shape color: #red width:2;
 		}
 		
 	}
@@ -487,8 +492,9 @@ species people skills: [escape_pedestrian] {
 	
 	aspect default {
 		if not is_outside{
-			draw circle(0.3) color:color border: #black;
+			draw sphere(0.3) color:color;// border: #black;
 		}
+		//draw obj_file(dataset_path+"/Obj/man.obj",-90::{1,0,0}) color:#gamablue size:2 rotate:heading+90;
 	}
 	
 	
@@ -578,11 +584,12 @@ grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/20
 
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter "num_people_building" var: density_scenario category:'Initialization' among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
-	parameter 'distance_people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 4.0#m;
-
+	parameter 'distance_people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 3.0#m;
+	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
+	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
@@ -593,23 +600,31 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species building_entrance refresh: false;
 			species wall refresh: false;
 			species pedestrian_path ;
-			species people;
+			species people position:{0,0,0.001};
 			species separator_ag refresh: false;
 			species flowCell;
-			graphics 'date'{
-			  point legendPos<-{world.shape.width*0,0};
-			 draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: legendPos perspective: true font:font("Helvetica", 20 , #bold); 	
-		    }
+
 		    graphics 'simulation'{
-		    	point simulegendPos<-{world.shape.width*0,world.shape.height*0.05};
+		    	point simulegendPos<-{world.shape.width*0,-world.shape.width*0.1};
 		    	 draw string("People: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
-		    	 draw string("Density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
-		    
+		    	 draw string("Distance: " + distance_people + "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    	 draw string("Density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+40#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    	 draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+60#px} perspective: true font:font("Helvetica", 20 , #bold);	    
 		    }
-		    graphics 'date'{
-			  point legendPos<-{world.shape.width*0,0};
-			  draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: legendPos perspective: true font:font("Helvetica", 20 , #bold); 	
+		     graphics 'simulation2'{
+		    	point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};
+		    	 draw string("Offices: " + length(dxf_element where each.layer="Offices")) color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	    
 		    }
+
+		    		graphics "social_graph" {
+				if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
+					loop eg over: social_distance_graph.edges {
+						geometry edge_geom <- geometry(eg);
+						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#gray;
+					}
+
+				}
+		}
 		}
 	}
 }
