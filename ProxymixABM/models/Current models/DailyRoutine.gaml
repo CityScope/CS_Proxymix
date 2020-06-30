@@ -31,20 +31,34 @@ global {
 	
 	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	int num_people_building <- 400;
-	float distance_people <- 2.0 #m;
+	float distance_people;
 	
 	bool display_pedestrian_path <- false;// parameter: true;
 	bool display_free_space <- false;// parameter: true;
 	
 	bool draw_flow_grid <- false;
+	bool draw_proximity_grid <- false;
+	bool showAvailableDesk<-true;
+	
+	bool parallel <- false; // use parallel computation
+	
+
+	float proximityCellSize <- 0.5; // size of the cells (in meters)
+	bool use_masked_by <- false; //far slower, but useful to obtain more realistic map
+	float precision <- 120.0; //only necessary when using masked_by operator
+	
 	date time_first_lunch <- nil;
 	
 	bool drawSocialDistanceGraph <- false;
 	graph<people, people> social_distance_graph <- graph<people, people>([]);
 	float R0;
 
-	
-	
+	//SPATIO TEMPORAL VALUES COMMPUETD ONLY ONES
+	int nbOffices;	
+	float officeArea;
+	int nbMeetingRooms;
+	float meetingRoomsArea;	
+		    			
 	
 	init {
 		validator <- false;
@@ -175,7 +189,16 @@ global {
 			}
 		}
 		
+		ask wall {
+			ask proximityCell overlapping self{
+				is_walking_area <- false;
+			}
+		}
 		
+		nbOffices<-(room count (each.type="Offices"));
+		officeArea<-sum((room where (each.type="Offices")) collect each.shape.area);
+		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
+		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
 	}	
 	
 	action initialize_pedestrian_model {
@@ -235,7 +258,15 @@ global {
 		
 	}
 	
+	reflex reset_proximity_cell when: draw_proximity_grid {
+		ask proximityCell parallel: parallel{
+			nb_interactions <- 0;	
+		}
+
+	}
+	
 	reflex change_step {
+		
 		if (current_date.hour >= 7 and current_date.minute > 3 and empty(people where (each.target != nil)))  {
 			step <- fast_step;
 		}
@@ -268,7 +299,7 @@ global {
 	}
 }
 
-species pedestrian_path skills: [pedestrian_road] {
+species pedestrian_path skills: [pedestrian_road] frequency: 0{
 	aspect default {
 		if (display_pedestrian_path) {
 			if(display_free_space and free_space != nil) {draw free_space color: #lightpink border: #black;}
@@ -401,6 +432,7 @@ species room {
 			
 		}
 		available_places <- copy(places);
+		
 	
 	}
 	bool is_available {
@@ -416,6 +448,10 @@ species room {
 		draw shape color: standard_color_per_layer[type];
 		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
 		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
+		if(showAvailableDesk){
+		  draw string(length(available_places)) at: {location.x-20#px,location.y} color:#white font:font("Helvetica", 20 , #bold); 	
+		}
+		
 	}
 }
 
@@ -474,7 +510,7 @@ species place_in_room {
 	float dists;
 }
 
-species people skills: [escape_pedestrian] {
+species people skills: [escape_pedestrian] parallel: parallel{
 	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
 	room working_place;
 	map<date, activity> agenda_day;
@@ -488,6 +524,7 @@ species people skills: [escape_pedestrian] {
 	bool is_outside;
 	rgb color <- #white;//rnd_color(255);
 	float speed <- min(5,gauss(4,1)) #km/#h;
+	
 	
 	
 	aspect default {
@@ -567,6 +604,30 @@ species people skills: [escape_pedestrian] {
 			}	
 		}
  	}
+ 	reflex when: draw_proximity_grid and not empty(people at_distance (distance_people/2)){
+		geometry geom <- circle(distance_people) ;
+		list<wall> ws <- wall at_distance (distance_people);
+		if not empty(ws) {
+			if (use_masked_by) {
+				geom <- geom masked_by (ws, precision);
+			} else {
+				ask ws {
+					geom <- geom - self;
+					if (geom = nil) {break;}
+					geom <- geom.geometries first_with (each overlaps myself);
+				}
+				
+			}
+			
+		}
+		if (geom != nil) {
+			ask proximityCell overlapping geom {
+				nb_interactions <- nb_interactions + 2;
+			}
+		}
+		
+ 	}
+	
 }
 
 grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/200  {
@@ -582,38 +643,62 @@ grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/20
 }
 
 
+grid proximityCell cell_width: proximityCellSize cell_height:proximityCellSize frequency: 0 use_neighbors_cache: false
+use_regular_agents: false
+{
+	rgb color <- #white;
+	int nb_interactions ;
+	bool is_walking_area <- true;
+	aspect default{
+		if (draw_proximity_grid and is_walking_area){
+			if(nb_interactions>1){
+				  draw shape color:blend(#red,#cyan, nb_interactions/10);//  depth:nb_interactions/1000;		
+			}
+		}
+	}	
+}
+
+
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
-	parameter 'distance_people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 3.0#m;
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.5#m;
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
 	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
+	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
+	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-true;
+	
 
 	output {
-		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false{
-			species room  refresh: false;
+		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false
+		camera_pos: {53.6625,6.2866,93.9839} camera_look_pos: {53.6625,6.285,0.0} camera_up_vector: {0.0,1.0,0.0}
+		{
+			species room  refresh: true;
 			species building_entrance refresh: false;
 			species wall refresh: false;
 			species pedestrian_path ;
 			species people position:{0,0,0.001};
 			species separator_ag refresh: false;
 			species flowCell;
+			species proximityCell;
 
 		    graphics 'simulation'{
 		    	point simulegendPos<-{world.shape.width*0,-world.shape.width*0.1};
-		    	 draw string("People: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
+		    	 //draw string("People: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
 		    	 draw string("Distance: " + distance_people + "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
-		    	 draw string("Density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+40#px} perspective: true font:font("Helvetica", 20 , #bold);
-		    	 draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+60#px} perspective: true font:font("Helvetica", 20 , #bold);	    
+		    	 //draw string("Density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+40#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    	 //draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+60#px} perspective: true font:font("Helvetica", 20 , #bold);	    
 		    }
 		     graphics 'simulation2'{
-		    	point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};
-		    	 draw string("Offices: " + length(dxf_element where each.layer="Offices")) color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	    
+		    	point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
+		    	 draw string("Nb Offices: " + nbOffices +  " - " +  with_precision(officeArea, 2)+ "m2") color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	
+		    	 draw string("Nb Meeting rooms: " + nbMeetingRooms +  " - " + with_precision(meetingRoomsArea,2) + "m2") color: #white at: {simulegendPo2s.x,simulegendPo2s.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    	     
 		    }
 
 		    		graphics "social_graph" {
@@ -626,6 +711,28 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 				}
 		}
 		}
+	}
+}
+
+experiment multiAnalysis type: gui parent:DailyRoutine
+{   
+	init
+	{  
+		create simulation with: [useCase::"CUCS",distance_people::2.0#m];
+		create simulation with: [useCase::"CUCS",distance_people::2.5#m];
+		create simulation with: [useCase::"CUCS",distance_people::3.0#m];
+
+	}
+	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
+	output
+	{	/*layout #split;
+		display map type: opengl background:#black toolbar:false draw_env:false
+		{
+			species dxf_element;
+			graphics 'legend'{
+			  draw useCase color: #white at: {-world.shape.width*0.1,-world.shape.height*0.1} perspective: true font:font("Helvetica", 20 , #bold);
+			}
+		}*/
 	}
 }
 
