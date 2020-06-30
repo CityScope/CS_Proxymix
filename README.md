@@ -13,3 +13,6 @@
       - In "Optional components of GAMA" choose "Pedestrian" and click next to install it
 
 https://youtu.be/SrVCloReDAI
+
+# Documentation
+Please use this [link](https://github.com/CityScope/CS_Proxymix/wiki) to see how to use the tool and especially how to produce autocad file input
