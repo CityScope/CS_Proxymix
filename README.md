@@ -1,6 +1,6 @@
-This is the official repository for Proxymix projet. The original proxymix projet for the MediaLab use case has been archived and this current reposetory is exploring the analysis of space and behavior of people.
+This is the official repository for Proxymix projet. The original proxymix projet for the MediaLab use case has been archived and this current reposetory is exploring the analysis of space and behavior of people. Don't hesitate to contribute or ask question through the [github issues](https://github.com/CityScope/CS_Proxymix/issues) 
 
-**NB: We are currently focusing on post-covid application but this project aims to be generic enough to be used for any other project related to ABM in an architectural space.**
+**NB: We are currently focusing on post-covid application but this project is generic enough to be used for any other project related to ABM in an architectural space.**
 
 # Installation
   - Clone this repository (clicking on the green Clone or Download button on this page -  to manage your repo you can also install GitHUb Desktop (https://desktop.github.com/) on your computer) 
@@ -17,3 +17,5 @@ https://youtu.be/SrVCloReDAI
 
 # Documentation
 Please use this [link](https://github.com/CityScope/CS_Proxymix/wiki) to see how to use the tool and especially how to produce autocad file input
+
+
