@@ -38,6 +38,7 @@ global {
 	
 	bool draw_flow_grid <- false;
 	bool draw_proximity_grid <- false;
+	bool showAvailableDesk<-true;
 	
 	bool parallel <- false; // use parallel computation
 	
@@ -447,6 +448,10 @@ species room {
 		draw shape color: standard_color_per_layer[type];
 		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
 		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
+		if(showAvailableDesk){
+		  draw string(length(available_places)) at: {location.x-20#px,location.y} color:#white font:font("Helvetica", 20 , #bold); 	
+		}
+		
 	}
 }
 
@@ -617,7 +622,7 @@ species people skills: [escape_pedestrian] parallel: parallel{
 		}
 		if (geom != nil) {
 			ask proximityCell overlapping geom {
-				nb_interactions <- nb_interactions + 1;
+				nb_interactions <- nb_interactions + 2;
 			}
 		}
 		
@@ -656,7 +661,7 @@ use_regular_agents: false
 
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.5#m;
@@ -666,10 +671,14 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
 	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
+	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-true;
+	
 
 	output {
-		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false{
-			species room  refresh: false;
+		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false
+		camera_pos: {53.6625,6.2866,93.9839} camera_look_pos: {53.6625,6.285,0.0} camera_up_vector: {0.0,1.0,0.0}
+		{
+			species room  refresh: true;
 			species building_entrance refresh: false;
 			species wall refresh: false;
 			species pedestrian_path ;
@@ -680,15 +689,15 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 
 		    graphics 'simulation'{
 		    	point simulegendPos<-{world.shape.width*0,-world.shape.width*0.1};
-		    	 draw string("People: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
+		    	 //draw string("People: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
 		    	 draw string("Distance: " + distance_people + "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
-		    	 draw string("Density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+40#px} perspective: true font:font("Helvetica", 20 , #bold);
-		    	 draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+60#px} perspective: true font:font("Helvetica", 20 , #bold);	    
+		    	 //draw string("Density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+40#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    	 //draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+60#px} perspective: true font:font("Helvetica", 20 , #bold);	    
 		    }
 		     graphics 'simulation2'{
 		    	point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
-		    	 draw string("Offices: " + nbOffices +  " - " +  with_precision(officeArea, 2)+ "m2") color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	
-		    	 draw string("Meeting rooms: " + nbMeetingRooms +  " - " + with_precision(meetingRoomsArea,2) + "m2") color: #white at: {simulegendPo2s.x,simulegendPo2s.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    	 draw string("Nb Offices: " + nbOffices +  " - " +  with_precision(officeArea, 2)+ "m2") color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	
+		    	 draw string("Nb Meeting rooms: " + nbMeetingRooms +  " - " + with_precision(meetingRoomsArea,2) + "m2") color: #white at: {simulegendPo2s.x,simulegendPo2s.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
 		    	     
 		    }
 
@@ -702,6 +711,28 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 				}
 		}
 		}
+	}
+}
+
+experiment multiAnalysis type: gui parent:DailyRoutine
+{   
+	init
+	{  
+		create simulation with: [useCase::"CUCS",distance_people::2.0#m];
+		create simulation with: [useCase::"CUCS",distance_people::2.5#m];
+		create simulation with: [useCase::"CUCS",distance_people::3.0#m];
+
+	}
+	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
+	output
+	{	/*layout #split;
+		display map type: opengl background:#black toolbar:false draw_env:false
+		{
+			species dxf_element;
+			graphics 'legend'{
+			  draw useCase color: #white at: {-world.shape.width*0.1,-world.shape.height*0.1} perspective: true font:font("Helvetica", 20 , #bold);
+			}
+		}*/
 	}
 }
 
