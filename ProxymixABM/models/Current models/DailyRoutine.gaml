@@ -31,18 +31,17 @@ global {
 	
 	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	int num_people_building <- 400;
-	float distance_people <- 2.0 #m;
+	float distance_people;
 	
 	bool display_pedestrian_path <- false;// parameter: true;
 	bool display_free_space <- false;// parameter: true;
 	
 	bool draw_flow_grid <- false;
-	bool draw_proximity_grid <- true;
+	bool draw_proximity_grid <- false;
 	
 	bool parallel <- false; // use parallel computation
 	
-	
-	float proximity_distance <- 1.5; //distance of consideration for proximity distance;
+
 	float proximityCellSize <- 0.5; // size of the cells (in meters)
 	bool use_masked_by <- false; //far slower, but useful to obtain more realistic map
 	float precision <- 120.0; //only necessary when using masked_by operator
@@ -53,8 +52,12 @@ global {
 	graph<people, people> social_distance_graph <- graph<people, people>([]);
 	float R0;
 
-	
-	
+	//SPATIO TEMPORAL VALUES COMMPUETD ONLY ONES
+	int nbOffices;	
+	float officeArea;
+	int nbMeetingRooms;
+	float meetingRoomsArea;	
+		    			
 	
 	init {
 		validator <- false;
@@ -191,8 +194,10 @@ global {
 			}
 		}
 		
-		
-		
+		nbOffices<-(room count (each.type="Offices"));
+		officeArea<-sum((room where (each.type="Offices")) collect each.shape.area);
+		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
+		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
 	}	
 	
 	action initialize_pedestrian_model {
@@ -594,9 +599,9 @@ species people skills: [escape_pedestrian] parallel: parallel{
 			}	
 		}
  	}
- 	reflex when: draw_proximity_grid and not empty(people at_distance proximity_distance){
-		geometry geom <- circle(proximity_distance) ;
-		list<wall> ws <- wall at_distance proximity_distance;
+ 	reflex when: draw_proximity_grid and not empty(people at_distance distance_people){
+		geometry geom <- circle(distance_people) ;
+		list<wall> ws <- wall at_distance distance_people;
 		if not empty(ws) {
 			if (use_masked_by) {
 				geom <- geom masked_by (ws, precision);
@@ -654,11 +659,12 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
-	parameter 'distance_people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 3.0#m;
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.5#m;
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
 	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
+	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
 
 	output {
@@ -680,8 +686,10 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 		    	 draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+60#px} perspective: true font:font("Helvetica", 20 , #bold);	    
 		    }
 		     graphics 'simulation2'{
-		    	point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};
-		    	 draw string("Offices: " + (dxf_element count (each.layer="Offices"))) color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	    
+		    	point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
+		    	 draw string("Offices: " + nbOffices +  " - " +  with_precision(officeArea, 2)+ "m2") color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	
+		    	 draw string("Meeting rooms: " + nbMeetingRooms +  " - " + with_precision(meetingRoomsArea,2) + "m2") color: #white at: {simulegendPo2s.x,simulegendPo2s.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    	     
 		    }
 
 		    		graphics "social_graph" {
