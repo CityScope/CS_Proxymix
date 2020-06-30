@@ -599,9 +599,9 @@ species people skills: [escape_pedestrian] parallel: parallel{
 			}	
 		}
  	}
- 	reflex when: draw_proximity_grid and not empty(people at_distance distance_people){
+ 	reflex when: draw_proximity_grid and not empty(people at_distance (distance_people/2)){
 		geometry geom <- circle(distance_people) ;
-		list<wall> ws <- wall at_distance distance_people;
+		list<wall> ws <- wall at_distance (distance_people);
 		if not empty(ws) {
 			if (use_masked_by) {
 				geom <- geom masked_by (ws, precision);
@@ -656,7 +656,7 @@ use_regular_agents: false
 
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.5#m;
