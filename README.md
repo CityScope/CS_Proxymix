@@ -1,5 +1,6 @@
-# CS_Proxymix
+This is the official repository for Proxymix projet. The original proxymix projet for the MediaLab use case has been archived and this current reposetory is exploring the analysis of space and behavior of people.
 
+**NB: We are currently focusing on post-covid application but this project aims to be generic enough to be used for any other project related to ABM in an architectural space.**
 
 # Installation
   - Clone this repository (clicking on the green Clone or Download button on this page -  to manage your repo you can also install GitHUb Desktop (https://desktop.github.com/) on your computer) 
