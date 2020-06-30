@@ -37,6 +37,16 @@ global {
 	bool display_free_space <- false;// parameter: true;
 	
 	bool draw_flow_grid <- false;
+	bool draw_proximity_grid <- true;
+	
+	bool parallel <- false; // use parallel computation
+	
+	
+	float proximity_distance <- 1.5; //distance of consideration for proximity distance;
+	float proximityCellSize <- 0.5; // size of the cells (in meters)
+	bool use_masked_by <- false; //far slower, but useful to obtain more realistic map
+	float precision <- 120.0; //only necessary when using masked_by operator
+	
 	date time_first_lunch <- nil;
 	
 	bool drawSocialDistanceGraph <- false;
@@ -175,6 +185,13 @@ global {
 			}
 		}
 		
+		ask wall {
+			ask proximityCell overlapping self{
+				is_walking_area <- false;
+			}
+		}
+		
+		
 		
 	}	
 	
@@ -235,7 +252,15 @@ global {
 		
 	}
 	
+	reflex reset_proximity_cell when: draw_proximity_grid {
+		ask proximityCell parallel: parallel{
+			nb_interactions <- 0;	
+		}
+
+	}
+	
 	reflex change_step {
+		
 		if (current_date.hour >= 7 and current_date.minute > 3 and empty(people where (each.target != nil)))  {
 			step <- fast_step;
 		}
@@ -268,7 +293,7 @@ global {
 	}
 }
 
-species pedestrian_path skills: [pedestrian_road] {
+species pedestrian_path skills: [pedestrian_road] frequency: 0{
 	aspect default {
 		if (display_pedestrian_path) {
 			if(display_free_space and free_space != nil) {draw free_space color: #lightpink border: #black;}
@@ -401,6 +426,7 @@ species room {
 			
 		}
 		available_places <- copy(places);
+		
 	
 	}
 	bool is_available {
@@ -474,7 +500,7 @@ species place_in_room {
 	float dists;
 }
 
-species people skills: [escape_pedestrian] {
+species people skills: [escape_pedestrian] parallel: parallel{
 	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
 	room working_place;
 	map<date, activity> agenda_day;
@@ -488,6 +514,7 @@ species people skills: [escape_pedestrian] {
 	bool is_outside;
 	rgb color <- #white;//rnd_color(255);
 	float speed <- min(5,gauss(4,1)) #km/#h;
+	
 	
 	
 	aspect default {
@@ -567,6 +594,30 @@ species people skills: [escape_pedestrian] {
 			}	
 		}
  	}
+ 	reflex when: draw_proximity_grid and not empty(people at_distance proximity_distance){
+		geometry geom <- circle(proximity_distance) ;
+		list<wall> ws <- wall at_distance proximity_distance;
+		if not empty(ws) {
+			if (use_masked_by) {
+				geom <- geom masked_by (ws, precision);
+			} else {
+				ask ws {
+					geom <- geom - self;
+					if (geom = nil) {break;}
+					geom <- geom.geometries first_with (each overlaps myself);
+				}
+				
+			}
+			
+		}
+		if (geom != nil) {
+			ask proximityCell overlapping geom {
+				nb_interactions <- nb_interactions + 1;
+			}
+		}
+		
+ 	}
+	
 }
 
 grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/200  {
@@ -582,9 +633,25 @@ grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/20
 }
 
 
+grid proximityCell cell_width: proximityCellSize cell_height:proximityCellSize frequency: 0 use_neighbors_cache: false
+use_regular_agents: false
+{
+	rgb color <- #white;
+	int nb_interactions ;
+	bool is_walking_area <- true;
+	aspect default{
+		if (draw_proximity_grid and is_walking_area){
+			if(nb_interactions>1){
+				  draw shape color:blend(#red,#cyan, nb_interactions/10);//  depth:nb_interactions/1000;		
+			}
+		}
+	}	
+}
+
+
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter 'distance_people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 3.0#m;
@@ -603,6 +670,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species people position:{0,0,0.001};
 			species separator_ag refresh: false;
 			species flowCell;
+			species proximityCell;
 
 		    graphics 'simulation'{
 		    	point simulegendPos<-{world.shape.width*0,-world.shape.width*0.1};
@@ -613,7 +681,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 		    }
 		     graphics 'simulation2'{
 		    	point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};
-		    	 draw string("Offices: " + length(dxf_element where each.layer="Offices")) color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	    
+		    	 draw string("Offices: " + (dxf_element count (each.layer="Offices"))) color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	    
 		    }
 
 		    		graphics "social_graph" {
