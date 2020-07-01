@@ -10,7 +10,7 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 
 global {
-	string useCase <- "CUCS";
+	string useCase <- "CUCS_Campus";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
 	list<string> layer_to_consider <- [walls,offices, supermarket, meeting_rooms,coffee,storage, furnitures ];
@@ -105,20 +105,25 @@ global {
 			create walking_area from: file(walking_area_path);
 		} else {
 			geometry walking_area_g <- copy(shape);
-			if build_pedestrian_network {
-				
-				
+			if empty(wall ) {
 				ask dxf_element {
-				
-					loop pt over: entrances {
-						walking_area_g <- walking_area_g - (square(0.1) at_location pt); 
+					walking_area_g <- walking_area_g - (shape );
+					walking_area_g <- walking_area_g.geometries with_max_of each.area;
+				}
+			} else {
+				if build_pedestrian_network {
+					ask dxf_element {
+						loop pt over: entrances {
+							walking_area_g <- walking_area_g - (square(0.1) at_location pt); 
+						}
 					}
 				}
+				ask wall {
+					walking_area_g <- walking_area_g - (shape );
+					walking_area_g <- walking_area_g.geometries with_max_of each.area;
+				}
 			}
-			ask wall {
-				walking_area_g <- walking_area_g - (shape );
-				walking_area_g <- walking_area_g.geometries with_max_of each.area;
-			}
+			
 			create walking_area from: walking_area_g.geometries;
 			save walking_area type: shp to: walking_area_path;
 		}
@@ -127,6 +132,7 @@ global {
 		if (build_pedestrian_network) {
 			display_pedestrian_path <- true;
 			loop t over: walking_area as list {
+				write "t:" + t.shape.area;
 				create triangles from: triangulate(t,tol_cliping,tol_triangulation );
 			}
 		
@@ -178,12 +184,7 @@ global {
 				walking_area_g <- union(walking_area);
 			} else {	
 		 		geometry walking_area_g <- copy(shape);
-				/*ask dxf_element {
 				
-					loop pt over: entrances {
-						walking_area_g <- walking_area_g - (square(0.5) at_location pt); 
-					}
-				}*/
 				ask wall {
 					walking_area_g <- walking_area_g - (shape );
 					walking_area_g <- walking_area_g.geometries with_max_of each.area;
