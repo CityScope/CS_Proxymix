@@ -29,7 +29,7 @@ global {
 	graph pedestrian_network;
 	list<room> available_offices;
 	
-	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	string density_scenario <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	int num_people_building <- 400;
 	float distance_people;
 	
@@ -64,7 +64,7 @@ global {
 	
 	init {
 		validator <- false;
-		outputFilePathName <-"../results/output"+date("now")+"distance_"+distance_people+".csv";
+		outputFilePathName <-"../results/output_" + (#now).year+"_"+(#now).month+"_"+ (#now).day + "_"+ (#now).hour+"_"+ (#now).minute  + "_" + (#now).second+"_distance_"+distance_people+".csv";
 		do initiliaze_dxf;
 		create pedestrian_path from: pedestrian_path_shape_file;
 		pedestrian_network <- as_edge_graph(pedestrian_path);
@@ -164,6 +164,7 @@ global {
 		create eating_outside_act with:[activity_places:: building_entrance as list];
 		
 		available_offices <- rooms_type[offices] where each.is_available(); 
+		
 		if (movement_model = pedestrian_skill) {
 			do initialize_pedestrian_model;
 		}
@@ -205,7 +206,7 @@ global {
 	
 	reflex save_model_output when: (cycle = 1 and savetoCSV){
 		// save the values of the variables name, speed and size to the csv file; the rewrite facet is set to false to continue to write in the same file
-		write "save to csv";
+		//write "save to csv";
 		//save ["type","nbEntrance","nbDesk"] to: outputFilePathName type:"csv" rewrite: false;
 		ask room {
 			// save the values of the variables name, speed and size to the csv file; the rewrite facet is set to false to continue to write in the same file
@@ -304,7 +305,7 @@ global {
 	
 	reflex people_arriving when: not empty(available_offices) and every(2 #s)
 	{	
-		  do create_people(rnd(0,min(3, length(available_offices))));
+		do create_people(rnd(0,min(3, length(available_offices))));
 	}
 	reflex updateGraph when: (drawSocialDistanceGraph = true) {
 		social_distance_graph <- graph<people, people>(people as_distance_graph (distance_people - 0.1#m));
@@ -349,25 +350,25 @@ species room {
 		map<geometry, place_in_room> pr;
 		
 		list<dxf_element> chairs_dxf <-  dxf_element where (each.layer = chairs);
-		
 		if (density_scenario = "data") {
 			if empty( chairs_dxf ) {
 				do error("Data density scenario requires to have a chair layer");
 			} else {
-				
 				loop d over: chairs_dxf overlapping self{
-				create place_in_room  {
-					location <-d.location;
-					if length(place_in_room) > 1 {
-						if (place_in_room closest_to self) distance_to self < 0.2 {
-							do die;
+					create place_in_room  {
+						location <-d.location;
+						if length(place_in_room) > 1 {
+							if (place_in_room closest_to self) distance_to self < 0.2 {
+								do die;
+							}
+						}
+						if not dead(self) {
+							myself.places << self;
 						}
 					}
-					if not dead(self) {
-						myself.places << self;
-					}
-					
-					}
+				}
+				if (not empty(places)) {
+					type <- offices;
 				}
 				room the_room <- self;
 				if (separator_proba > 0) and (length(places) > 1) {
@@ -445,7 +446,6 @@ species room {
 		}
 		available_places <- copy(places);
 		
-	
 	}
 	bool is_available {
 		return nb_affected < length(places);
@@ -674,7 +674,7 @@ use_regular_agents: false
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.5#m;
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
