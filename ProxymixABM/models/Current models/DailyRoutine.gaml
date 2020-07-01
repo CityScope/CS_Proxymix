@@ -53,16 +53,18 @@ global {
 	graph<people, people> social_distance_graph <- graph<people, people>([]);
 	float R0;
 
-	//SPATIO TEMPORAL VALUES COMMPUETD ONLY ONES
+	//SPATIO TEMPORAL VALUES COMPUETD ONLY ONES
 	int nbOffices;	
 	float officeArea;
 	int nbMeetingRooms;
 	float meetingRoomsArea;	
+	bool savetoCSV<-true;
+	string outputFilePathName;
 		    			
 	
 	init {
 		validator <- false;
-	
+		outputFilePathName <-"../results/output"+date("now")+"distance_"+distance_people+".csv";
 		do initiliaze_dxf;
 		create pedestrian_path from: pedestrian_path_shape_file;
 		pedestrian_network <- as_edge_graph(pedestrian_path);
@@ -199,6 +201,16 @@ global {
 		officeArea<-sum((room where (each.type="Offices")) collect each.shape.area);
 		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
 		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
+	}
+	
+	reflex save_model_output when: (cycle = 1 and savetoCSV){
+		// save the values of the variables name, speed and size to the csv file; the rewrite facet is set to false to continue to write in the same file
+		write "save to csv";
+		//save ["type","nbEntrance","nbDesk"] to: outputFilePathName type:"csv" rewrite: false;
+		ask room {
+			// save the values of the variables name, speed and size to the csv file; the rewrite facet is set to false to continue to write in the same file
+			save [type,length(entrances), length(available_places)] to: outputFilePathName type:"csv" rewrite: false;
+		}
 	}	
 	
 	action initialize_pedestrian_model {
