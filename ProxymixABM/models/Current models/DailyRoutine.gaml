@@ -62,6 +62,12 @@ global {
 	bool savetoCSV<-true;
 	string outputFilePathName;
 		    			
+	bool show_dynamic_bottleneck <- true;  //show or not the bottleneck
+	int bottleneck_livespan <- 5; //to livespan of a bottleneck agent (to avoid glitching aspect) 
+	float coeff_speed_slow <- 2.0; //a people is considered as "slow" if its real speed is lower than it wanted speed / coeff_speed_slow during min_num_step_bottleneck
+	int min_num_step_bottleneck <- 3;
+	float distance_bottleneck <- 2.0; //a bottleneck is considered if there is at least min_num_people_bottleneck slow people at a distance of distance_bottleneck;
+	int min_num_people_bottleneck <- 2; 
 	
 	init {
 		validator <- false;
@@ -279,6 +285,25 @@ global {
 
 	}
 	
+	reflex manage_bottleneck  {
+		if show_dynamic_bottleneck {
+			list<people> slow_people <- people where each.is_slow_real;
+			if not empty(slow_people) {
+				list<list<people>> clusters <- simple_clustering_by_distance(slow_people,distance_bottleneck);
+				loop cluster over: clusters {
+					if (length(cluster) >= min_num_people_bottleneck) {
+						create bottleneck with: [shape:: union(cluster collect (each.shape + (distance_bottleneck/2.0)))];
+					}
+				}
+			}
+			ask bottleneck where (each.live_span <= 0) {do die;}
+		} else {
+			ask bottleneck  {do die;}
+		}
+		
+		
+	}
+	
 	reflex change_step {
 		
 		if (current_date.hour >= 7 and current_date.minute > 3 and empty(people where (each.target != nil)))  {
@@ -313,6 +338,14 @@ global {
 	}
 }
 
+
+species bottleneck {
+	bool real <- false;
+	int live_span <- bottleneck_livespan update: live_span - 1;
+	aspect default {
+		draw shape color: #red ; 
+	}
+}
 species pedestrian_path skills: [pedestrian_road] frequency: 0{
 	aspect default {
 		if (display_pedestrian_path) {
@@ -540,7 +573,9 @@ species people skills: [escape_pedestrian] parallel: parallel{
 	bool is_outside;
 	rgb color <- #white;//rnd_color(255);
 	float speed <- min(5,gauss(4,1)) #km/#h;
-	
+	bool is_slow <- false update: false;
+	bool is_slow_real <- false;
+	int counter <- 0;
 	
 	
 	aspect default {
@@ -581,8 +616,25 @@ species people skills: [escape_pedestrian] parallel: parallel{
 				if (final_target = nil) {
 					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target ;
 				}
+				point prev_loc <- copy(location);
 				do walk;
+				float r_s <- prev_loc distance_to location;
+				is_slow <- r_s < (speed/coeff_speed_slow);
+				if (is_slow) {
+					counter <- counter + 1;
+					if (counter >= min_num_step_bottleneck) {
+						is_slow_real <- true;
+					}
+				} else {
+					is_slow_real <- false;
+					counter <- 0;
+				}
+				
 				arrived <- final_target = nil;
+				if (arrived) {
+					is_slow_real <- false;
+					counter <- 0;
+				}
 			}
 		}
 		else {
@@ -677,7 +729,7 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS_Campus" among: ["CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.5#m;
@@ -688,6 +740,8 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
 	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-true;
+	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-true;
+	
 	
 
 	output {
@@ -703,6 +757,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species separator_ag refresh: false;
 			agents "flowCell" value:draw_flow_grid ? flowCell : [] ;
 			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
+			species bottleneck transparency: 0.5;
 
 		    graphics 'simulation'{
 		    	point simulegendPos<-{world.shape.width*0,-world.shape.width*0.1};
@@ -740,7 +795,7 @@ experiment multiAnalysis type: gui parent:DailyRoutine
 		create simulation with: [useCase::"CUCS",distance_people::3.0#m];
 
 	}
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
 	output
 	{	/*layout #split;
 		display map type: opengl background:#black toolbar:false draw_env:false
