@@ -38,12 +38,13 @@ global {
 	
 	bool draw_flow_grid <- false;
 	bool draw_proximity_grid <- false;
-	bool showAvailableDesk<-true;
+	bool showAvailableDesk<-false;
 	
 	bool parallel <- false; // use parallel computation
 	
 
 	float proximityCellSize <- 0.5; // size of the cells (in meters)
+	int proximityCellmaxNumber <- 300 ;
 	bool use_masked_by <- false; //far slower, but useful to obtain more realistic map
 	float precision <- 120.0; //only necessary when using masked_by operator
 	
@@ -459,11 +460,14 @@ species room {
 	aspect default {
 		draw shape color: standard_color_per_layer[type];
 		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
-		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
-		if(showAvailableDesk){
-		  draw string(length(available_places)) at: {location.x-20#px,location.y} color:#white font:font("Helvetica", 20 , #bold); 	
-		}
+		 loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
 		
+		
+	}
+	aspect available_places_info {
+		if(showAvailableDesk){
+		 	draw string(length(available_places)) at: {location.x-20#px,location.y} color:#white font:font("Helvetica", 20 , #bold); 	
+		} 
 	}
 }
 
@@ -655,12 +659,12 @@ grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/20
 }
 
 
-grid proximityCell cell_width: proximityCellSize cell_height:proximityCellSize frequency: 0 use_neighbors_cache: false
-use_regular_agents: false
+grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, proximityCellSize) cell_height:max(world.shape.height / proximityCellmaxNumber, proximityCellSize) frequency: 0 use_neighbors_cache: false use_regular_agents: false
 {
 	rgb color <- #white;
 	int nb_interactions ;
 	bool is_walking_area <- true;
+	
 	aspect default{
 		if (draw_proximity_grid and is_walking_area){
 			if(nb_interactions>1){
@@ -673,8 +677,8 @@ use_regular_agents: false
 
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS" among: ["CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'fileName:' var: useCase category: 'file' <- "CUCS_Campus" among: ["CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.5#m;
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
@@ -690,14 +694,15 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false
 		camera_pos: {53.6625,6.2866,93.9839} camera_look_pos: {53.6625,6.285,0.0} camera_up_vector: {0.0,1.0,0.0}
 		{
-			species room  refresh: true;
-			species building_entrance refresh: false;
+			species room  refresh: false;
+			species room aspect: available_places_info refresh: true;
+			species building_entrance refresh: true;
 			species wall refresh: false;
 			species pedestrian_path ;
 			species people position:{0,0,0.001};
 			species separator_ag refresh: false;
-			species flowCell;
-			species proximityCell;
+			agents "flowCell" value:draw_flow_grid ? flowCell : [] ;
+			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
 
 		    graphics 'simulation'{
 		    	point simulegendPos<-{world.shape.width*0,-world.shape.width*0.1};
