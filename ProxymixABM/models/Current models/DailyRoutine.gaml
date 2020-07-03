@@ -50,6 +50,7 @@ global {
 	
 	date time_first_lunch <- nil;
 	
+	bool drawSimuInfo<-false;
 	bool drawSocialDistanceGraph <- false;
 	graph<people, people> social_distance_graph <- graph<people, people>([]);
 	float R0;
@@ -59,7 +60,7 @@ global {
 	float officeArea;
 	int nbMeetingRooms;
 	float meetingRoomsArea;	
-	bool savetoCSV<-true;
+	bool savetoCSV<-false;
 	string outputFilePathName;
 		    			
 	bool show_dynamic_bottleneck <- true;  //show or not the bottleneck
@@ -580,7 +581,7 @@ species people skills: [escape_pedestrian] parallel: parallel{
 	
 	aspect default {
 		if not is_outside{
-			draw sphere(0.3) color:color;// border: #black;
+			draw circle(0.3) color:color;// border: #black;
 		}
 		//draw obj_file(dataset_path+"/Obj/man.obj",-90::{1,0,0}) color:#gamablue size:2 rotate:heading+90;
 	}
@@ -729,13 +730,14 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Level 2" among: ["CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Level 1" among: ["CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.5#m;
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
-	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "unit" var: unit category: "file" <- #cm;
+	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
+	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
 	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
@@ -746,7 +748,6 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 
 	output {
 		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false
-		camera_pos: {53.6625,6.2866,93.9839} camera_look_pos: {53.6625,6.285,0.0} camera_up_vector: {0.0,1.0,0.0}
 		{
 			species room  refresh: false;
 			species room aspect: available_places_info refresh: true;
@@ -759,21 +760,18 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
 			species bottleneck transparency: 0.5;
 
-		    graphics 'simulation'{
-		    	point simulegendPos<-{world.shape.width*0,-world.shape.width*0.1};
-		    	 //draw string("People: " + length(people)) color: #white at: simulegendPos perspective: true font:font("Helvetica", 20 , #bold); 
-		    	 draw string("Distance: " + distance_people + "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
-		    	 //draw string("Density: " + peopleDensity*100 + "%") color: #white at: {simulegendPos.x,simulegendPos.y+40#px} perspective: true font:font("Helvetica", 20 , #bold);
-		    	 //draw string("Time: " + current_date.hour + "h:" + current_date.minute+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+60#px} perspective: true font:font("Helvetica", 20 , #bold);	    
-		    }
-		     graphics 'simulation2'{
-		    	point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
-		    	 draw string("Nb Offices: " + nbOffices +  " - " +  with_precision(officeArea, 2)+ "m2") color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	
-		    	 draw string("Nb Meeting rooms: " + nbMeetingRooms +  " - " + with_precision(meetingRoomsArea,2) + "m2") color: #white at: {simulegendPo2s.x,simulegendPo2s.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
-		    	     
+
+		     graphics 'simulation'{
+		     	if(drawSimuInfo){
+		     		point simulegendPos<-{world.shape.width*0,-world.shape.width*0.1};
+		        	draw string("Distance: " +  with_precision(distance_people,2)+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #bold);
+		    		point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
+		    		draw string("Nb Offices: " + nbOffices +  " - " +  with_precision(officeArea, 2)+ "m2") color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	
+		    		draw string("Nb Meeting rooms: " + nbMeetingRooms +  " - " + with_precision(meetingRoomsArea,2) + "m2") color: #white at: {simulegendPo2s.x,simulegendPo2s.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
+		     	}     
 		    }
 
-		    		graphics "social_graph" {
+		    graphics "social_graph" {
 				if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
 					loop eg over: social_distance_graph.edges {
 						geometry edge_geom <- geometry(eg);
