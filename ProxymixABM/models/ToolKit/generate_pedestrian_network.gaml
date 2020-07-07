@@ -10,7 +10,7 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 
 global {
-	string useCase <- "CUCS_Campus";
+	string useCase <- "CUCS/Ground";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
 	list<string> layer_to_consider <- [walls,offices, supermarket, meeting_rooms,coffee,storage, furnitures ];
@@ -85,20 +85,26 @@ global {
 		ask rooms{
 			geometry contour <- nil;
 			float dist <-0.3;
+			int cpt <- 0;
 			loop while: contour = nil {
+				cpt <- cpt + 1;
 				contour <- copy(shape.contour);
 				ask wall at_distance 1.0 {
 					contour <- contour - (shape +dist);
 				}
-				ask rooms_entrances at_distance 1.0 {
-					contour <- contour - (shape + dist);
+				if cpt < 10 {
+					ask (rooms) at_distance 1.0 {
+						contour <- contour - (shape + dist);
+					}
 				}
-				
+				if cpt = 20 {
+					break;
+				}
 				dist <- dist * 0.5;	
 			} 
 			if contour != nil {
-				entrances <- points_on (contour, 2.0);		
-			}
+				entrances <- points_on (contour, 2.0);
+			}		
 		}
 		write "entrances created";
 		if (not recreate_walking_area) and file_exists(walking_area_path) {
@@ -132,7 +138,6 @@ global {
 		if (build_pedestrian_network) {
 			display_pedestrian_path <- true;
 			loop t over: walking_area as list {
-				write "t:" + t.shape.area;
 				create triangles from: triangulate(t,tol_cliping,tol_triangulation );
 			}
 		
