@@ -252,27 +252,33 @@ global {
 			
 			date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 40 #mn);
 			time_first_lunch <-((time_first_lunch = nil) or (time_first_lunch > lunch_time)) ? lunch_time : time_first_lunch;
-			
+			activity act_coffee <- activity first_with (each.name = coffee);
+			activity shopping_supermarket <- activity first_with (each.name = supermarket);
+			bool return_after_lunch <- false;
 			if (flip(0.8)) {
 				agenda_day[lunch_time] <-first(eating_outside_act) ;
+				return_after_lunch <- true;
 				lunch_time <- lunch_time add_seconds rnd(30 #mn, 90 #mn);
-				if flip(0.3) {
+				if flip(0.3) and act_coffee != nil{
 					agenda_day[lunch_time] <- activity first_with (each.name = coffee);
-					lunch_time <- lunch_time add_seconds rnd(2#mn, 10 #mn);
+					lunch_time <- lunch_time add_seconds rnd(5#mn, 15 #mn);
 				}
 			} else {
-				activity shopping_supermarket <- activity first_with (each.name = supermarket);
 				if flip(0.3) and  shopping_supermarket != nil{
 					agenda_day[lunch_time] <-shopping_supermarket ;
-					lunch_time <- lunch_time add_seconds rnd(120, 10 #mn);
+					return_after_lunch <- true;
+					lunch_time <- lunch_time add_seconds rnd(5#mn, 10 #mn);
 				}
-				if flip(0.5) {
-					agenda_day[lunch_time] <- activity first_with (each.name = coffee);
-					lunch_time <- lunch_time add_seconds rnd(5#mn, 30 #mn);
+				if flip(0.5) and act_coffee != nil{
+					agenda_day[lunch_time] <- act_coffee;
+					return_after_lunch <- true;
+					lunch_time <- lunch_time add_seconds rnd(10#mn, 30 #mn);
 				}	
 			}
 			
-			agenda_day[lunch_time] <- first(working);
+			if (return_after_lunch) {
+				agenda_day[lunch_time] <- first(working);
+			}
 			agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(30),rnd(59))] <- first(going_home_act);
 		}
 		
@@ -597,7 +603,6 @@ species people skills: [escape_pedestrian] parallel: parallel{
 		if(target_place != nil and (has_place) ) {target_room.available_places << target_place;}
 		string n <- current_activity = nil ? "" : copy(current_activity.name);
 		current_activity <- agenda_day.values[0];
-		
 		agenda_day >> first(agenda_day);
 		target <- target_room.entrances closest_to self;
 		target_room <- current_activity.get_place(self);
