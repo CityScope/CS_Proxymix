@@ -505,8 +505,8 @@ species room {
 		
 	}
 	aspect available_places_info {
-		if(showAvailableDesk){
-		 	draw string(length(available_places)) at: {location.x-20#px,location.y} color:#white font:font("Helvetica", 20 , #bold); 	
+		if(showAvailableDesk and (type="Offices" or type="Meeeting rooms")){
+		 	draw string(length(available_places)) at: {location.x-20#px,location.y,1.0} color:#white font:font("Helvetica", 20 , #bold) perspective:false; 	
 		} 
 	}
 }
@@ -735,7 +735,7 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Ground" among: ["CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
@@ -761,7 +761,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species pedestrian_path ;
 			species people position:{0,0,0.001};
 			species separator_ag refresh: false;
-			agents "flowCell" value:draw_flow_grid ? flowCell : [] ;
+			agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
 			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
 			species bottleneck transparency: 0.5;
 
