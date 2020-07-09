@@ -735,7 +735,7 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Level 1" among: ["CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Ground" among: ["CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
@@ -748,8 +748,8 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
 	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-true;
 	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-true;
-	
-	
+	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
+
 
 	output {
 		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false
