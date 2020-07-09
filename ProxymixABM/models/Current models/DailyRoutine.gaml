@@ -50,7 +50,7 @@ global {
 	
 	date time_first_lunch <- nil;
 	
-	bool drawSimuInfo<-false;
+	bool drawSimuInfo<-true;
 	bool drawSocialDistanceGraph <- false;
 	graph<people, people> social_distance_graph <- graph<people, people>([]);
 	float R0;
@@ -60,6 +60,7 @@ global {
 	float officeArea;
 	int nbMeetingRooms;
 	float meetingRoomsArea;	
+	int nbDesk;
 	bool savetoCSV<-false;
 	string outputFilePathName;
 		    			
@@ -210,6 +211,7 @@ global {
 		officeArea<-sum((room where (each.type="Offices")) collect each.shape.area);
 		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
 		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
+		nbDesk<-length(room collect each.available_places);
 	}
 	
 	reflex save_model_output when: (cycle = 1 and savetoCSV){
@@ -500,9 +502,7 @@ species room {
 	aspect default {
 		draw shape color: standard_color_per_layer[type];
 		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
-		 loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
-		
-		
+		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
 	}
 	aspect available_places_info {
 		if(showAvailableDesk and (type="Offices" or type="Meeeting rooms")){
@@ -736,9 +736,9 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.0#m;
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
@@ -773,6 +773,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 		    		point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
 		    		draw string("Nb Offices: " + nbOffices +  " - " +  with_precision(officeArea, 2)+ "m2") color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	
 		    		draw string("Nb Meeting rooms: " + nbMeetingRooms +  " - " + with_precision(meetingRoomsArea,2) + "m2") color: #white at: {simulegendPo2s.x,simulegendPo2s.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    		draw string("Nb Desk: " + length(room collect each.available_places)) color: #white at: {simulegendPo2s.x,simulegendPo2s.y+40#px} perspective: true font:font("Helvetica", 20 , #bold);
 		     	}     
 		    }
 
