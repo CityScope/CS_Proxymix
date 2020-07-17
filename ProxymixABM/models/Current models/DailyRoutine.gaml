@@ -71,6 +71,10 @@ global {
 	float distance_bottleneck <- 2.0; //a bottleneck is considered if there is at least min_num_people_bottleneck slow people at a distance of distance_bottleneck;
 	int min_num_people_bottleneck <- 2; 
 	
+	bool show_droplet <- true;  //show or not the bottleneck
+	int droplet_livespan <- 5; //to livespan of a bottleneck agent (to avoid glitching aspect) 
+	float droplet_distance<-2.0;
+	
 	init {
 		validator <- false;
 		outputFilePathName <-"../results/output_" + (#now).year+"_"+(#now).month+"_"+ (#now).day + "_"+ (#now).hour+"_"+ (#now).minute  + "_" + (#now).second+"_distance_"+distance_people+".csv";
@@ -311,6 +315,18 @@ global {
 		}
 		
 		
+	}
+	reflex manageDroplet{
+	 if(show_droplet){
+	   ask people{
+	 	create droplet{
+	 		location<-myself.location+ {rnd(-droplet_distance,droplet_distance),rnd(-droplet_distance,droplet_distance)};
+	    }	
+ 	   }
+	   ask droplet where (each.live_span <= 0) {do die;}		
+	 }else{
+	 	ask droplet {do die;}
+	 }
 	}
 	
 	reflex change_step {
@@ -566,6 +582,14 @@ species place_in_room {
 	float dists;
 }
 
+species droplet{
+	int live_span <- droplet_livespan update: live_span - 1;
+	int size<-14+rnd(200);
+	aspect base{
+		draw circle(size/1000) color:rgb(size*1.1,size*1.6,200,50);
+	}
+}
+
 species people skills: [escape_pedestrian] parallel: parallel{
 	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
 	room working_place;
@@ -700,8 +724,7 @@ species people skills: [escape_pedestrian] parallel: parallel{
 			}
 		}
 		
- 	}
-	
+ 	}	
 }
 
 grid flowCell cell_width: world.shape.width/200 cell_height:world.shape.width/200  {
@@ -738,7 +761,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 1.0#m;
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
@@ -746,13 +769,16 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
 	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
-	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-true;
+	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
 	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-true;
 	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
-
-
+	parameter "Show droplets:" category: "Visualization" var:show_droplet <-false;
+	parameter "Droplets lifespan:" category: "Visualization" var:droplet_livespan min:0 max:100 <-10;
+	parameter "Droplets distance:" category: "Visualization" var:droplet_distance min:0.0 max:10.0 <-2.0;
+	
+	
 	output {
-		display map synchronized: true background:#black parent:floorPlan type:opengl draw_env:false
+		display map synchronized: true background:#black parent:floorPlan type:java2D draw_env:false
 		{
 			species room  refresh: false;
 			species room aspect: available_places_info refresh: true;
@@ -764,6 +790,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
 			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
 			species bottleneck transparency: 0.5;
+			species droplet aspect:base;
 
 
 		     graphics 'simulation'{

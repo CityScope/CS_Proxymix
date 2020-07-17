@@ -21,9 +21,9 @@ global
 	bool validator<-true;
 	geometry shape <- envelope(the_dxf_file);
 	map<string,rgb> standard_color_per_layer <- 
-	[offices::rgb(0,0,50),meeting_rooms::rgb(0,0,75),
+	[offices::rgb(50,50,50),meeting_rooms::rgb(75,75,75),
 	entrance::#red,elevators::#orange,
-	coffee::#green,supermarket::#darkgreen,
+	coffee::rgb(25,25,25),supermarket::#darkgreen,
 	storage::#brown, furnitures::#maroon, 
 	toilets::rgb(25,25,25),  
 	walls::#gray, doors::#lightgray,
