@@ -74,7 +74,8 @@ global {
 	bool show_droplet <- true;  //show or not the bottleneck
 	int droplet_livespan <- 5; //to livespan of a bottleneck agent (to avoid glitching aspect) 
 	float droplet_distance<-2.0;
-	
+	bool ventilation;
+	float ventilation_ratio;
 	init {
 		validator <- false;
 		outputFilePathName <-"../results/output_" + (#now).year+"_"+(#now).month+"_"+ (#now).day + "_"+ (#now).hour+"_"+ (#now).minute  + "_" + (#now).second+"_distance_"+distance_people+".csv";
@@ -88,7 +89,11 @@ global {
 			} else if type = entrance {
 				create building_entrance  with: [shape::polygon(se.points), type::type];
 			} else if type in [offices, supermarket, meeting_rooms,coffee,storage] {
-				create room with: [shape::polygon(se.points), type::type] ;
+				create room with: [shape::polygon(se.points), type::type]{
+					if flip (ventilation_ratio){
+						isVentilated<-true;
+					}
+				}
 			}
 		} 
 		
@@ -403,6 +408,7 @@ species room {
 	list<place_in_room> places;
 	list<place_in_room> available_places;
 	int num_places;
+	bool isVentilated;
 	
 	action intialization {
 		list<geometry> squares;
@@ -515,10 +521,20 @@ species room {
 		return place;
 	}
 	
+	reflex manageVentilation when:(isVentilated and ventilation){
+		ask droplet overlapping self{
+			live_span<-live_span-1;
+			do wander speed:1.0;
+		}
+	}
+	
 	aspect default {
 		draw shape color: standard_color_per_layer[type];
 		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
 		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
+		if(isVentilated and ventilation){
+		 draw shape color:rgb(0,255,0,0.5) empty:false;	
+		}
 	}
 	aspect available_places_info {
 		if(showAvailableDesk and (type="Offices" or type="Meeeting rooms")){
@@ -582,7 +598,7 @@ species place_in_room {
 	float dists;
 }
 
-species droplet{
+species droplet skills:[moving]{
 	int live_span <- droplet_livespan update: live_span - 1;
 	int size<-14+rnd(200);
 	aspect base{
@@ -772,9 +788,11 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
 	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-true;
 	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
-	parameter "Show droplets:" category: "Visualization" var:show_droplet <-false;
-	parameter "Droplets lifespan:" category: "Visualization" var:droplet_livespan min:0 max:100 <-10;
-	parameter "Droplets distance:" category: "Visualization" var:droplet_distance min:0.0 max:10.0 <-2.0;
+	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
+	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
+	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
+	parameter "Trigger Ventilation:" category: "Ventilation" var:ventilation <-false;
+	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
 	
 	
 	output {
