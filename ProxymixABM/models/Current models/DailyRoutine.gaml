@@ -29,7 +29,7 @@ global {
 	graph pedestrian_network;
 	list<room> available_offices;
 	
-	string density_scenario <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	int num_people_building <- 400;
 	float distance_people;
 	
@@ -417,7 +417,7 @@ species room {
 		list<dxf_element> chairs_dxf <-  dxf_element where (each.layer = chairs);
 		if (density_scenario = "data") {
 			if empty( chairs_dxf ) {
-				do error("Data density scenario requires to have a chair layer");
+				do tell("Data density scenario requires to have a chair layer");
 			} else {
 				loop d over: chairs_dxf overlapping self{
 					create place_in_room  {
