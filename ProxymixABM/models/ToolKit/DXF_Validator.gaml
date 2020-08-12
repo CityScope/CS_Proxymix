@@ -18,7 +18,7 @@ global
 experiment ValidatedDXF type: gui
 {   
 
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Ground" among: ["CUCS/Level 2","CUCS/Ground","CUCS_Campus","CUCS/Level 1","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "CUT" among: ["CUT","CUCS/Level 2","CUCS/Ground","CUCS_Campus","CUCS/Level 1","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
 	output
 	{	layout #split;
 		display map type: opengl background:#black toolbar:false draw_env:true
