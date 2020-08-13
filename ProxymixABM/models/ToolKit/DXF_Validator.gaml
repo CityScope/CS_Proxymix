@@ -40,6 +40,7 @@ experiment ValidatedAllDXF type: gui
 		create simulation with: [useCase::"Factory"];
 		create simulation with: [useCase::"Learning_Center"];
 		create simulation with: [useCase::"SanSebastian"];
+		create simulation with: [useCase::"CUT"];
 	}
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
 	output

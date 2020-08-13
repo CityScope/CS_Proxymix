@@ -10,13 +10,12 @@ model Constants
 global {
 	
 	string layer <- "layer";
-	string walls <- "Walls";	
+	string walls <- "Walls";
+	string windows <- "Windows";	
 	string entrance <-"Entrance";
 	string offices <- "Offices";
-	string supermarket <-"Supermarket";
-	string meeting_rooms <- "Meeting rooms";
-	string coffee <- "Coffee";
-	string storage <- "Storage";	
+	string meeting_rooms <- "Meeting rooms";	
+	string coffee <- "Coffee";	
 	string furnitures <- "Furniture";
 	string toilets <- "Toilets";
 	string elevators <- "Elevators";

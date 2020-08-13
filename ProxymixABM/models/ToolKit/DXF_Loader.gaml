@@ -20,13 +20,14 @@ global
 	file the_dxf_file <- dxf_file(dataset_path + useCase +"/building.dxf",unit);
 	bool validator<-true;
 	geometry shape <- envelope(the_dxf_file);
+	
+	// Defining the mandatory layer
 	map<string,rgb> standard_color_per_layer <- 
 	[offices::rgb(50,50,50),meeting_rooms::rgb(75,75,75),
 	entrance::#red,elevators::#orange,
-	coffee::rgb(25,25,25),supermarket::#darkgreen,
-	storage::#brown, furnitures::#maroon, 
+	coffee::rgb(25,25,25), furnitures::#maroon, 
 	toilets::rgb(25,25,25),  
-	walls::#gray, doors::#lightgray,
+	walls::#gray, windows::#white,doors::#lightgray,
 	stairs::rgb(125,125,125),
 	chairs::rgb(125,125,125)];
 	bool showLegend<-false;

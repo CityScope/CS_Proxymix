@@ -10,10 +10,10 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 
 global {
-	string useCase <- "CUCS/Ground";
+	string useCase <- "CUT";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
-	list<string> layer_to_consider <- [walls,offices, supermarket, meeting_rooms,coffee,storage, furnitures ];
+	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee,storage, furnitures ];
 	
 	bool recreate_walking_area <- true;
 	
