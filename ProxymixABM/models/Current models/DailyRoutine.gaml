@@ -88,7 +88,7 @@ global {
 				create wall with: [shape::clean(polygon(se.points))];
 			} else if type = entrance {
 				create building_entrance  with: [shape::polygon(se.points), type::type];
-			} else if type in [offices, supermarket, meeting_rooms,coffee,storage] {
+			} else if type in [offices, meeting_rooms,coffee] {
 				create room with: [shape::polygon(se.points), type::type]{
 					if flip (ventilation_ratio){
 						isVentilated<-true;
