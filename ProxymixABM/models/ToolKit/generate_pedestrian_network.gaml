@@ -13,7 +13,7 @@ global {
 	string useCase <- "CUT";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
-	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee,storage, furnitures ];
+	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee, furnitures ];
 	
 	bool recreate_walking_area <- true;
 	
@@ -78,8 +78,8 @@ global {
 		
 		}
 		
-		list<dxf_element> rooms <- dxf_element where (each.layer in [offices, supermarket, meeting_rooms,coffee,storage]);
-		list<dxf_element> rooms_entrances <- dxf_element where (each.layer in [entrance, offices, supermarket, meeting_rooms,coffee,storage]);
+		list<dxf_element> rooms <- dxf_element where (each.layer in [offices, supermarket, meeting_rooms,coffee]);
+		list<dxf_element> rooms_entrances <- dxf_element where (each.layer in [entrance, offices, supermarket, meeting_rooms,coffee]);
 		write "Number of dxf elements:" + length(dxf_element);
 		
 		ask rooms{
