@@ -153,7 +153,8 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
 	parameter "Draw Infection Grid:" category: "Visualization" var:draw_infection_grid;
 	parameter "Show People:" category: "Visualization" var:showPeople;
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory","MediaLab"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUT","CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	
 	
 	output{
 	  display CoronaMap type:opengl parent:map background:#black draw_env:false synchronized:false{
