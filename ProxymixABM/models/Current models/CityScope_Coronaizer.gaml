@@ -52,6 +52,12 @@ global{
 	        is_immune <-  false;
 	        is_recovered<-false;
 		}
+		ask ViralPeople{
+		  write "ca init" + maskRatio;
+		  if (flip(maskRatio)){
+		    as_mask<-true;
+		  }
+	    }
 		
 	}
 
@@ -70,6 +76,8 @@ global{
 		list<float> tmp2 <- tmp collect (each.nb_people_infected_by_me*max((time_recovery/(0.00001+time- each.infected_time))),1);
 		R0<- mean(tmp2);
 	}
+	
+
 }
 
 
@@ -83,10 +91,11 @@ species ViralPeople  mirrors:people{
     geometry shape<-circle(1);
     int nb_people_infected_by_me<-0;
     bool has_been_infected<-false;
+    bool as_mask<-false;
 
 		
-	reflex infected_contact when: is_infected and not target.is_outside {
-		ask ViralPeople at_distance infectionDistance {
+	reflex infected_contact when: is_infected and not target.is_outside and !as_mask {
+		ask ViralPeople where !each.as_mask at_distance infectionDistance {
 			if (not target.is_outside) {
 				geometry line <- line([myself,self]);
 				if empty(wall overlapping line) {
@@ -123,6 +132,9 @@ species ViralPeople  mirrors:people{
 		if(showPeople) and not target.is_outside{
 		  draw circle(is_infected ? 0.4#m : 0.3#m) color:(is_susceptible) ? #green : ((is_infected) ? #red : #blue);	
 		}
+		if (as_mask){
+		  draw circle(0.1#m) color:rgb(70,130,180) border:rgb(70,130,180)-100;	
+		}	
 	}
 }
 grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 neighbors: 8 {

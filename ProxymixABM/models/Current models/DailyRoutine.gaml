@@ -804,7 +804,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species building_entrance refresh: true;
 			species wall refresh: false;
 			species pedestrian_path ;
-			species people position:{0,0,0.001};
+			//species people position:{0,0,0.001};
 			species separator_ag refresh: false;
 			agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
 			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
