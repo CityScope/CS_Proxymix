@@ -25,7 +25,6 @@ global {
 	float unit <- #cm;
 	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp", gama.pref_gis_default_crs);
 	date starting_date <- date([2020,4,6,7]);
-	float peopleDensity<-1.0;
 	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
 	list<room> available_offices;
@@ -788,14 +787,10 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "CUT" among: ["CUT","CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
+	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
 	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
 	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
-	
-	
-	
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
