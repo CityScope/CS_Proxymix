@@ -52,13 +52,16 @@ global{
 	        is_immune <-  false;
 	        is_recovered<-false;
 		}
+
+		
+	}
+	
+	reflex updateMask{
 		ask ViralPeople{
-		  write "ca init" + maskRatio;
 		  if (flip(maskRatio)){
 		    as_mask<-true;
 		  }
 	    }
-		
 	}
 
 	
@@ -133,7 +136,7 @@ species ViralPeople  mirrors:people{
 		  draw circle(is_infected ? 0.4#m : 0.3#m) color:(is_susceptible) ? #green : ((is_infected) ? #red : #blue);	
 		}
 		if (as_mask){
-		  draw circle(0.1#m) color:rgb(70,130,180) border:rgb(70,130,180)-100;	
+		  draw square(0.2#m) color:#white border:rgb(70,130,180)-100;	
 		}	
 	}
 }
@@ -200,14 +203,14 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 			  draw string("Ro: " + R0) color: #white at: roPos perspective: true font:font("Helvetica", 20 , #bold); 	
 		 }
 	  }	
-	 display CoronaChart refresh:every(#mn) toolbar:false {
+	 /*display CoronaChart refresh:every(#mn) toolbar:false {
 		//chart "Population in "+cityScopeCity type: series x_serie_labels: (current_day) x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
 		chart "Population in " type: series x_serie_labels: ("") x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
 			data "susceptible" value: nb_susceptible color: #green;
 			data "infected" value: nb_infected color: #red;	
 			data "recovered" value: nb_recovered color: #blue;
 		}
-	  }
+	  }*/
 	}		
 }
 
