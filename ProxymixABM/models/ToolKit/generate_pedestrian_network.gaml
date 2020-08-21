@@ -3,14 +3,11 @@
 * Author: Patrick Taillandier
 * Description: generate the pedestrian network
 ***/
-
 model generatepedestriannetwork
-
-
 import "DXF_Loader.gaml"
-
 global {
-	string useCase <- "CUT";
+	
+	string useCase <- "UDG/CUAAD";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
 	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee, furnitures ];
@@ -130,10 +127,13 @@ global {
 				}
 			}
 			
+			
 			create walking_area from: walking_area_g.geometries;
 			save walking_area type: shp to: walking_area_path;
 		}
 		write "Walking area created";
+		
+		
 		
 		if (build_pedestrian_network) {
 			display_pedestrian_path <- true;
