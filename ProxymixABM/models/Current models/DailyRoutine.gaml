@@ -31,7 +31,8 @@ global {
 	list<room> available_offices;
 	
 	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
-	int num_people_building <- 400;
+	int num_people_per_building;
+	int num_people_per_room;
 	float distance_people;
 	
 	bool display_pedestrian_path <- false;// parameter: true;
@@ -103,16 +104,16 @@ global {
 			list<room> offices_list <- room where (each.type = offices);
 			float tot_area <- offices_list sum_of each.shape.area;
 			ask offices_list {
-				num_places <- max(1,round(num_people_building * shape.area / tot_area));
+				num_places <- max(1,round(num_people_per_building * shape.area / tot_area));
 			}
 			int nb <- offices_list sum_of each.num_places;
-			if (nb > num_people_building) and (length(offices_list) > num_people_building) {
-				loop times: nb - num_people_building {
+			if (nb > num_people_per_building) and (length(offices_list) > num_people_per_building) {
+				loop times: nb - num_people_per_building {
 					room r <- one_of(offices_list where (each.num_places > 1));
 					r.num_places <- r.num_places - 1;	
 				}
-			} else if (nb < num_people_building) {
-				loop times: num_people_building - nb{
+			} else if (nb < num_people_per_building) {
+				loop times: num_people_per_building - nb{
 					room r <- one_of(offices_list);
 					r.num_places <- r.num_places + 1;	
 				}
@@ -466,7 +467,18 @@ species room {
 		else if (density_scenario = "distance") or (type != offices) {
 			squares <-  to_squares(shape, distance_people, true) where (each.location overlaps shape);
 		}
-		else if density_scenario in ["num_people_building", "num_people_room"] {
+		else if (density_scenario= "num_people_room"){
+			num_places <-num_people_per_room;
+			int nb <- num_places;
+			loop while: length(squares) < num_places {
+				squares <-  num_places = 0 ? []: to_squares(shape, nb, true) where (each.location overlaps shape);
+				nb <- nb +1;
+			}
+			if (length(squares) > num_places) {
+				squares <- num_places among squares;
+			}
+		}
+		else if density_scenario in ["num_people_building"] {
 			int nb <- num_places;
 			loop while: length(squares) < num_places {
 				squares <-  num_places = 0 ? []: to_squares(shape, nb, true) where (each.location overlaps shape);
@@ -776,9 +788,14 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter 'fileName:' var: useCase category: 'file' <- "CUT" among: ["CUT","CUCS/Level 2","CUCS/Level 1","CUCS/Ground","CUCS","CUCS_Campus","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter "num_people_building" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'density:' var: peopleDensity category:'Initialization' min:0.0 max:1.0 <- 1.0;
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
+	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
+	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
+	
+	
+	
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
 	parameter "unit" var: unit category: "file" <- #cm;
 	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
@@ -804,7 +821,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species building_entrance refresh: true;
 			species wall refresh: false;
 			species pedestrian_path ;
-			//species people position:{0,0,0.001};
+			species people position:{0,0,0.001};
 			species separator_ag refresh: false;
 			agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
 			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
