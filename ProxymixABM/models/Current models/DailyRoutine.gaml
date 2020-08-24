@@ -56,7 +56,8 @@ global {
 	float R0;
 
 	//SPATIO TEMPORAL VALUES COMPUETD ONLY ONES
-	int nbOffices;	
+	int nbOffices;
+	float totalArea;	
 	float officeArea;
 	int nbMeetingRooms;
 	float meetingRoomsArea;	
@@ -181,7 +182,7 @@ global {
 		create going_home_act with:[activity_places:: building_entrance as list];
 		create eating_outside_act with:[activity_places:: building_entrance as list];
 		
-		available_offices <- rooms_type[offices] where each.is_available(); 
+		available_offices <- rooms_type[offices] where each.is_available() + rooms_type[meeting_rooms] where each.is_available(); 
 		
 		if (movement_model = pedestrian_skill) {
 			do initialize_pedestrian_model;
@@ -217,6 +218,7 @@ global {
 		}
 		
 		nbOffices<-(room count (each.type="Offices"));
+		totalArea<-sum((room) collect each.shape.area);
 		officeArea<-sum((room where (each.type="Offices")) collect each.shape.area);
 		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
 		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
@@ -823,14 +825,22 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species droplet aspect:base;
 
 
-		     graphics 'simulation'{
+			graphics 'site'{
+			  point sitlegendPos<-{-world.shape.width*0.25,-world.shape.width*0.1};
+			  draw string("SITE:") color: #white at: {sitlegendPos.x,sitlegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+			  draw string("Site: " +  useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+		      draw string("Building Type: " +  useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+		        	
+			}	
+		    graphics 'simulation'{
 		     	if(drawSimuInfo){
-		     		point simulegendPos<-{world.shape.width*0,-world.shape.width*0.1};
-		        	draw string("Distance: " +  with_precision(distance_people,2)+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #bold);
+		     		point simulegendPos<-{world.shape.width*0.25,-world.shape.width*0.1};
+		        	draw string("CHARACTERISTICS") color: #white at: {simulegendPos.x,simulegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+		        	draw string("Total Occupants: " +  length(people) ) color: #white at: {simulegendPos.x,simulegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+		        	draw string("Distance: " +  with_precision(distance_people,2)+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 		    		point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
-		    		draw string("Nb Offices: " + nbOffices +  " - " +  with_precision(officeArea, 2)+ "m2") color: #white at: simulegendPo2s perspective: true font:font("Helvetica", 20 , #bold); 	
-		    		draw string("Nb Meeting rooms: " + nbMeetingRooms +  " - " + with_precision(meetingRoomsArea,2) + "m2") color: #white at: {simulegendPo2s.x,simulegendPo2s.y+20#px} perspective: true font:font("Helvetica", 20 , #bold);
-		    		draw string("Nb Desk: " + length(room collect each.available_places)) color: #white at: {simulegendPo2s.x,simulegendPo2s.y+40#px} perspective: true font:font("Helvetica", 20 , #bold);
+		    		draw string("Surfaces: " + with_precision(totalArea,2) + "m2") color: #white at: {simulegendPos.x,simulegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 	
+
 		     	}     
 		    }
 

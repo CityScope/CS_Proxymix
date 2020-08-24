@@ -191,17 +191,25 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	  	}	
 	  	
 	  	graphics "infectiousStatus"{
-	  		point infectiousLegendPos<-{world.shape.width*0.4,0};
-	  		point textOffSet<-{0,20#px};
-	  		draw "S:" + nb_susceptible color: #green at: infectiousLegendPos perspective: true font:font("Helvetica", 20 , #plain); 
-	  		draw "I:" + nb_infected color: #red at: infectiousLegendPos+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
-	  		draw "R:" + nb_recovered color: #blue at: infectiousLegendPos+textOffSet+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
-	  		
+	  		point infectiousLegendPos<-{world.shape.width*0.75,-world.shape.width*0.1};
+	  		draw "PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+	  		draw "Infected new comers (based on local official statistics):" + initial_nb_infected color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw "Low Risk of Infection:" + nb_susceptible color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw "High Risk of Infection:" + nb_infected color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		//draw "R:" + nb_recovered color: #blue at: infectiousLegendPos+textOffSet+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
 	  	}
-	  	 graphics 'ro'{
+	  	
+	  	
+	  	graphics "simu"{
+	  		point simLegendPos<-{world.shape.width*0.25,world.shape.height*1.5};
+	  		draw "PARAMETERS" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+	  		draw "Mask Ratio:" + maskRatio color: #white at: {simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  	}
+	  	
+	  	 /*graphics 'ro'{
 			  point roPos<-{0,world.shape.height*1.1};
 			  draw string("Ro: " + R0) color: #white at: roPos perspective: true font:font("Helvetica", 20 , #bold); 	
-		 }
+		 }*/
 	  }	
 	 /*display CoronaChart refresh:every(#mn) toolbar:false {
 		//chart "Population in "+cityScopeCity type: series x_serie_labels: (current_day) x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
