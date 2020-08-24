@@ -33,9 +33,13 @@ experiment Episode3 type: gui parent: Coronaizer{
 }
 
 experiment Episode4 type: gui parent: Coronaizer{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUT";
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA";
+	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
 }
 
 experiment Episode5 type: gui parent: Coronaizer{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS_Campus";
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUSUR";
+	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
 }
