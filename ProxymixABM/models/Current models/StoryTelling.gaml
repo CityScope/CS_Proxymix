@@ -21,17 +21,15 @@ experiment Episode1 type: gui parent: Coronaizer{
 }
 
 experiment Episode2 type: gui parent: Coronaizer{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUT";
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUT/lab";
+	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 50;
 }
 
 experiment Episode3 type: gui parent: Coronaizer{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUT";
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_building" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 100;
-	
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD";
+	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;	
 }
 
 experiment Episode4 type: gui parent: Coronaizer{
