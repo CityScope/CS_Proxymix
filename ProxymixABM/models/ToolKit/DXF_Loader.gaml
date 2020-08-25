@@ -16,6 +16,7 @@ global
 	string dataset_path <- "./../../includes/";
 	string useCase;
 	string useCaseType<-"default";
+	string ventilationType<-"default";
 	file the_dxf_metadata <- file_exists(dataset_path + useCase +"/building.csv") ?csv_file(dataset_path + useCase +"/building.csv",",",true) : nil;
 	float unit <- (the_dxf_metadata != nil )? float(matrix(the_dxf_metadata)[1,0]) : #cm;
 	//define the bounds of the studied area

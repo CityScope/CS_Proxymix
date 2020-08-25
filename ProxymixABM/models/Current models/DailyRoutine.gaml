@@ -817,7 +817,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species building_entrance refresh: true;
 			species wall refresh: false;
 			species pedestrian_path ;
-			species people position:{0,0,0.001};
+			//species people position:{0,0,0.001};
 			species separator_ag refresh: false;
 			agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
 			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
@@ -837,9 +837,9 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 		     		point simulegendPos<-{world.shape.width*0.25,-world.shape.width*0.1};
 		        	draw string("CHARACTERISTICS") color: #white at: {simulegendPos.x,simulegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
 		        	draw string("Total Occupants: " +  length(people) ) color: #white at: {simulegendPos.x,simulegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-		        	draw string("Distance: " +  with_precision(distance_people,2)+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+		        	draw string("Physical distance: " +  with_precision(distance_people,2)+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 		    		point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
-		    		draw string("Surfaces: " + with_precision(totalArea,2) + "m2") color: #white at: {simulegendPos.x,simulegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 	
+		    		draw string("Area: " + with_precision(totalArea,2) + "m2") color: #white at: {simulegendPos.x,simulegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 	
 
 		     	}     
 		    }
