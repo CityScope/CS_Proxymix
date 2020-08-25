@@ -182,7 +182,10 @@ global {
 		create going_home_act with:[activity_places:: building_entrance as list];
 		create eating_outside_act with:[activity_places:: building_entrance as list];
 		
-		available_offices <- rooms_type[offices] where each.is_available() + rooms_type[meeting_rooms] where each.is_available(); 
+		
+		available_offices <- rooms_type[offices] where each.is_available();	
+		
+		 
 		
 		if (movement_model = pedestrian_skill) {
 			do initialize_pedestrian_model;

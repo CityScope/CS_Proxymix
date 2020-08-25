@@ -213,7 +213,7 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	  	
 	  	
 	  	graphics "simu"{
-	  		point simLegendPos<-{world.shape.width*0.25,world.shape.height*1.5};
+	  		point simLegendPos<-{world.shape.width*0.25,world.shape.height*1.25};
 	  		draw "PARAMETERS" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
 	  		draw "Mask Ratio:" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  	}
