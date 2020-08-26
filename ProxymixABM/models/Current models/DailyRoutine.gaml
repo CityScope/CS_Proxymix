@@ -15,7 +15,16 @@ global {
 	//string dataset <- "MediaLab";
 	float normal_step <- 1#s;
 	float fast_step <- 5 #mn;
+	bool use_change_step <- true;
 	bool change_step <- false update: false;
+	
+	string agenda_scenario <- "simple" among: ["simple", "custom", "classic daily activities"];
+	float step_arrival <- 1#mn;
+	float arrival_time_interval <- 15 #mn;
+	float activity_duration_mean <- 1#h;
+	float activity_duration_std <- 0.0;
+	
+	map<date,int> people_to_create;
 	
 	float step <- normal_step on_change: {change_step <- true;};
 	float separator_proba <- 0.0;
@@ -226,6 +235,16 @@ global {
 		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
 		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
 		nbDesk<-length(room collect each.available_places);
+		
+		if (arrival_time_interval = 0.0) {
+			people_to_create[current_date] <- length(available_offices);
+		} else {
+			int nb <- 1 + int(step_arrival * length(available_offices) / arrival_time_interval);
+		
+			loop i from: 0 to: arrival_time_interval step: step_arrival{
+				people_to_create[starting_date add_seconds i] <- nb;
+			}
+		}
 	}
 	
 	reflex save_model_output when: (cycle = 1 and savetoCSV){
@@ -266,39 +285,48 @@ global {
 			goto_entrance <- true;
 			location <- any_location_in (one_of(building_entrance).init_place);
 			
-			date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 40 #mn);
-			time_first_lunch <-((time_first_lunch = nil) or (time_first_lunch > lunch_time)) ? lunch_time : time_first_lunch;
-			activity act_coffee <- activity first_with (each.name = coffee);
-			activity shopping_supermarket <- activity first_with (each.name = supermarket);
-			bool return_after_lunch <- false;
-			if (flip(0.8)) {
-				agenda_day[lunch_time] <-first(eating_outside_act) ;
-				return_after_lunch <- true;
-				lunch_time <- lunch_time add_seconds rnd(30 #mn, 90 #mn);
-				if flip(0.3) and act_coffee != nil{
-					agenda_day[lunch_time] <- activity first_with (each.name = coffee);
-					lunch_time <- lunch_time add_seconds rnd(5#mn, 15 #mn);
+			switch agenda_scenario {
+				match "simple" {
+					agenda_day[current_date add_seconds max(1#mn,gauss(activity_duration_mean, activity_duration_std))] <- first(going_home_act);
 				}
-			} else {
-				if flip(0.3) and  shopping_supermarket != nil{
-					agenda_day[lunch_time] <-shopping_supermarket ;
-					return_after_lunch <- true;
-					lunch_time <- lunch_time add_seconds rnd(5#mn, 10 #mn);
+				match "custom" {
+					
+				} 
+				match "classic daily activities" {
+					date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 40 #mn);
+					time_first_lunch <-((time_first_lunch = nil) or (time_first_lunch > lunch_time)) ? lunch_time : time_first_lunch;
+					activity act_coffee <- activity first_with (each.name = coffee);
+					activity shopping_supermarket <- activity first_with (each.name = supermarket);
+					bool return_after_lunch <- false;
+					if (flip(0.8)) {
+						agenda_day[lunch_time] <-first(eating_outside_act) ;
+						return_after_lunch <- true;
+						lunch_time <- lunch_time add_seconds rnd(30 #mn, 90 #mn);
+						if flip(0.3) and act_coffee != nil{
+							agenda_day[lunch_time] <- activity first_with (each.name = coffee);
+							lunch_time <- lunch_time add_seconds rnd(5#mn, 15 #mn);
+						}
+					} else {
+						if flip(0.3) and  shopping_supermarket != nil{
+							agenda_day[lunch_time] <-shopping_supermarket ;
+							return_after_lunch <- true;
+							lunch_time <- lunch_time add_seconds rnd(5#mn, 10 #mn);
+						}
+						if flip(0.5) and act_coffee != nil{
+							agenda_day[lunch_time] <- act_coffee;
+							return_after_lunch <- true;
+							lunch_time <- lunch_time add_seconds rnd(10#mn, 30 #mn);
+						}	
+					}
+					
+					if (return_after_lunch) {
+						agenda_day[lunch_time] <- first(working);
+					}
+					agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(30),rnd(59))] <- first(going_home_act);
+	
 				}
-				if flip(0.5) and act_coffee != nil{
-					agenda_day[lunch_time] <- act_coffee;
-					return_after_lunch <- true;
-					lunch_time <- lunch_time add_seconds rnd(10#mn, 30 #mn);
-				}	
 			}
-			
-			if (return_after_lunch) {
-				agenda_day[lunch_time] <- first(working);
-			}
-			agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(30),rnd(59))] <- first(going_home_act);
-		}
-		
-		
+		}	
 	}
 	
 	reflex reset_proximity_cell when: draw_proximity_grid {
@@ -339,24 +367,14 @@ global {
 	 }
 	}
 	
-	reflex change_step {
+	reflex change_step when: use_change_step{
 		
-		if (current_date.hour >= 7 and current_date.minute > 3 and empty(people where (each.target != nil)))  {
+		if (time > step_arrival and empty(people where (each.target != nil)))  {
 			step <- fast_step;
 		}
-		if (time_first_lunch != nil and current_date.hour = time_first_lunch.hour and current_date.minute > time_first_lunch.minute){
+		if not empty(people where (each.target != nil)){
 			step <- normal_step;
 		}
-		if (current_date.hour >= 12 and current_date.minute > 5 and empty(people where (each.target != nil)))  {
-			step <- fast_step;
-		} 
-		if (current_date.hour = 18){
-			step <- normal_step;
-		}
-		if (not empty(people where (each.target != nil))) {
-			step <- normal_step;
-		}
-		
 	}
 	
 	
@@ -364,9 +382,15 @@ global {
 		do pause;
 	}
 	
-	reflex people_arriving when: not empty(available_offices) and every(2 #s)
+	reflex people_arriving when: not empty(available_offices) and not empty(people_to_create)
 	{	
-		do create_people(rnd(0,min(3, length(available_offices))));
+		loop d over: people_to_create.keys {
+			if current_date >= d {
+				do create_people(rnd(0,min(people_to_create[d], length(available_offices))));
+				remove key:d from: people_to_create;
+			}
+		} 
+		
 	}
 	reflex updateGraph when: (drawSocialDistanceGraph = true) {
 		social_distance_graph <- graph<people, people>(people as_distance_graph (distance_people - 0.1#m));
@@ -820,7 +844,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species building_entrance refresh: true;
 			species wall refresh: false;
 			species pedestrian_path ;
-			//species people position:{0,0,0.001};
+			species people position:{0,0,0.001};
 			species separator_ag refresh: false;
 			agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
 			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
