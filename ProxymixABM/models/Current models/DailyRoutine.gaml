@@ -827,26 +827,6 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species bottleneck transparency: 0.5;
 			species droplet aspect:base;
 
-
-			graphics 'site'{
-			  point sitlegendPos<-{-world.shape.width*0.25,-world.shape.width*0.1};
-			  draw string("SITE:") color: #white at: {sitlegendPos.x,sitlegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-			  draw string("Site: " +  useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-		      draw string("Building Type: " +  useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-		        	
-			}	
-		    graphics 'simulation'{
-		     	if(drawSimuInfo){
-		     		point simulegendPos<-{world.shape.width*0.25,-world.shape.width*0.1};
-		        	draw string("CHARACTERISTICS") color: #white at: {simulegendPos.x,simulegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-		        	draw string("Total Occupants: " +  length(people) ) color: #white at: {simulegendPos.x,simulegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-		        	draw string("Physical distance: " +  with_precision(distance_people,2)+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-		    		point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
-		    		draw string("Area: " + with_precision(totalArea,2) + "m2") color: #white at: {simulegendPos.x,simulegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 	
-
-		     	}     
-		    }
-
 		    graphics "social_graph" {
 				if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
 					loop eg over: social_distance_graph.edges {
@@ -855,7 +835,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 					}
 
 				}
-		}
+			}
 		}
 	}
 }

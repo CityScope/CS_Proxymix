@@ -155,7 +155,7 @@ grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 ne
 	}	
 }
 
-experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
+experiment Coronaizer type:gui autorun:true{
 
 	//float minimum_cycle_duration<-0.02;
 	parameter "Infection distance:" category: "Policy" var:infectionDistance min: 1.0 max: 100.0 step:1;
@@ -170,10 +170,43 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	parameter "Show People:" category: "Visualization" var:showPeople;
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD" among: ["UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
+	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
+	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
+	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
+	parameter "unit" var: unit category: "file" <- #cm;
+	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
+	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
+	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
+	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
+	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
+	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
+	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-true;
+	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
+	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
+	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
+	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
+	parameter "Trigger Ventilation:" category: "Ventilation" var:ventilation <-false;
+	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
 	
 	output{
-	  display CoronaMap type:opengl parent:map background:#black draw_env:false synchronized:false{
+	  layout #split;
+	  display CoronaMap type:opengl  background:#black draw_env:false synchronized:false{
 
+	  	
+	  	species room  refresh: false;
+		species room aspect: available_places_info refresh: true;
+		species building_entrance refresh: true;
+		species wall refresh: false;
+		species pedestrian_path ;
+		//species people position:{0,0,0.001};
+		species separator_ag refresh: false;
+		agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
+		agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
+		species bottleneck transparency: 0.5;
+		species droplet aspect:base;
 	  	species ViralPeople aspect:base;
 	  	species cell aspect:default;
 	  	graphics "infection_graph" {
@@ -184,7 +217,15 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 					}
 
 				}
+		}
+		graphics "social_graph" {
+			if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
+				loop eg over: social_distance_graph.edges {
+					geometry edge_geom <- geometry(eg);
+					draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#gray;
 			}
+		  }
+		}
 			
 
 		graphics "text" {
@@ -218,19 +259,38 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	  		draw "Mask Ratio:" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  	}
 	  	
+	  	graphics 'site'{
+			  point sitlegendPos<-{-world.shape.width*0.25,-world.shape.width*0.1};
+			  draw string("SITE:") color: #white at: {sitlegendPos.x,sitlegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+			  draw string("Site: " +  useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+		      draw string("Building Type: " +  useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);        	
+		}	
+		graphics 'simulation'{
+		  if(drawSimuInfo){
+     		point simulegendPos<-{world.shape.width*0.25,-world.shape.width*0.1};
+        	draw string("CHARACTERISTICS") color: #white at: {simulegendPos.x,simulegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+        	draw string("Total Occupants: " +  length(people) ) color: #white at: {simulegendPos.x,simulegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+        	draw string("Physical distance: " +  with_precision(distance_people,2)+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+    		point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
+    		draw string("Area: " + with_precision(totalArea,2) + "m2") color: #white at: {simulegendPos.x,simulegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 	
+		   }     
+		}
+		
+		
+	  	
 	  	 /*graphics 'ro'{
 			  point roPos<-{0,world.shape.height*1.1};
 			  draw string("Ro: " + R0) color: #white at: roPos perspective: true font:font("Helvetica", 20 , #bold); 	
 		 }*/
 	  }	
-	 /*display CoronaChart refresh:every(#mn) toolbar:false {
-		//chart "Population in "+cityScopeCity type: series x_serie_labels: (current_day) x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
-		chart "Population in " type: series x_serie_labels: ("") x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
+	 display CoronaChart refresh:every(#mn) toolbar:false background:#black{
+		chart "Population in " size:{1.0,1.0}style:line background:#black type: series x_serie_labels: ("") x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
 			data "susceptible" value: nb_susceptible color: #green;
 			data "infected" value: nb_infected color: #red;	
-			data "recovered" value: nb_recovered color: #blue;
+			//data "recovered" value: nb_recovered color: #blue;
 		}
-	  }*/
+		
+	  }
 	}		
 }
 
