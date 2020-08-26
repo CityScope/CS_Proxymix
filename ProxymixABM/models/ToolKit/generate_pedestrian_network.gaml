@@ -21,7 +21,7 @@ global {
  	bool random_densification <- false;//random densification (if true, use random points to fill open areas; if false, use uniform points), 
  	float min_dist_open_area <- 0.1;//min distance to considered an area as open area, 
  	float density_open_area <- 0.1; //density of points in the open areas (float)
- 	bool clean_network <- false; 
+ 	bool clean_network <-  false; 
 	float tol_cliping <- 0.1; //tolerance for the cliping in triangulation (float; distance), 
 	float tol_triangulation <- 0.0; //tolerance for the triangulation 
 	float min_dist_obstacles_filtering <- 0.0;// minimal distance to obstacles to keep a path (float; if 0.0, no filtering), 
@@ -137,11 +137,8 @@ global {
 		
 		if (build_pedestrian_network) {
 			display_pedestrian_path <- true;
-			loop t over: walking_area as list {
-				create triangles from: triangulate(t,tol_cliping,tol_triangulation );
-			}
-		
-		 	list<geometry> pp  <- generate_pedestrian_network([],walking_area,add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering);
+			list<geometry> geoms_decomp <- decomp_shape_triangulation();
+			list<geometry> pp <- generate_pedestrian_network([],geoms_decomp,add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering);
 			
 			
 			list<geometry> ggs;
@@ -227,6 +224,32 @@ global {
 			
 			
 		}
+	} 
+	
+	
+	list<geometry> decomp_it(geometry g) {
+		list<geometry> geom_f;
+		try{
+			g <- clean(g);
+			create triangles from: triangulate(g,tol_cliping,tol_triangulation );
+			geom_f << g;
+			
+		} catch {
+			loop gsg over: g.geometries {
+				list<geometry> sub_areas <- gsg to_rectangles (gsg.width / 2.0, gsg.height / 2.0) ;
+				loop gg over: sub_areas{
+					geom_f <- geom_f + decomp_it(gg);
+				}
+			}			
+		}
+		return geom_f;		
+	}
+	list<geometry> decomp_shape_triangulation {
+		list<geometry> geom_f;
+		loop t over: (walking_area accumulate (each.shape.geometries)) {
+			geom_f <- geom_f + decomp_it(t);
+		}
+		return (geom_f where (each != nil and each.area > 0.1));
 	}
 }
 
