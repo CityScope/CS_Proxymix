@@ -81,7 +81,7 @@ global {
 	float distance_bottleneck <- 2.0; //a bottleneck is considered if there is at least min_num_people_bottleneck slow people at a distance of distance_bottleneck;
 	int min_num_people_bottleneck <- 2; 
 	
-	bool show_droplet <- true;  //show or not the bottleneck
+	bool show_droplet <- false;  //show or not the bottleneck
 	int droplet_livespan <- 5; //to livespan of a bottleneck agent (to avoid glitching aspect) 
 	float droplet_distance<-2.0;
 	bool ventilation;

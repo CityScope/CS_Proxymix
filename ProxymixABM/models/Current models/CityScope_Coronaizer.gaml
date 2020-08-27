@@ -193,7 +193,7 @@ experiment Coronaizer type:gui autorun:true{
 	
 	output{
 	  layout #split;
-	  display CoronaMap type:opengl  background:#black draw_env:false synchronized:false{
+	  display Simulation type:opengl  background:#black draw_env:false synchronized:false{
 
 	  	
 	  	species room  refresh: false;
