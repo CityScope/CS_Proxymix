@@ -237,10 +237,10 @@ global {
 		nbDesk<-length(room collect each.available_places);
 		
 		if (arrival_time_interval = 0.0) {
-			people_to_create[current_date] <- length(available_offices);
+			people_to_create[current_date] <- nbDesk;
 		} else {
-			int nb <- 1 + int(step_arrival * length(available_offices) / arrival_time_interval);
-		
+			int nb <- 1 + int(step_arrival * nbDesk / arrival_time_interval);
+			
 			loop i from: 0 to: arrival_time_interval step: step_arrival{
 				people_to_create[starting_date add_seconds i] <- nb;
 			}
@@ -369,7 +369,7 @@ global {
 	
 	reflex change_step when: use_change_step{
 		
-		if (time > step_arrival and empty(people where (each.target != nil)))  {
+		if (time > arrival_time_interval and empty(people where (each.target != nil)))  {
 			step <- fast_step;
 		}
 		if not empty(people where (each.target != nil)){
@@ -386,7 +386,7 @@ global {
 	{	
 		loop d over: people_to_create.keys {
 			if current_date >= d {
-				do create_people(rnd(0,min(people_to_create[d], length(available_offices))));
+				do create_people(max(0,min(people_to_create[d], length(available_offices collect each.available_places))));
 				remove key:d from: people_to_create;
 			}
 		} 
