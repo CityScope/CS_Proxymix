@@ -19,7 +19,7 @@ global {
 	bool change_step <- false update: false;
 	
 	string agenda_scenario <- "classic day" among: ["simple", "custom", "classic day"];
-	float step_arrival <- 1#mn;
+	float step_arrival <- 5#s;
 	float arrival_time_interval <- 15 #mn;
 	float activity_duration_mean <- 1#h;
 	float activity_duration_std <- 0.0;
@@ -369,12 +369,31 @@ global {
 	
 	reflex change_step when: use_change_step{
 		
-		if (time > arrival_time_interval and empty(people where (each.target != nil)))  {
+		if (agenda_scenario = "classic day") {
+			if (current_date.hour >= 7 and current_date.minute > 3 and empty(people where (each.target != nil)))  {
+				step <- fast_step;
+			}
+			if (time_first_lunch != nil and current_date.hour = time_first_lunch.hour and current_date.minute > time_first_lunch.minute){
+				step <- normal_step;
+			}
+			if (current_date.hour >= 12 and current_date.minute > 5 and empty(people where (each.target != nil)))  {
+				step <- fast_step;
+			} 
+			if (current_date.hour = 18){
+				step <- normal_step;
+			}
+			if (not empty(people where (each.target != nil))) {
+				step <- normal_step;
+			}
+		} else {
+			if (time > arrival_time_interval and empty(people where (each.target != nil)))  {
 			step <- fast_step;
-		}
-		if not empty(people where (each.target != nil)){
-			step <- normal_step;
-		}
+			}
+			if not empty(people where (each.target != nil)){
+				step <- normal_step;
+			}
+		}	
+		
 	}
 	
 	
