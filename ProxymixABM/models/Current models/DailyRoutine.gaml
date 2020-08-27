@@ -18,7 +18,7 @@ global {
 	bool use_change_step <- true;
 	bool change_step <- false update: false;
 	
-	string agenda_scenario <- "simple" among: ["simple", "custom", "classic daily activities"];
+	string agenda_scenario <- "classic day" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 1#mn;
 	float arrival_time_interval <- 15 #mn;
 	float activity_duration_mean <- 1#h;
@@ -292,7 +292,7 @@ global {
 				match "custom" {
 					
 				} 
-				match "classic daily activities" {
+				match "classic day" {
 					date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 40 #mn);
 					time_first_lunch <-((time_first_lunch = nil) or (time_first_lunch > lunch_time)) ? lunch_time : time_first_lunch;
 					activity act_coffee <- activity first_with (each.name = coffee);
