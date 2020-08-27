@@ -276,6 +276,8 @@ experiment Coronaizer type:gui autorun:true{
 		   }     
 		}
 		
+
+		
 		
 	  	
 	  	 /*graphics 'ro'{
@@ -283,14 +285,21 @@ experiment Coronaizer type:gui autorun:true{
 			  draw string("Ro: " + R0) color: #white at: roPos perspective: true font:font("Helvetica", 20 , #bold); 	
 		 }*/
 	  }	
-	 display CoronaChart refresh:every(#mn) toolbar:false background:#black{
+	 /*display CoronaChart refresh:every(#mn) toolbar:false background:#black{
 		chart "Population in " size:{1.0,1.0}style:line background:#black type: series x_serie_labels: ("") x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
 			data "susceptible" value: nb_susceptible color: #green;
 			data "infected" value: nb_infected color: #red;	
 			//data "recovered" value: nb_recovered color: #blue;
 		}
 		
-	  }
+		chart "People Distribution" background:#black  type: pie size: {1.0,1.0} position: {world.shape.width*1.1,world.shape.height*0.5} color: #white axes: #yellow title_font: 'Helvetica' title_font_size: 12.0 
+		tick_font: 'Helvetica' tick_font_size: 10 tick_font_style: 'bold' label_font: 'Helvetica' label_font_size: 32 label_font_style: 'bold' x_label: 'Nice Xlabel' y_label:'Nice Ylabel'
+		{
+			data "Low Risk" value: nb_susceptible color:#green;
+			data "High Risk" value: nb_infected color:#red;
+		}
+		
+	  }*/
 	}		
 }
 
