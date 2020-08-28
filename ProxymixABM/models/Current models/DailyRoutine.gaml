@@ -24,7 +24,7 @@ global {
 	float activity_duration_mean <- 1#h;
 	float activity_duration_std <- 0.0;
 	
-	float distance_queue <- 1#m;
+	float distance_queue <- 10#m;
 	bool queueing <- false;
 	float waiting_time_entrance <- 5#s;
 	
@@ -40,6 +40,7 @@ global {
 	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
 	list<room> available_offices;
+	float peopleSize<-1.0#m;
 	
 	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	int num_people_per_building;
@@ -68,7 +69,7 @@ global {
 	graph<people, people> social_distance_graph <- graph<people, people>([]);
 	float R0;
 
-	//SPATIO TEMPORAL VALUES COMPUETD ONLY ONES
+	//SPATIO TEMPORAL VALUES COMPUTED ONLY ONES
 	int nbOffices;
 	float totalArea;	
 	float officeArea;
@@ -794,7 +795,7 @@ species people skills: [escape_pedestrian] parallel: parallel{
 	
 	aspect default {
 		if not is_outside{
-			draw circle(0.3) color:color;// border: #black;
+			draw circle(peopleSize) color:color;// border: #black;
 		}
 		//draw obj_file(dataset_path+"/Obj/man.obj",-90::{1,0,0}) color:#gamablue size:2 rotate:heading+90;
 	}

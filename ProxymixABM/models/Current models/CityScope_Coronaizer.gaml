@@ -133,10 +133,10 @@ species ViralPeople  mirrors:people{
 	
 	aspect base {
 		if(showPeople) and not target.is_outside{
-		  draw circle(is_infected ? 0.4#m : 0.3#m) color:(is_susceptible) ? #green : ((is_infected) ? #red : #blue);	
+		  draw circle(is_infected ? peopleSize*1.25 : peopleSize) color:(is_susceptible) ? #green : ((is_infected) ? #red : #blue);	
 		}
 		if (as_mask){
-		  draw square(0.2#m) color:#white border:rgb(70,130,180)-100;	
+		  draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
 		}	
 	}
 }
@@ -168,9 +168,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
 	parameter "Draw Infection Grid:" category: "Visualization" var:draw_infection_grid;
 	parameter "Show People:" category: "Visualization" var:showPeople;
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD" among: ["UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+    parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD" among: ["UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
 	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
@@ -257,6 +255,7 @@ experiment Coronaizer type:gui autorun:true{
 	  		point simLegendPos<-{world.shape.width*0.25,world.shape.height*1.25};
 	  		draw "PARAMETERS" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
 	  		draw "Mask Ratio:" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw "Queueing:" + queueing color: #white at: {simLegendPos.x,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  	}
 	  	
 	  	graphics 'site'{
