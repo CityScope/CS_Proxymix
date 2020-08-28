@@ -20,9 +20,13 @@ global {
 	
 	string agenda_scenario <- "classic day" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
-	float arrival_time_interval <- 15 #mn;
+	float arrival_time_interval <- 0#mn;//15 #mn;
 	float activity_duration_mean <- 1#h;
 	float activity_duration_std <- 0.0;
+	
+	float distance_queue <- 2#m;
+	bool queueing <- false;
+	float waiting_time_entrance <- 2#s;
 	
 	map<date,int> people_to_create;
 	
@@ -132,7 +136,6 @@ global {
 		ask room + building_entrance {
 			do intialization;
 		}
-		
 		ask dxf_element {
 			do die;
 		}
@@ -171,10 +174,16 @@ global {
 				dist <- dist * 0.5;	
 			} 
 			if contour != nil {
-				entrances <- points_on (contour, 2.0);
+				list<point> ents <- points_on (contour, 2.0);
+				loop pt over:ents {
+					create room_entrance with: [location::pt,my_room::self] {
+						myself.entrances << self;
+					}
+				
+				}
 			}
 			ask places {
-				point pte <- myself.entrances closest_to self;
+				point pte <- (myself.entrances closest_to self).location;
 				dists <- self distance_to pte;
 			}
 					
@@ -193,8 +202,6 @@ global {
 		
 		
 		available_offices <- rooms_type[offices] where each.is_available();	
-		
-		 
 		
 		if (movement_model = pedestrian_skill) {
 			do initialize_pedestrian_model;
@@ -234,13 +241,11 @@ global {
 		officeArea<-sum((room where (each.type="Offices")) collect each.shape.area);
 		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
 		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
-		nbDesk<-length(room collect each.available_places);
-		
+		nbDesk<-length(room accumulate each.available_places);
 		if (arrival_time_interval = 0.0) {
 			people_to_create[current_date] <- nbDesk;
 		} else {
 			int nb <- 1 + int(step_arrival * nbDesk / arrival_time_interval);
-			
 			loop i from: 0 to: arrival_time_interval step: step_arrival{
 				people_to_create[starting_date add_seconds i] <- nb;
 			}
@@ -280,7 +285,7 @@ global {
 			}
 			current_activity <- first(working);
 			target_room <- current_activity.get_place(self);
-			target <- target_room.entrances closest_to self;
+			target <- (target_room.entrances closest_to self).location;
 			
 			goto_entrance <- true;
 			location <- any_location_in (one_of(building_entrance).init_place);
@@ -405,7 +410,7 @@ global {
 	{	
 		loop d over: people_to_create.keys {
 			if current_date >= d {
-				do create_people(max(0,min(people_to_create[d], length(available_offices collect each.available_places))));
+				do create_people(max(0,min(people_to_create[d], length(available_offices accumulate each.available_places))));
 				remove key:d from: people_to_create;
 			}
 		} 
@@ -447,12 +452,102 @@ species wall {
 	}
 }
 
+
+species room_entrance {
+	geometry queue;
+	room my_room;
+	list<people> people_waiting;
+	list<point> positions;
+	
+	geometry waiting_area;
+	
+	init {
+		do default_queue;
+	}
+	action default_queue {
+		geometry line_g;
+		float d <- #max_float;
+		loop i from: 0 to: length(my_room.shape.points) - 2 {
+			point pt1 <- my_room.shape.points[i];
+			point pt2 <- my_room.shape.points[i+1];
+			geometry l <- line([pt1, pt2]);
+			if (self distance_to l) < d {
+				line_g <- l;
+				d <- self distance_to l;
+			}
+		}
+		line_g <- line_g rotated_by 90;
+		if (line_g intersects my_room ) {
+			geometry line_g2 <- line(reverse(line_g.points));
+			if (line_g2 inter my_room).perimeter < (line_g inter my_room).perimeter {
+				line_g <- line_g2;
+			}
+		}
+		line_g <- line_g at_location (line_g.location );
+		point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
+		float nb <- max(1, length(my_room.places)) * distance_queue;
+		queue <- line([location,location + vector * nb ]);
+		list<wall> ws <- wall overlapping queue;
+		if not empty(ws) {
+			loop w over: ws {
+				queue <- queue - ws;
+				queue <- queue.geometries with_min_of (each distance_to self);
+			}
+		}
+		
+		do manage_queue();
+	}
+	
+	action manage_queue {
+		positions <- queue points_on (2.0); 
+		waiting_area <- (last(positions) + 3.0)  - (queue + 1.0);
+		list<wall> ws <- wall overlapping waiting_area;
+		if not empty(ws) {
+			loop w over: ws {
+				waiting_area <- waiting_area - ws ;
+				waiting_area <- waiting_area.geometries with_min_of (each distance_to last(positions) );
+			}
+		}
+		
+	}
+	
+	action add_people(people someone) {
+		if (length(people_waiting) < length(positions)) {
+			someone.location <- positions[length(people_waiting)];
+		} else {
+			someone.location  <- any_location_in(waiting_area);
+		}
+		people_waiting << someone;
+	}
+	
+	
+	reflex manage_visitor when: not empty(people_waiting) and every(waiting_time_entrance) {
+		people the_first_one <- first(people_waiting);
+		people_waiting >> the_first_one;
+		the_first_one.in_line<-false;
+		if (not empty(people_waiting)) {
+			loop i from: 0 to: length(people_waiting) - 1 {
+				if (i < length(positions)) {
+					people_waiting[i].location <- positions[i];
+				}
+			}
+		}	
+	}
+	 
+	aspect default {
+		draw shape color: #cyan;	
+		//if(showWaitingLine){
+		    draw queue color: #red;	
+	  //}
+		 
+	}
+}
 species room {
 	int nb_affected;
 	string type;
 	pedestrian_path closest_path;
 	geometry init_place;
-	list<point> entrances;
+	list<room_entrance> entrances;
 	list<place_in_room> places;
 	list<place_in_room> available_places;
 	int num_places;
@@ -549,6 +644,7 @@ species room {
 					myself.places << self;
 				}
 			} 
+				
 			if (length(places) > 1 and separator_proba > 0.0) {
 				graph g <- as_intersection_graph(squares, 0.01);
 				list<list<place_in_room>> ex;
@@ -606,11 +702,11 @@ species building_entrance parent: room {
 	place_in_room get_target(people p){
 		return place_in_room closest_to p;
 	}
-	
+
 	aspect default {
 		draw shape color: standard_color_per_layer[type];
 		draw init_place color:#magenta border: #black;
-		loop e over: entrances {draw square(0.1) at: e color: #magenta border: #black;}
+		loop e over: entrances {draw square(0.1) at: e.location color: #magenta border: #black;}
 		loop p over: available_places {draw square(0.1) at: p.location color: #cyan border: #black;}
 	}
 }
@@ -682,6 +778,8 @@ species people skills: [escape_pedestrian] parallel: parallel{
 	bool is_slow <- false update: false;
 	bool is_slow_real <- false;
 	int counter <- 0;
+	bool in_line <- false;
+	
 	
 	
 	aspect default {
@@ -703,7 +801,7 @@ species people skills: [escape_pedestrian] parallel: parallel{
 		string n <- current_activity = nil ? "" : copy(current_activity.name);
 		current_activity <- agenda_day.values[0];
 		agenda_day >> first(agenda_day);
-		target <- target_room.entrances closest_to self;
+		target <- (target_room.entrances closest_to self).location;
 		target_room <- current_activity.get_place(self);
 		go_oustide_room <- true;
 		is_outside <- false;
@@ -711,7 +809,7 @@ species people skills: [escape_pedestrian] parallel: parallel{
 		target_place <- nil;
 	}
 	
-	reflex goto_activity when: target != nil{
+	reflex goto_activity when: target != nil and not in_line{
 		bool arrived <- false;
 		if goto_entrance {
 			if (movement_model = moving_skill) {
@@ -748,21 +846,28 @@ species people skills: [escape_pedestrian] parallel: parallel{
 		}
 		if(arrived) {
 			if (go_oustide_room) {
-				target <- target_room.entrances closest_to self;
+				target <- (target_room.entrances closest_to self).location;
 				
 				go_oustide_room <- false;
 				goto_entrance <- true;
 			}
 			else if (goto_entrance) {
+				
 				target_place <- target_room.get_target(self);
 				if target_place != nil {
 					target <- target_place.location;
 					goto_entrance <- false;
+					if (queueing) {
+						ask room_entrance closest_to self {
+							do add_people(myself);
+						}
+						in_line <- true;
+					}
 				} else {
 					room tr <- current_activity.get_place(self);
 					if (tr != nil ) {
 						target_room <- tr;
-						target <- target_room.entrances closest_to self;
+						target <- (target_room.entrances closest_to self).location;
 					}
 				}
 			} else {
@@ -859,6 +964,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 		display map synchronized: true background:#black parent:floorPlan type:java2D draw_env:false
 		{
 			species room  refresh: false;
+			//species room_entrance;
 			species room aspect: available_places_info refresh: true;
 			species building_entrance refresh: true;
 			species wall refresh: false;
