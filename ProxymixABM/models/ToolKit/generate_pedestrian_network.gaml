@@ -7,7 +7,7 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 global {
 	
-	string useCase <- "UDG/CUCEA";
+	string useCase <- "UDG/CUSUR";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
 	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee, furnitures ];
