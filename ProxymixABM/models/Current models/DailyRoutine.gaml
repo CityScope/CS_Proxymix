@@ -24,9 +24,9 @@ global {
 	float activity_duration_mean <- 1#h;
 	float activity_duration_std <- 0.0;
 	
-	float distance_queue <- 2#m;
+	float distance_queue <- 1#m;
 	bool queueing <- false;
-	float waiting_time_entrance <- 2#s;
+	float waiting_time_entrance <- 5#s;
 	
 	map<date,int> people_to_create;
 	
@@ -285,7 +285,8 @@ global {
 			}
 			current_activity <- first(working);
 			target_room <- current_activity.get_place(self);
-			target <- (target_room.entrances closest_to self).location;
+			the_entrance <- (target_room.entrances closest_to self);
+			target <- the_entrance.location;
 			
 			goto_entrance <- true;
 			location <- any_location_in (one_of(building_entrance).init_place);
@@ -499,7 +500,7 @@ species room_entrance {
 	}
 	
 	action manage_queue {
-		positions <- queue points_on (2.0); 
+		positions <- queue points_on (distance_queue); 
 		waiting_area <- (last(positions) + 3.0)  - (queue + 1.0);
 		list<wall> ws <- wall overlapping waiting_area;
 		if not empty(ws) {
@@ -520,6 +521,14 @@ species room_entrance {
 		people_waiting << someone;
 	}
 	
+	point get_position {
+		if (length(people_waiting) < length(positions)) {
+			return positions[length(people_waiting)];
+		} else {
+			return any_location_in(waiting_area);
+		}
+	}
+	
 	
 	reflex manage_visitor when: not empty(people_waiting) and every(waiting_time_entrance) {
 		people the_first_one <- first(people_waiting);
@@ -536,9 +545,9 @@ species room_entrance {
 	 
 	aspect default {
 		draw shape color: #cyan;	
-		//if(showWaitingLine){
+		if(queueing){
 		    draw queue color: #red;	
-	  //}
+	  }
 		 
 	}
 }
@@ -779,6 +788,7 @@ species people skills: [escape_pedestrian] parallel: parallel{
 	bool is_slow_real <- false;
 	int counter <- 0;
 	bool in_line <- false;
+	room_entrance the_entrance;
 	
 	
 	
@@ -812,6 +822,13 @@ species people skills: [escape_pedestrian] parallel: parallel{
 	reflex goto_activity when: target != nil and not in_line{
 		bool arrived <- false;
 		if goto_entrance {
+			if (queueing) and ((self distance_to target) < (2 * distance_queue))  {
+				point pt <- the_entrance.get_position();
+				if (pt != target) {
+					final_target <- nil;
+					target <- pt;
+				}
+			}
 			if (movement_model = moving_skill) {
 				do goto target: target on: pedestrian_network;
 				arrived <- location = target;
@@ -846,7 +863,12 @@ species people skills: [escape_pedestrian] parallel: parallel{
 		}
 		if(arrived) {
 			if (go_oustide_room) {
-				target <- (target_room.entrances closest_to self).location;
+				if (queueing) {
+					target <- (target_room.entrances closest_to self).location;
+				} else {
+					the_entrance <- (target_room.entrances closest_to self);
+					target <- the_entrance.get_position();
+				}
 				
 				go_oustide_room <- false;
 				goto_entrance <- true;
@@ -964,7 +986,7 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 		display map synchronized: true background:#black parent:floorPlan type:java2D draw_env:false
 		{
 			species room  refresh: false;
-			//species room_entrance;
+			species room_entrance;
 			species room aspect: available_places_info refresh: true;
 			species building_entrance refresh: true;
 			species wall refresh: false;
