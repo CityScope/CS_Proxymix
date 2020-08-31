@@ -249,7 +249,7 @@ experiment Coronaizer type:gui autorun:true{
 	  		draw "High risk people" color:#red at:{simLegendPos.x+1.0#m,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw circle(0.5#m) color:#red at:{simLegendPos.x,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw "Type of Ventilation: " + ventilationType color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		draw "Time Spent in classrooms: " + timeSpent + "h" color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+80#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+	  		draw "Time Spent in classrooms: " + (timeSpent/#h) + "h" color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+80#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw "Agenda: " + agenda_scenario color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+100#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		
 	  		

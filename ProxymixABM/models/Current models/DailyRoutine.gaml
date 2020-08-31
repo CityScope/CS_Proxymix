@@ -21,12 +21,12 @@ global {
 	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
 	float arrival_time_interval <- 0#mn;//15 #mn;
-	float activity_duration_mean <- 1#h;
-	float activity_duration_std <- 0.0;
 	
 	float distance_queue <- 1#m;
 	bool queueing <- true;
 	float waiting_time_entrance <- 5#s;
+	bool first_end_sim <- true;
+	 	
 	
 	map<date,int> people_to_create;
 	
@@ -294,7 +294,7 @@ global {
 			
 			switch agenda_scenario {
 				match "simple" {
-					agenda_day[current_date add_seconds max(1#mn,gauss(activity_duration_mean, activity_duration_std))] <- first(going_home_act);
+					agenda_day[current_date add_seconds max(1#mn,timeSpent)] <- first(going_home_act);
 				}
 				match "custom" {
 					
@@ -404,8 +404,20 @@ global {
 	}
 	
 	
-	reflex end_simulation when: current_date.hour > 12 and empty(people) {
-		do pause;
+	reflex end_simulation when: empty(people) and time > 100 {
+		if (first_end_sim) {
+			write "End of simulation (" + int(world) + "): " +current_date;
+	 		first_end_sim <- false;
+		}
+		bool ready_end <- true;
+	 	loop s over: COVID_model {
+	 		if  not empty((s.people)) {
+	 			ready_end <- false;
+	 		} 
+	 	}
+	 	if (ready_end) {
+	 		do pause;
+	 	}
 	}
 	
 	reflex people_arriving when: not empty(available_offices) and not empty(people_to_create)
@@ -805,7 +817,7 @@ species droplet skills:[moving]{
 	}
 }
 
-species people skills: [escape_pedestrian] parallel: parallel{
+species people skills: [escape_pedestrian] {
 	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
 	room working_place;
 	map<date, activity> agenda_day;
