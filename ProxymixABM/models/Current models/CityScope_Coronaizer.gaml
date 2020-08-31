@@ -256,14 +256,14 @@ experiment Coronaizer type:gui autorun:true{
 	  		//draw "R:" + nb_recovered color: #blue at: infectiousLegendPos+textOffSet+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
 	  	}
 	  	
-	  	graphics "simuLegend"{
+	  /* 	graphics "simuLegend"{
 	  		point simLegendPos<-{-world.shape.width*0.25,world.shape.height*1.5};
 	  		draw "SCENARIO" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
 	  		draw "Type of Ventilation: " + ventilationType color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw "Time Spent in classrooms: " + timeSpent + "h" color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw "Agenda: " + agenda_scenario color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 
-	  	}
+	  	}*/
 	  	
 	  	
 	  	graphics "simu"{
