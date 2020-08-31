@@ -191,7 +191,7 @@ experiment Coronaizer type:gui autorun:true{
 	
 	output{
 	  layout #split;
-	  display Simulation type:opengl  background:#black draw_env:false synchronized:true autosave:true{
+	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false{
 	  	species room  refresh: false;
 		species room aspect: available_places_info refresh: true;
 		species building_entrance refresh: true;
@@ -262,6 +262,7 @@ experiment Coronaizer type:gui autorun:true{
 	  		draw "Type of Ventilation: " + ventilationType color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw "Time Spent in classrooms: " + timeSpent + "h" color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw "Agenda: " + agenda_scenario color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+
 	  	}
 	  	
 	  	

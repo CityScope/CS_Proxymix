@@ -21,12 +21,12 @@ global {
 	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
 	float arrival_time_interval <- 0#mn;//15 #mn;
-	float activity_duration_mean <- 1#h;
-	float activity_duration_std <- 0.0;
 	
 	float distance_queue <- 1#m;
 	bool queueing <- true;
 	float waiting_time_entrance <- 5#s;
+	bool first_end_sim <- true;
+	 	
 	
 	map<date,int> people_to_create;
 	
@@ -286,7 +286,19 @@ global {
 			}
 			current_activity <- first(working);
 			target_room <- current_activity.get_place(self);
-			the_entrance <- (target_room.entrances closest_to self);
+			list<room_entrance> re <- copy(target_room.entrances);
+			if (length(re) = 1) {
+				the_entrance <- first(re);
+			} else {
+				re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room);
+
+				if (empty(re)) {
+					re <- target_room.entrances;
+				}
+				the_entrance <- re[rnd_choice(re collect (length(each.positions) / each distance_to self) )];
+		
+			}
+		//	the_entrance <- (target_room.entrances closest_to self);
 			target <- the_entrance.location;
 			
 			goto_entrance <- true;
@@ -294,7 +306,7 @@ global {
 			
 			switch agenda_scenario {
 				match "simple" {
-					agenda_day[current_date add_seconds max(1#mn,gauss(activity_duration_mean, activity_duration_std))] <- first(going_home_act);
+					agenda_day[current_date add_seconds max(1#mn,timeSpent)] <- first(going_home_act);
 				}
 				match "custom" {
 					
@@ -404,8 +416,20 @@ global {
 	}
 	
 	
-	reflex end_simulation when: current_date.hour > 12 and empty(people) {
-		do pause;
+	reflex end_simulation when: empty(people) and time > 100 {
+		if (first_end_sim) {
+			write "End of simulation (" + int(world) + "): " +current_date;
+	 		first_end_sim <- false;
+		}
+		bool ready_end <- true;
+	 	loop s over: COVID_model {
+	 		if  not empty((s.people)) {
+	 			ready_end <- false;
+	 		} 
+	 	}
+	 	if (ready_end) {
+	 		do pause;
+	 	}
 	}
 	
 	reflex people_arriving when: not empty(available_offices) and not empty(people_to_create)
@@ -805,7 +829,7 @@ species droplet skills:[moving]{
 	}
 }
 
-species people skills: [escape_pedestrian] parallel: parallel{
+species people skills: [escape_pedestrian] {
 	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
 	room working_place;
 	map<date, activity> agenda_day;
@@ -857,7 +881,7 @@ species people skills: [escape_pedestrian] parallel: parallel{
 	reflex goto_activity when: target != nil and not in_line{
 		bool arrived <- false;
 		if goto_entrance {
-			if (queueing) and ((self distance_to target) < (2 * distance_queue))  {
+			if (queueing) and (species(target_room) != building_entrance) and ((self distance_to target) < (2 * distance_queue))  and ((self distance_to target) > (1 * distance_queue))  {
 				point pt <- the_entrance.get_position();
 				if (pt != target) {
 					final_target <- nil;
@@ -902,7 +926,11 @@ species people skills: [escape_pedestrian] parallel: parallel{
 					target <- (target_room.entrances closest_to self).location;
 				} else {
 					the_entrance <- (target_room.entrances closest_to self);
-					target <- the_entrance.get_position();
+					if (species(target_room) = building_entrance) {
+						target <- the_entrance.location;
+					} else {
+						target <- the_entrance.get_position();
+					}
 				}
 				
 				go_oustide_room <- false;
@@ -914,7 +942,7 @@ species people skills: [escape_pedestrian] parallel: parallel{
 				if target_place != nil {
 					target <- target_place.location;
 					goto_entrance <- false;
-					if (queueing) {
+					if (queueing and (species(target_room) != building_entrance)) {
 						ask room_entrance closest_to self {
 							do add_people(myself);
 						}
