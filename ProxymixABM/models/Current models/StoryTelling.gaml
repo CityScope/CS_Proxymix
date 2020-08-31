@@ -37,7 +37,7 @@ experiment Episode1 type: gui parent: Coronaizer{
 
 experiment Episode2 type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUT/lab";
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUT/room104";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0;
