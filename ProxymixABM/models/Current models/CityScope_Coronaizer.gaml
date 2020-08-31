@@ -181,7 +181,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
 	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
-	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-true;
+	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-false;
 	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
 	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
@@ -191,9 +191,7 @@ experiment Coronaizer type:gui autorun:true{
 	
 	output{
 	  layout #split;
-	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false{
-
-	  	
+	  display Simulation type:opengl  background:#black draw_env:false synchronized:true autosave:true{
 	  	species room  refresh: false;
 		species room aspect: available_places_info refresh: true;
 		species building_entrance refresh: true;
@@ -228,8 +226,23 @@ experiment Coronaizer type:gui autorun:true{
 			
 
 		graphics "text" {
-		  point timeLegendPos<-{world.shape.width,world.shape.height*1.25};
-	      draw "time" + string(current_date, "dd MMMM yyyy HH:mm:ss") color: #gray font: font("Helvetica", 25, #italic) at:{timeLegendPos.x,timeLegendPos.y-20#px,0.01};
+		  point timeLegendPos<-{-world.shape.width*0.25,world.shape.height*3.5};
+	      draw "TIME:" color: #white font: font("Helvetica", 30, #bold) at:{timeLegendPos.x,timeLegendPos.y,0.01};
+	      draw string(current_date, "HH:mm:ss") color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+20#px,0.01};
+	  	}
+	  	
+	  	graphics "buildingLegend"{
+	  		point legendPos<-{world.shape.width*1,world.shape.height*3.5};
+	  		draw "LEGEND" color:#white at:{legendPos.x-30#px,legendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+	  		
+	  		draw "Stairwell"color: #white at: {legendPos.x,legendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw rectangle(20#px,10#px) color:rgb(0, 169, 217) at:{legendPos.x-20#px,legendPos.y+-5#px,0.01} perspective: true;
+	  		
+	  		draw "Classrooms"color: #white at: {legendPos.x,legendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw rectangle(20#px,10#px) color:#darkgrey at:{legendPos.x-20#px,legendPos.y+20#px-5#px,0.01} perspective: true;
+	  		
+	  		draw "Meeting Rooms"color: #white at: {legendPos.x,legendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw rectangle(20#px,10#px) color:#lightgrey at:{legendPos.x-20#px,legendPos.y+40#px-5#px,0.01} perspective: true;
 	  	}	
 	  	
 	  	graphics "infectiousStatus"{
@@ -237,46 +250,42 @@ experiment Coronaizer type:gui autorun:true{
 	  		draw "SIMULATION PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
 	  		draw "Initial infected new comers:" + initial_nb_infected + " people" color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  		draw "Low Risk of Infection:" + nb_susceptible + " people"color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw circle(0.5#m) color:#green at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+20#px-5#px,0.01} perspective: true;
 	  		draw "High Risk of Infection:" + nb_infected + " people" color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw circle(0.5#m) color:#red at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+40#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		//draw "R:" + nb_recovered color: #blue at: infectiousLegendPos+textOffSet+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
 	  	}
 	  	
 	  	graphics "simuLegend"{
 	  		point simLegendPos<-{-world.shape.width*0.25,world.shape.height*1.5};
-	  		draw "LEGEND" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-	  		draw "Low risk people" color:#green at:{simLegendPos.x+1.0#m,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		draw circle(0.5#m) color:#green at:{simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		draw "High risk people" color:#red at:{simLegendPos.x+1.0#m,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		draw circle(0.5#m) color:#red at:{simLegendPos.x,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		draw "Type of Ventilation: " + ventilationType color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		draw "Time Spent in classrooms: " + timeSpent + "h" color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+80#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		draw "Agenda: " + agenda_scenario color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+100#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		
-	  		
+	  		draw "SCENARIO" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+	  		draw "Type of Ventilation: " + ventilationType color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+	  		draw "Time Spent in classrooms: " + timeSpent + "h" color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+	  		draw "Agenda: " + agenda_scenario color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  	}
 	  	
 	  	
 	  	graphics "simu"{
 	  		point simLegendPos<-{world.shape.width*0.25,world.shape.height*1.5};
 	  		draw "PARAMETERS" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-	  		draw "Mask Ratio:" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-	  		draw "Queueing:" + queueing color: #white at: {simLegendPos.x,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw "Percentage of user wearing masks:" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw "Distance Queueing:" + queueing color: #white at: {simLegendPos.x,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  	}
 	  	
 	  	graphics 'site'{
 			  point sitlegendPos<-{-world.shape.width*0.25,-world.shape.width*0.1};
-			  draw string("SITE:") color: #white at: {sitlegendPos.x,sitlegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-			  draw string("Site: " +  useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-		      draw string("Building Type: " +  useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);        	
+			  draw string(title) color: #white at: {sitlegendPos.x,sitlegendPos.y-200#px,0.01} perspective: true font:font("Helvetica", 90 , #bold);
+			  draw string("SITE:" + useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+		      draw string("Building Type: " +  useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);        	
 		}	
 		graphics 'simulation'{
 		  if(drawSimuInfo){
      		point simulegendPos<-{world.shape.width*0.25,-world.shape.width*0.1};
         	draw string("CHARACTERISTICS") color: #white at: {simulegendPos.x,simulegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
         	draw string("Total Occupants: " +  length(people) ) color: #white at: {simulegendPos.x,simulegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-        	draw string("Physical distance: " +  with_precision(distance_people,2)+ "m") color: #white at: {simulegendPos.x,simulegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+        	draw string("Physical distance: " +  (density_scenario="data" ? "none" : with_precision(distance_people,2))) color: #white at: {simulegendPos.x,simulegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
     		point simulegendPo2s<-{world.shape.width*0.5,-world.shape.width*0.1};		    	
-    		draw string("Area: " + with_precision(totalArea,2) + "m2") color: #white at: {simulegendPos.x,simulegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 	
+    		draw string("Floor area: " + with_precision(totalArea,2) + "m2") color: #white at: {simulegendPos.x,simulegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 	
 		   }     
 		}
 		

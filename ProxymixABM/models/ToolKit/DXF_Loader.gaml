@@ -16,6 +16,7 @@ global
 	string dataset_path <- "./../../includes/";
 	string useCase;
 	//Parameters used onyl for video editing
+	string title<-"default";
 	string useCaseType<-"default";
 	string ventilationType<-"default";
 	float timeSpent<-1.0;

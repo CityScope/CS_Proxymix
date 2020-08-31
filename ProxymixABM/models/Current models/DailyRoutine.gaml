@@ -79,7 +79,7 @@ global {
 	bool savetoCSV<-false;
 	string outputFilePathName;
 		    			
-	bool show_dynamic_bottleneck <- true;  //show or not the bottleneck
+	bool show_dynamic_bottleneck <- false;  //show or not the bottleneck
 	int bottleneck_livespan <- 5; //to livespan of a bottleneck agent (to avoid glitching aspect) 
 	float coeff_speed_slow <- 2.0; //a people is considered as "slow" if its real speed is lower than it wanted speed / coeff_speed_slow during min_num_step_bottleneck
 	int min_num_step_bottleneck <- 3;
