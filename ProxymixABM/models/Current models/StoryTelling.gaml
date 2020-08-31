@@ -24,13 +24,14 @@ experiment Episode1 type: gui parent: Coronaizer{
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.3#m;
+	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 
 
 	//Scenario 2
 	init
 	{   
 		create simulation with: [useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms and Offices",ventilationType::"Natural",
-		timeSpent::0.45,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.3#m ];
+		timeSpent::0.45,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple"];
 
 	}
 }
@@ -46,11 +47,12 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.15#m;
+	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	//Scenario 2
 	init
 	{   
 		create simulation with: [useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"Natural",
-		timeSpent::0.45,density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.15#m];
+		timeSpent::0.45,density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.15#m,agenda_scenario::"simple"];
 
 	}
 }
@@ -66,11 +68,12 @@ experiment Episode3 type: gui parent: Coronaizer{
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.2#m;
+	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	//Scenario 2
 	init
 	{   
 		create simulation with: [useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural",
-		timeSpent::0.45,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.2#m];
+		timeSpent::0.45,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.2#m,agenda_scenario::"simple"];
 
 	}
 }
@@ -86,11 +89,12 @@ experiment Episode4 type: gui parent: Coronaizer{
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.4#m;
+	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	//Scenario 2
 	init
 	{   
 		create simulation with: [useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",
-		timeSpent::0.45,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.4#m];
+		timeSpent::0.45,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.4#m,agenda_scenario::"simple"];
 
 	}
 }
@@ -106,11 +110,12 @@ experiment Episode5 type: gui parent: Coronaizer{
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-2.0#m;
+	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	//Scenario 2
 	init
 	{   
 		create simulation with: [useCase::"UDG/CUSUR",useCaseType::"Labs",ventilationType::"Natural",
-		timeSpent::0.45,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::2.0#m];
+		timeSpent::0.45,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::2.0#m,agenda_scenario::"simple"];
 
 	}
 }
