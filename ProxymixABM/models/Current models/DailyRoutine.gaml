@@ -24,8 +24,8 @@ global {
 	float activity_duration_mean <- 1#h;
 	float activity_duration_std <- 0.0;
 	
-	float distance_queue <- 10#m;
-	bool queueing <- false;
+	float distance_queue <- 1#m;
+	bool queueing <- true;
 	float waiting_time_entrance <- 5#s;
 	
 	map<date,int> people_to_create;
@@ -487,14 +487,49 @@ species room_entrance {
 		}
 		line_g <- line_g at_location (line_g.location );
 		point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
-		float nb <- max(1, length(my_room.places)) * distance_queue;
+		float nb <- max(1, length(my_room.places)) * distance_queue ;
 		queue <- line([location,location + vector * nb ]);
-		list<wall> ws <- wall overlapping queue;
+		list<geometry> ws <- (wall overlapping (queue+ 0.2)) collect each.shape;
+		ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue + 0.2);
 		if not empty(ws) {
 			loop w over: ws {
-				queue <- queue - ws;
+				geometry qq <- queue - (w + 0.2);
+				if (qq = nil) {
+					queue <- queue - (w + 0.01);
+				} else {
+					queue <- qq;
+				}
 				queue <- queue.geometries with_min_of (each distance_to self);
 			}
+		}
+		vector <- (queue.points[1] - queue.points[0]);// / queue.perimeter;
+		queue <- line([location,location + vector * rnd(0.2,1.0)]);
+		
+		int cpt <- 0;
+		loop while: (queue.perimeter / distance_queue) < length(my_room.places) {
+			if (cpt = 10) {break;}
+			cpt <- cpt + 1;
+			point pt <- last(queue.points);
+			
+			line_g <- line([queue.points[length(queue.points) - 2],queue.points[length(queue.points) - 1]]) rotated_by 90;
+			if (line_g.perimeter = 0) {
+				break;
+			}
+			line_g <- line_g at_location last(queue.points );
+			point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
+			float nb <- max(0.5,(max(1, length(my_room.places)) * distance_queue) - queue.perimeter);
+			queue <-  line(queue.points + [pt + vector * nb ]);
+			list<geometry> ws <- wall overlapping (queue+ 0.2);
+			ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue + 0.2);
+			ws <- ws +  room overlapping (queue+ 0.2);
+			
+			if not empty(ws) {
+				loop w over: ws {
+					queue <- queue - w ;
+					queue <- queue.geometries with_min_of (each distance_to pt);
+				}
+			}
+			
 		}
 		
 		do manage_queue();
@@ -545,7 +580,6 @@ species room_entrance {
 	}
 	 
 	aspect default {
-		draw shape color: #cyan;	
 		if(queueing){
 		    draw queue color: #red;	
 	  }

@@ -198,6 +198,7 @@ experiment Coronaizer type:gui autorun:true{
 		species room aspect: available_places_info refresh: true;
 		species building_entrance refresh: true;
 		species wall refresh: false;
+		species room_entrance;
 		species pedestrian_path ;
 		//species people position:{0,0,0.001};
 		species separator_ag refresh: false;
