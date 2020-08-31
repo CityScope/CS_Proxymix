@@ -191,7 +191,7 @@ experiment Coronaizer type:gui autorun:true{
 	
 	output{
 	  layout #split;
-	  display Simulation type:opengl  background:#black draw_env:false synchronized:false{
+	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false{
 
 	  	
 	  	species room  refresh: false;
@@ -228,7 +228,8 @@ experiment Coronaizer type:gui autorun:true{
 			
 
 		graphics "text" {
-	      //draw "day" + string(current_day) + " - " + string(current_hour) + "h" color: #gray font: font("Helvetica", 25, #italic) at:{world.shape.width * 0.8, world.shape.height * 0.975};
+		  point timeLegendPos<-{world.shape.width,world.shape.height*1.25};
+	      draw "time" + string(current_date, "dd MMMM yyyy HH:mm:ss") color: #gray font: font("Helvetica", 25, #italic) at:{timeLegendPos.x,timeLegendPos.y-20#px,0.01};
 	  	}	
 	  	
 	  	graphics "infectiousStatus"{
@@ -241,7 +242,7 @@ experiment Coronaizer type:gui autorun:true{
 	  	}
 	  	
 	  	graphics "simuLegend"{
-	  		point simLegendPos<-{-world.shape.width*0.25,world.shape.height*1.25};
+	  		point simLegendPos<-{-world.shape.width*0.25,world.shape.height*1.5};
 	  		draw "LEGEND" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
 	  		draw "Low risk people" color:#green at:{simLegendPos.x+1.0#m,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw circle(0.5#m) color:#green at:{simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
@@ -253,7 +254,7 @@ experiment Coronaizer type:gui autorun:true{
 	  	
 	  	
 	  	graphics "simu"{
-	  		point simLegendPos<-{world.shape.width*0.25,world.shape.height*1.25};
+	  		point simLegendPos<-{world.shape.width*0.25,world.shape.height*1.5};
 	  		draw "PARAMETERS" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
 	  		draw "Mask Ratio:" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  		draw "Queueing:" + queueing color: #white at: {simLegendPos.x,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 

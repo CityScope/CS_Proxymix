@@ -14,11 +14,11 @@ import "./../ToolKit/DXF_Loader.gaml"
 global {
 	//string dataset <- "MediaLab";
 	float normal_step <- 1#s;
-	float fast_step <- 5 #mn;
+	float fast_step <- 5#mn;
 	bool use_change_step <- true;
 	bool change_step <- false update: false;
 	
-	string agenda_scenario <- "classic day" among: ["simple", "custom", "classic day"];
+	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
 	float arrival_time_interval <- 0#mn;//15 #mn;
 	float activity_duration_mean <- 1#h;
