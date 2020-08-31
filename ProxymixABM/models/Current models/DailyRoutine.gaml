@@ -286,7 +286,19 @@ global {
 			}
 			current_activity <- first(working);
 			target_room <- current_activity.get_place(self);
-			the_entrance <- (target_room.entrances closest_to self);
+			list<room_entrance> re <- copy(target_room.entrances);
+			if (length(re) = 1) {
+				the_entrance <- first(re);
+			} else {
+				re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room);
+
+				if (empty(re)) {
+					re <- target_room.entrances;
+				}
+				the_entrance <- re[rnd_choice(re collect (length(each.positions) / each distance_to self) )];
+		
+			}
+		//	the_entrance <- (target_room.entrances closest_to self);
 			target <- the_entrance.location;
 			
 			goto_entrance <- true;
@@ -869,7 +881,7 @@ species people skills: [escape_pedestrian] {
 	reflex goto_activity when: target != nil and not in_line{
 		bool arrived <- false;
 		if goto_entrance {
-			if (queueing) and ((self distance_to target) < (2 * distance_queue))  {
+			if (queueing) and (species(target_room) != building_entrance) and ((self distance_to target) < (2 * distance_queue))  and ((self distance_to target) > (1 * distance_queue))  {
 				point pt <- the_entrance.get_position();
 				if (pt != target) {
 					final_target <- nil;
@@ -914,7 +926,11 @@ species people skills: [escape_pedestrian] {
 					target <- (target_room.entrances closest_to self).location;
 				} else {
 					the_entrance <- (target_room.entrances closest_to self);
-					target <- the_entrance.get_position();
+					if (species(target_room) = building_entrance) {
+						target <- the_entrance.location;
+					} else {
+						target <- the_entrance.get_position();
+					}
 				}
 				
 				go_oustide_room <- false;
@@ -926,7 +942,7 @@ species people skills: [escape_pedestrian] {
 				if target_place != nil {
 					target <- target_place.location;
 					goto_entrance <- false;
-					if (queueing) {
+					if (queueing and (species(target_room) != building_entrance)) {
 						ask room_entrance closest_to self {
 							do add_people(myself);
 						}
