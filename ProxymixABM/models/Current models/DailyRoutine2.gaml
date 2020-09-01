@@ -14,19 +14,19 @@ import "./../ToolKit/DXF_Loader.gaml"
 global {
 	//string dataset <- "MediaLab";
 	float normal_step <- 1#s;
-	float fast_step <- 5#mn;
+	float fast_step <- 5 #mn;
 	bool use_change_step <- true;
 	bool change_step <- false update: false;
 	
-	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
+	string agenda_scenario <- "classic day" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
 	float arrival_time_interval <- 0#mn;//15 #mn;
+	float activity_duration_mean <- 1#h;
+	float activity_duration_std <- 0.0;
 	
 	float distance_queue <- 1#m;
 	bool queueing <- true;
-	float waiting_time_entrance <- 5#s;
-	bool first_end_sim <- true;
-	 	
+	float waiting_time_entrance <- 5#s;//#s;//#s;
 	
 	map<date,int> people_to_create;
 	
@@ -79,7 +79,7 @@ global {
 	bool savetoCSV<-false;
 	string outputFilePathName;
 		    			
-	bool show_dynamic_bottleneck <- false;  //show or not the bottleneck
+	bool show_dynamic_bottleneck <- true;  //show or not the bottleneck
 	int bottleneck_livespan <- 5; //to livespan of a bottleneck agent (to avoid glitching aspect) 
 	float coeff_speed_slow <- 2.0; //a people is considered as "slow" if its real speed is lower than it wanted speed / coeff_speed_slow during min_num_step_bottleneck
 	int min_num_step_bottleneck <- 3;
@@ -154,7 +154,7 @@ global {
 				}
 			}
 		}
-		ask room + building_entrance{
+		ask (room + building_entrance ) {//} sort_by - length(each.places){
 			geometry contour <- nil;
 			float dist <-0.3;
 			int cpt <- 0;
@@ -179,6 +179,9 @@ global {
 				loop pt over:ents {
 					create room_entrance with: [location::pt,my_room::self] {
 						myself.entrances << self;
+						if species(myself) != building_entrance {
+							do default_queue;
+						}
 					}
 				
 				}
@@ -295,10 +298,10 @@ global {
 				if (empty(re)) {
 					re <- target_room.entrances;
 				}
-				the_entrance <- re[rnd_choice(re collect (length(each.positions) / each distance_to self) )];
+				the_entrance <- re[rnd_choice(re collect (each distance_to self))];
 		
 			}
-		//	the_entrance <- (target_room.entrances closest_to self);
+			//the_entrance <- target_room.entrances closest_to self;
 			target <- the_entrance.location;
 			
 			goto_entrance <- true;
@@ -306,7 +309,7 @@ global {
 			
 			switch agenda_scenario {
 				match "simple" {
-					agenda_day[current_date add_seconds max(1#mn,timeSpent)] <- first(going_home_act);
+					agenda_day[current_date add_seconds max(1#mn,gauss(activity_duration_mean, activity_duration_std))] <- first(going_home_act);
 				}
 				match "custom" {
 					
@@ -344,6 +347,7 @@ global {
 					agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(30),rnd(59))] <- first(going_home_act);
 	
 				}
+					
 			}
 		}	
 	}
@@ -389,13 +393,13 @@ global {
 	reflex change_step when: use_change_step{
 		
 		if (agenda_scenario = "classic day") {
-			if (current_date.hour >= 7 and current_date.minute > 3 and empty(people where (each.target != nil)))  {
+			if (current_date.hour >= 7 and current_date.minute >= 15 and empty(people where (each.target != nil)))  {
 				step <- fast_step;
 			}
 			if (time_first_lunch != nil and current_date.hour = time_first_lunch.hour and current_date.minute > time_first_lunch.minute){
 				step <- normal_step;
 			}
-			if (current_date.hour >= 12 and current_date.minute > 5 and empty(people where (each.target != nil)))  {
+			if (current_date.hour >= 12 and current_date.minute >= 15 and empty(people where (each.target != nil)))  {
 				step <- fast_step;
 			} 
 			if (current_date.hour = 18){
@@ -416,30 +420,19 @@ global {
 	}
 	
 	
-	reflex end_simulation when: empty(people) and time > 100 {
-		if (first_end_sim) {
-			write "End of simulation (" + int(world) + "): " +current_date;
-	 		first_end_sim <- false;
-		}
-		bool ready_end <- true;
-	 	loop s over: COVID_model {
-	 		if  not empty((s.people)) {
-	 			ready_end <- false;
-	 		} 
-	 	}
-	 	if (ready_end) {
-	 		do pause;
-	 	}
+	reflex end_simulation when: current_date.hour > 12 and empty(people) {
+		do pause;
 	}
 	
 	reflex people_arriving when: not empty(available_offices) and not empty(people_to_create)
 	{	
+		create people;
 		loop d over: people_to_create.keys {
 			if current_date >= d {
 				do create_people(max(0,min(people_to_create[d], length(available_offices accumulate each.available_places))));
 				remove key:d from: people_to_create;
 			}
-		} 
+		}  
 		
 	}
 	reflex updateGraph when: (drawSocialDistanceGraph = true) {
@@ -487,9 +480,6 @@ species room_entrance {
 	
 	geometry waiting_area;
 	
-	init {
-		do default_queue;
-	}
 	action default_queue {
 		geometry line_g;
 		float d <- #max_float;
@@ -512,6 +502,7 @@ species room_entrance {
 		line_g <- line_g at_location (line_g.location );
 		point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
 		float nb <- max(1, length(my_room.places)) * distance_queue ;
+		write "nb places: " + length(my_room.places);
 		queue <- line([location,location + vector * nb ]);
 		list<geometry> ws <- (wall overlapping (queue+ 0.2)) collect each.shape;
 		ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue + 0.2);
@@ -519,7 +510,9 @@ species room_entrance {
 			loop w over: ws {
 				geometry qq <- queue - (w + 0.2);
 				if (qq = nil) {
+					write "queue: " + queue + " w: " + w;
 					queue <- queue - (w + 0.01);
+					
 				} else {
 					queue <- qq;
 				}
@@ -527,11 +520,11 @@ species room_entrance {
 			}
 		}
 		vector <- (queue.points[1] - queue.points[0]);// / queue.perimeter;
-		queue <- line([location,location + vector * rnd(0.2,1.0)]);
+		queue <- line([location,location + vector * rnd(0.5,1.0)]);
 		
 		int cpt <- 0;
 		loop while: (queue.perimeter / distance_queue) < length(my_room.places) {
-			if (cpt = 10) {break;}
+			if (cpt = 20) {break;}
 			cpt <- cpt + 1;
 			point pt <- last(queue.points);
 			
@@ -542,18 +535,24 @@ species room_entrance {
 			line_g <- line_g at_location last(queue.points );
 			point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
 			float nb <- max(0.5,(max(1, length(my_room.places)) * distance_queue) - queue.perimeter);
-			queue <-  line(queue.points + [pt + vector * nb ]);
-			list<geometry> ws <- wall overlapping (queue+ 0.2);
-			ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue + 0.2);
-			ws <- ws +  room overlapping (queue+ 0.2);
-			
+			geometry gl <-  line([last(queue.points),pt + vector * nb ]);
+			list<geometry> ws <- wall overlapping (gl+ 0.2);
+			if (cpt < 10) {
+				ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (gl + 0.2);
+				if (cpt < 6) {
+					ws <- ws +  room overlapping (gl + 0.2);
+				}
+			}
 			if not empty(ws) {
 				loop w over: ws {
-					geometry g <- queue - w ;
-					if (g != nil) {
-							queue <- g.geometries with_min_of (each distance_to pt);
+					gl <- gl - w ;
+					if (gl = nil) {
+						break;
 					}
-				
+					gl <- gl.geometries with_min_of (each distance_to pt);
+				}
+				if (gl != nil) {
+					queue <- line(queue.points + last(gl.points));
 				}
 			}
 			
@@ -608,7 +607,10 @@ species room_entrance {
 	 
 	aspect default {
 		if(queueing){
-		    draw queue color: #red;	
+		    draw queue color: #blue;	
+		    loop p over: positions {
+		    	draw square(0.1) at: p color: #orange;
+		    }
 	  }
 		 
 	}
@@ -747,12 +749,12 @@ species room {
 		return place;
 	}
 	
-	reflex manageVentilation when:(isVentilated and ventilation){
+	/*reflex manageVentilation when:(isVentilated and ventilation){
 		ask droplet overlapping self{
 			live_span<-live_span-1;
 			do wander speed:1.0;
 		}
-	}
+	}*/
 	
 	aspect default {
 		draw shape color: standard_color_per_layer[type];
@@ -832,7 +834,7 @@ species droplet skills:[moving]{
 	}
 }
 
-species people skills: [escape_pedestrian] {
+species people skills: [escape_pedestrian] parallel: parallel{
 	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
 	room working_place;
 	map<date, activity> agenda_day;
@@ -851,7 +853,6 @@ species people skills: [escape_pedestrian] {
 	int counter <- 0;
 	bool in_line <- false;
 	room_entrance the_entrance;
-	
 	
 	
 	aspect default {
@@ -883,6 +884,7 @@ species people skills: [escape_pedestrian] {
 	
 	reflex goto_activity when: target != nil and not in_line{
 		bool arrived <- false;
+			
 		if goto_entrance {
 			if (queueing) and (species(target_room) != building_entrance) and ((self distance_to target) < (2 * distance_queue))  and ((self distance_to target) > (1 * distance_queue))  {
 				point pt <- the_entrance.get_position();
@@ -934,6 +936,7 @@ species people skills: [escape_pedestrian] {
 					} else {
 						target <- the_entrance.get_position();
 					}
+				
 				}
 				
 				go_oustide_room <- false;
@@ -1024,9 +1027,11 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 }
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Lab" among: ["UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+		parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2";
+	
+	/*parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUSUR" among: ["UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
 	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
 	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
@@ -1045,6 +1050,35 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 	parameter "Trigger Ventilation:" category: "Ventilation" var:ventilation <-false;
 	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
 	
+	*/
+		bool a_boolean_to_disable_parameters <- true;
+	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
+	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
+	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
+	parameter "unit" var: unit category: "file" <- #cm;
+	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
+	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
+	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
+	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
+	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
+	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
+	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-true;
+	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
+	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
+	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
+	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
+	parameter "Trigger Ventilation:" category: "Ventilation" var:ventilation <-false;
+	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
+	
+	
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2";
+	parameter 'useCaseType:' var: useCaseType category: 'file' <- "Classrooms and Offices";
+	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
+	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0;
+	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter "Queueing:" category: "Policy" var: queueing  <-true;
+	parameter "People Size:" category: "Policy" var: peopleSize  <-0.3#m;
 	
 	output {
 		display map synchronized: true background:#black parent:floorPlan type:java2D draw_env:false
