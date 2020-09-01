@@ -21,3 +21,5 @@ dataProcess/*.ipynb
 ProxymixABM/includes/MediaLab/ML_3_L.dwl
 
 ProxymixABM/includes/MediaLab/ML_3_L.dwl2
+
+*.csv
