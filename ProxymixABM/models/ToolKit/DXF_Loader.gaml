@@ -16,6 +16,7 @@ global
 	string dataset_path <- "./../../includes/";
 	string useCase;
 	//Parameters used onyl for video editing
+	int episode <-0;
 	string title<-"default";
 	string useCaseType<-"default";
 	string ventilationType<-"default";
@@ -29,7 +30,7 @@ global
 	
 	// Defining the mandatory layer
 	map<string,rgb> standard_color_per_layer <- 
-	[offices::rgb(50,50,50),meeting_rooms::rgb(75,75,75),library::#orange,
+	[offices::rgb(50,50,50),meeting_rooms::rgb(75,75,75),library::#orange,lab::rgb(10,10,10),
 	entrance::rgb(0, 169, 217),elevators::#orange,
 	coffee::rgb(25,25,25), furnitures::#maroon, 
 	toilets::rgb(25,25,25),  sanitation::#purple,

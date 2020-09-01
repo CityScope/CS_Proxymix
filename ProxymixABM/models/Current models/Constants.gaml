@@ -16,6 +16,7 @@ global {
 	string offices <- "Offices";
 	string meeting_rooms <- "Meeting rooms";
 	string library<-"Library";
+	string lab<-"Labs";
 	string sanitation<-"Sanitation";	
 	string coffee <- "Coffee";
 	string supermarket <-"Supermarket";	
