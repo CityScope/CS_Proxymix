@@ -63,6 +63,7 @@ experiment Episode1Bis type: gui parent: Coronaizer{
 experiment Episode2 type: gui parent: Coronaizer{
 	//Scenario 1
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUT/lab";
+	parameter 'Workplace layer name' var: workplace_layer category: "file" <- "Labs";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0#h;
@@ -76,7 +77,7 @@ experiment Episode2 type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"Natural",
-		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.15#m,agenda_scenario::"simple"];
+		timeSpent::45#mn,workplace_layer::"Labs",density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.15#m,agenda_scenario::"simple"];
 
 	}
 }

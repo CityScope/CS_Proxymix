@@ -13,6 +13,9 @@ import "./../ToolKit/DXF_Loader.gaml"
 
 global {
 	//string dataset <- "MediaLab";
+	
+	string workplace_layer <- offices;
+	
 	float normal_step <- 1#s;
 	float fast_step <- 5#mn;
 	bool use_change_step <- true;
@@ -103,7 +106,7 @@ global {
 				create wall with: [shape::clean(polygon(se.points))];
 			} else if type = entrance {
 				create building_entrance  with: [shape::polygon(se.points), type::type];
-			} else if type in [offices, meeting_rooms,coffee] {
+			} else if type in [workplace_layer, meeting_rooms,coffee] {
 				create room with: [shape::polygon(se.points), type::type]{
 					if flip (ventilation_ratio){
 						isVentilated<-true;
@@ -114,7 +117,7 @@ global {
 		
 		
 		if (density_scenario = "num_people_building") {
-			list<room> offices_list <- room where (each.type = offices);
+			list<room> offices_list <- room where (each.type = workplace_layer);
 			float tot_area <- offices_list sum_of each.shape.area;
 			ask offices_list {
 				num_places <- max(1,round(num_people_per_building * shape.area / tot_area));
@@ -190,7 +193,7 @@ global {
 					
 		}
 		map<string, list<room>> rooms_type <- room group_by each.type;
-		loop ty over: rooms_type.keys  - [offices, entrance]{
+		loop ty over: rooms_type.keys  - [workplace_layer, entrance]{
 			create activity {
 				name <-  ty;
 				activity_places <- rooms_type[ty];
@@ -201,8 +204,7 @@ global {
 		create going_home_act with:[activity_places:: building_entrance as list];
 		create eating_outside_act with:[activity_places:: building_entrance as list];
 		
-		
-		available_offices <- rooms_type[offices] where each.is_available();	
+		available_offices <- rooms_type[workplace_layer] where each.is_available();	
 		
 		if (movement_model = pedestrian_skill) {
 			do initialize_pedestrian_model;
@@ -237,9 +239,9 @@ global {
 			}
 		}
 		
-		nbOffices<-(room count (each.type="Offices"));
+		nbOffices<-(room count (each.type=workplace_layer));
 		totalArea<-sum((room) collect each.shape.area);
-		officeArea<-sum((room where (each.type="Offices")) collect each.shape.area);
+		officeArea<-sum((room where (each.type=workplace_layer)) collect each.shape.area);
 		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
 		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
 		nbDesk<-length(room accumulate each.available_places);
@@ -647,7 +649,7 @@ species room {
 					}
 				}
 				if (not empty(places)) {
-					type <- offices;
+					type <- workplace_layer;
 				}
 				room the_room <- self;
 				if (separator_proba > 0) and (length(places) > 1) {
@@ -676,7 +678,7 @@ species room {
 			
 			
 		} 
-		else if (density_scenario = "distance") or (type != offices) {
+		else if (density_scenario = "distance") or (type != workplace_layer) {
 			squares <-  to_squares(shape, distance_people, true) where (each.location overlaps shape);
 		}
 		else if (density_scenario= "num_people_room"){
@@ -763,7 +765,7 @@ species room {
 		}
 	}
 	aspect available_places_info {
-		if(showAvailableDesk and (type="Offices" or type="Meeeting rooms")){
+		if(showAvailableDesk and (type=workplace_layer or type="Meeeting rooms")){
 		 	draw string(length(available_places)) at: {location.x-20#px,location.y,1.0} color:#white font:font("Helvetica", 20 , #bold) perspective:false; 	
 		} 
 	}
@@ -1024,7 +1026,7 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 }
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Lab" among: ["UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Lab" among: ["CUCS/Lab" ,"UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
 	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
@@ -1084,7 +1086,7 @@ experiment multiAnalysis type: gui parent:DailyRoutine
 		create simulation with: [useCase::"CUCS",distance_people::3.0#m];
 
 	}
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["UDG/CUCS/Campus","CUCS/Level 2","CUCS/Ground","CUCS","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS/Level 2","CUCS/Ground","CUCS","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
 	output
 	{	/*layout #split;
 		display map type: opengl background:#black toolbar:false draw_env:false
