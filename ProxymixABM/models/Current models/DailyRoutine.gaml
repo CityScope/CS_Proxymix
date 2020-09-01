@@ -1084,7 +1084,7 @@ experiment multiAnalysis type: gui parent:DailyRoutine
 		create simulation with: [useCase::"CUCS",distance_people::3.0#m];
 
 	}
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS/Level 2","CUCS/Ground","CUCS","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["UDG/CUCS/Campus","CUCS/Level 2","CUCS/Ground","CUCS","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
 	output
 	{	/*layout #split;
 		display map type: opengl background:#black toolbar:false draw_env:false
