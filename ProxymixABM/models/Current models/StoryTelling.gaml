@@ -60,10 +60,10 @@ experiment Episode2 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::2,title::"Scenario B: Air Conditioning",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",
+		/*create simulation with: [episode::2,title::"Scenario B: Air Conditioning",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",
 		timeSpent::45#mn,workplace_layer::"Labs",density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
 		show_droplet::true,droplet_livespan::5,droplet_distance::1.0];
-
+*/
 	}
 }
 
@@ -82,7 +82,8 @@ experiment Episode3 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural",
+		create simulation with: [useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
+			proba_using_before_work::1.0, proba_using_after_work::0.5,
 		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.2#m,agenda_scenario::"simple"];
 
 	}

@@ -31,6 +31,12 @@ global {
 	bool first_end_sim <- true;
 	 	
 	
+	bool use_sanitation <- false;
+	float proba_using_before_work <- 0.7;
+	float proba_using_after_work <- 0.3;
+	int nb_people_per_sanitation <- 2;
+	float sanitation_usage_duration <- 20 #s;
+	
 	map<date,int> people_to_create;
 	
 	float step <- normal_step on_change: {change_step <- true;};
@@ -43,7 +49,9 @@ global {
 	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
 	list<room> available_offices;
-	float peopleSize<-1.0#m;
+	float peopleSize<-0.1#m;
+	
+	list<room> sanitation_rooms;
 	
 	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	int num_people_per_building;
@@ -106,7 +114,7 @@ global {
 				create wall with: [shape::clean(polygon(se.points))];
 			} else if type = entrance {
 				create building_entrance  with: [shape::polygon(se.points), type::type];
-			} else if type in [workplace_layer, meeting_rooms,coffee] {
+			} else if type in [workplace_layer, meeting_rooms,coffee, sanitation] {
 				create room with: [shape::polygon(se.points), type::type]{
 					if flip (ventilation_ratio){
 						isVentilated<-true;
@@ -136,6 +144,9 @@ global {
 			}
 			
 		} 
+		
+		
+	
 		
 		ask room + building_entrance {
 			do intialization;
@@ -193,7 +204,12 @@ global {
 					
 		}
 		map<string, list<room>> rooms_type <- room group_by each.type;
-		loop ty over: rooms_type.keys  - [workplace_layer, entrance]{
+		sanitation_rooms <- rooms_type[sanitation];
+		if (use_sanitation and not empty(sanitation_rooms)) {
+			create sanitation_activity with:[activity_places:: sanitation_rooms];
+		}
+		
+		loop ty over: rooms_type.keys  - [workplace_layer, entrance, sanitation]{
 			create activity {
 				name <-  ty;
 				activity_places <- rooms_type[ty];
@@ -286,29 +302,60 @@ global {
 			if not(working_place.is_available()) {
 				available_offices >> working_place;
 			}
-			current_activity <- first(working);
-			target_room <- current_activity.get_place(self);
-			list<room_entrance> re <- copy(target_room.entrances);
-			if (length(re) = 1) {
-				the_entrance <- first(re);
-			} else {
-				re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room);
-
-				if (empty(re)) {
-					re <- target_room.entrances;
+			
+			if (use_sanitation and not empty(sanitation_rooms) and flip(proba_using_before_work)) {
+				current_activity <- first(sanitation_activity);
+				target_room <- sanitation_rooms[rnd_choice(sanitation_rooms collect (1 / each distance_to self) )];
+				waiting_sanitation <- true;
+				
+				list<room_entrance> re <- copy(target_room.entrances);
+				write re;
+				write re collect each.positions;
+				if (length(re) = 1) {
+					the_entrance <- first(re);
+				} else {
+					re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room);
+		
+					if (empty(re)) {
+						re <- target_room.entrances;
+					}
+					the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / each distance_to self) )];
 				}
-				the_entrance <- re[rnd_choice(re collect (length(each.positions) / each distance_to self) )];
+				
+			//	the_entrance <- (target_room.entrances closest_to self);
+				target <- the_entrance.location;
+				agenda_day[current_date add_seconds 10] <- first(working);
+			} else {
+				current_activity <- first(working);
+				target_room <- current_activity.get_place(self);
+				list<room_entrance> re <- copy(target_room.entrances);
+				if (length(re) = 1) {
+					the_entrance <- first(re);
+				} else {
+					re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room);
+		
+					if (empty(re)) {
+						re <- target_room.entrances;
+					}
+					write re;
+					the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / each distance_to self) )];
+				}
+				
+			//	the_entrance <- (target_room.entrances closest_to self);
+				target <- the_entrance.location;
 		
 			}
-		//	the_entrance <- (target_room.entrances closest_to self);
-			target <- the_entrance.location;
-			
+					
 			goto_entrance <- true;
 			location <- any_location_in (one_of(building_entrance).init_place);
 			
 			switch agenda_scenario {
 				match "simple" {
-					agenda_day[current_date add_seconds max(1#mn,timeSpent)] <- first(going_home_act);
+					if (use_sanitation and not empty(sanitation_rooms) and flip(proba_using_after_work)) {
+						agenda_day[current_date add_seconds (max(1#mn,timeSpent) - 1)] <- first(sanitation_activity);
+					}
+					agenda_day[current_date add_seconds (max(1#mn,timeSpent))] <- first(going_home_act);
+					
 				}
 				match "custom" {
 					
@@ -407,10 +454,9 @@ global {
 				step <- normal_step;
 			}
 		} else {
-			if (time > arrival_time_interval and empty(people where (each.target != nil)))  {
-			step <- fast_step;
-			}
-			if not empty(people where (each.target != nil)){
+			if (time > arrival_time_interval and empty(people where (each.target != nil and each.waiting_sanitation) ))  {
+				step <- fast_step;
+			} else {
 				step <- normal_step;
 			}
 		}	
@@ -420,8 +466,7 @@ global {
 	
 	reflex end_simulation when: empty(people) and time > 100 {
 		if (first_end_sim) {
-			write "End of simulation (" + int(world) + "): " +current_date;
-	 		first_end_sim <- false;
+			first_end_sim <- false;
 		}
 		bool ready_end <- true;
 	 	loop s over: COVID_model {
@@ -490,9 +535,13 @@ species room_entrance {
 	geometry waiting_area;
 	
 	init {
-		do default_queue;
+		if (queueing) {
+			do default_queue;
+		}
+		
 	}
 	action default_queue {
+		int nb_places <- my_room.type = sanitation ? 20 : length(my_room.places);
 		geometry line_g;
 		float d <- #max_float;
 		loop i from: 0 to: length(my_room.shape.points) - 2 {
@@ -505,16 +554,18 @@ species room_entrance {
 			}
 		}
 		line_g <- line_g rotated_by 90;
-		if (line_g intersects my_room ) {
-			geometry line_g2 <- line(reverse(line_g.points));
-			if (line_g2 inter my_room).perimeter < (line_g inter my_room).perimeter {
-				line_g <- line_g2;
+		
+		//line_g <- line_g at_location (line_g.location );
+		bool consider_rooms <-  (room first_with ((each - 0.1) overlaps location)) = nil;
+		point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
+		float nb <- max(1, nb_places) * distance_queue ;
+		queue <- line([location,location + vector * nb ]);
+		if (queue intersects my_room ) {
+			geometry line_g2 <- line(reverse(queue.points));
+			if (line_g2 inter my_room).perimeter < (queue inter my_room).perimeter {
+				queue <- line_g2;
 			}
 		}
-		line_g <- line_g at_location (line_g.location );
-		point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
-		float nb <- max(1, length(my_room.places)) * distance_queue ;
-		queue <- line([location,location + vector * nb ]);
 		list<geometry> ws <- (wall overlapping (queue+ 0.2)) collect each.shape;
 		ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue + 0.2);
 		if not empty(ws) {
@@ -532,7 +583,7 @@ species room_entrance {
 		queue <- line([location,location + vector * rnd(0.2,1.0)]);
 		
 		int cpt <- 0;
-		loop while: (queue.perimeter / distance_queue) < length(my_room.places) {
+		loop while: (queue.perimeter / distance_queue) < nb_places {
 			if (cpt = 10) {break;}
 			cpt <- cpt + 1;
 			point pt <- last(queue.points);
@@ -543,11 +594,11 @@ species room_entrance {
 			}
 			line_g <- line_g at_location last(queue.points );
 			point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
-			float nb <- max(0.5,(max(1, length(my_room.places)) * distance_queue) - queue.perimeter);
+			float nb <- max(0.5,(max(1, nb_places) * distance_queue) - queue.perimeter);
 			queue <-  line(queue.points + [pt + vector * nb ]);
 			list<geometry> ws <- wall overlapping (queue+ 0.2);
 			ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue + 0.2);
-			ws <- ws +  room overlapping (queue+ 0.2);
+			if (consider_rooms) {ws <- ws +  room overlapping (queue+ 0.2);}
 			
 			if not empty(ws) {
 				loop w over: ws {
@@ -565,8 +616,8 @@ species room_entrance {
 	}
 	
 	action manage_queue {
-		positions <- queue points_on (distance_queue); 
-		waiting_area <- (last(positions) + 3.0)  - (queue + 1.0);
+		positions <- queue.perimeter > 0 ?  queue points_on (distance_queue) : []; 
+		waiting_area <- (queue + 1.0)  - (queue + 0.1);
 		list<wall> ws <- wall overlapping waiting_area;
 		if not empty(ws) {
 			loop w over: ws {
@@ -578,39 +629,58 @@ species room_entrance {
 	}
 	
 	action add_people(people someone) {
-		if (length(people_waiting) < length(positions)) {
-			someone.location <- positions[length(people_waiting)];
-		} else {
-			someone.location  <- any_location_in(waiting_area);
+		if not empty(positions) {
+			if (length(people_waiting) < length(positions)) {
+				someone.location <- positions[length(people_waiting)];
+			} else {
+				someone.location  <- any_location_in(waiting_area);
+			}
 		}
 		people_waiting << someone;
 	}
 	
 	point get_position {
-		if (length(people_waiting) < length(positions)) {
-			return positions[length(people_waiting)];
-		} else {
-			return any_location_in(waiting_area);
+		if empty(positions) {return location;}
+		
+		else {
+			if (length(people_waiting) < length(positions)) {
+				return positions[length(people_waiting)];
+			} else {
+				return any_location_in(waiting_area);
+			}
+			
 		}
 	}
 	
 	
-	reflex manage_visitor when: not empty(people_waiting) and every(waiting_time_entrance) {
-		people the_first_one <- first(people_waiting);
-		people_waiting >> the_first_one;
-		the_first_one.in_line<-false;
-		if (not empty(people_waiting)) {
-			loop i from: 0 to: length(people_waiting) - 1 {
-				if (i < length(positions)) {
-					people_waiting[i].location <- positions[i];
+	reflex manage_visitor when: not empty(people_waiting) {
+		int nb <- 0;
+		if (my_room.type != sanitation) {
+			if every(waiting_time_entrance) {
+				nb <-1;
+			}
+		} else {
+			nb <- nb_people_per_sanitation - (my_room.people_inside count (each.using_sanitation));
+		}
+		if nb > 0 {
+			loop times: nb {
+				people the_first_one <- first(people_waiting);
+				people_waiting >> the_first_one;
+				the_first_one.in_line<-false;
+				if (not empty(people_waiting) and not empty(positions)) {
+					loop i from: 0 to: length(people_waiting) - 1 {
+						if (i < length(positions)) {
+							people_waiting[i].location <- positions[i];
+						}
+					}
 				}
 			}
-		}	
+		} 
 	}
 	 
 	aspect default {
 		if(queueing){
-		    draw queue color: #red;	
+		    draw queue color: #blue;	
 	  }
 		 
 	}
@@ -625,6 +695,7 @@ species room {
 	list<place_in_room> available_places;
 	int num_places;
 	bool isVentilated;
+	list<people> people_inside;
 	
 	action intialization {
 		list<geometry> squares;
@@ -771,6 +842,7 @@ species room {
 	}
 }
 
+
 species building_entrance parent: room {
 	place_in_room get_target(people p){
 		return place_in_room closest_to p;
@@ -784,6 +856,17 @@ species building_entrance parent: room {
 	}
 }
 
+
+species sanitation_activity parent: activity{
+	room get_place(people p) {
+		if flip(0.3) {
+			return shuffle(activity_places) with_min_of length(first(each.entrances).people_waiting);
+		} else {
+			return activity_places closest_to p;
+		}
+	}
+	
+}
 species activity {
 	list<room> activity_places;
 	
@@ -853,7 +936,9 @@ species people skills: [escape_pedestrian] {
 	int counter <- 0;
 	bool in_line <- false;
 	room_entrance the_entrance;
-	
+	bool waiting_sanitation <- false;
+	bool using_sanitation <- false;
+	float sanitation_time <- 0.0;
 	
 	
 	aspect default {
@@ -863,13 +948,21 @@ species people skills: [escape_pedestrian] {
 		//draw obj_file(dataset_path+"/Obj/man.obj",-90::{1,0,0}) color:#gamablue size:2 rotate:heading+90;
 	}
 	
-	
+	reflex sanitation_behavior when: using_sanitation {
+		sanitation_time <- sanitation_time + step;
+		if (sanitation_time > sanitation_usage_duration) {
+			sanitation_time <- 0.0;
+			using_sanitation <- false;
+			waiting_sanitation <- false;
+			target_room.people_inside >> self;
+		}
+	}
 	reflex updateFlowCell when:not is_outside{
 		ask (flowCell overlapping self.location){
 			nbPeople<-nbPeople+1;
 		}
 	}
-	reflex define_activity when: not empty(agenda_day) and 
+	reflex define_activity when: not waiting_sanitation and not empty(agenda_day) and 
 		(after(agenda_day.keys[0])){
 		if(target_place != nil and (has_place) ) {target_room.available_places << target_place;}
 		string n <- current_activity = nil ? "" : copy(current_activity.name);
@@ -881,6 +974,9 @@ species people skills: [escape_pedestrian] {
 		is_outside <- false;
 		goto_entrance <- false;
 		target_place <- nil;
+		if (species(current_activity) = sanitation_activity) {
+			waiting_sanitation <- true;
+		}
 	}
 	
 	reflex goto_activity when: target != nil and not in_line{
@@ -927,7 +1023,7 @@ species people skills: [escape_pedestrian] {
 		}
 		if(arrived) {
 			if (go_oustide_room) {
-				if (queueing) {
+				if (!queueing) {
 					target <- (target_room.entrances closest_to self).location;
 				} else {
 					the_entrance <- (target_room.entrances closest_to self);
@@ -942,27 +1038,43 @@ species people skills: [escape_pedestrian] {
 				goto_entrance <- true;
 			}
 			else if (goto_entrance) {
-				
-				target_place <- target_room.get_target(self);
-				if target_place != nil {
-					target <- target_place.location;
+				if (species(current_activity) = sanitation_activity) {
+					target <- target_room.location;
 					goto_entrance <- false;
-					if (queueing and (species(target_room) != building_entrance)) {
+					if (queueing) or (target_room.type = sanitation) {
 						ask room_entrance closest_to self {
 							do add_people(myself);
 						}
 						in_line <- true;
+					} else {
+							
 					}
 				} else {
-					room tr <- current_activity.get_place(self);
-					if (tr != nil ) {
-						target_room <- tr;
-						target <- (target_room.entrances closest_to self).location;
+					target_place <- target_room.get_target(self);
+					if target_place != nil {
+						target <- target_place.location;
+						goto_entrance <- false;
+						if (queueing and (species(target_room) != building_entrance)) {
+							ask room_entrance closest_to self {
+								do add_people(myself);
+							}
+							in_line <- true;
+						}
+					} else {
+						room tr <- current_activity.get_place(self);
+						if (tr != nil ) {
+							target_room <- tr;
+							target <- (target_room.entrances closest_to self).location;
+						}
 					}
 				}
 			} else {
 				has_place <- true;
 				target <- nil;
+				if (species(current_activity) = sanitation_activity) {
+					using_sanitation <- true;
+					target_room.people_inside << self;
+				}
 				if (species(target_room) = building_entrance) {
 					is_outside <- true;
 				}
@@ -1026,7 +1138,7 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 }
 
 experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "CUCS/Lab" among: ["CUCS/Lab" ,"UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD" among: ["CUCS/CUAAD" ,"UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
 	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
@@ -1059,9 +1171,9 @@ experiment DailyRoutine type: gui parent: DXFDisplay{
 			species pedestrian_path ;
 			species people position:{0,0,0.001};
 			species separator_ag refresh: false;
-			agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
-			agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
-			species bottleneck transparency: 0.5;
+			//agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
+			//agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
+			//species bottleneck transparency: 0.5;
 			species droplet aspect:base;
 
 		    graphics "social_graph" {
