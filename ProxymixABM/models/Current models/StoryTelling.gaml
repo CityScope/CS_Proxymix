@@ -20,7 +20,7 @@ experiment Episode1 type: gui parent: Coronaizer{
 	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "Classrooms and Offices";
-	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
+//	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0 #h;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
@@ -54,15 +54,17 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.15#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	//DROPLET PARAMETER
-	parameter "Show droplets:" category: "Droplet" var:show_droplet <-true;
+	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-20;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-3.0;
+	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
+	
 	//Scenario 2
 	init
 	{   
 		create simulation with: [episode::2,title::"Scenario B: Air Conditioning",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",
 		timeSpent::45#mn,workplace_layer::"Labs",density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
-		show_droplet::true,droplet_livespan::5,droplet_distance::1.0];
+		show_droplet::false,droplet_livespan::5,droplet_distance::1.0];
 
 	}
 }
