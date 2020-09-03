@@ -11,18 +11,26 @@ model CityScopeCoronaizer
 import "DailyRoutine.gaml"
 
 global{
+	
+	bool use_SIR_model <- true;
+	
 	float infectionDistance <- 2#m;
 	float maskRatio <- 0.0;
+	float direct_infection_factor<-0.1; //increasement of the infection risk per second
 	
-	float diminution_infection_rate_separator <- 0.9;
+	float diminution_infection_risk_mask <- 0.75; //1.0 masks are totaly efficient to avoid direct transmission
+	float diminution_infection_risk_separator <- 0.9;
+	
 	
 	bool a_boolean_to_disable_parameters <- true;
+    
     int number_day_recovery<-10;
 	int time_recovery<-1440*number_day_recovery*60;
 	float infection_rate<-0.05;
-	int initial_nb_infected<-10;
-	float step<-1#mn;
+    //float step<-1#mn;
 	int totalNbInfection;
+	
+   	int initial_nb_infected<-10;
 	
 	bool drawInfectionGraph <- false;
 	bool draw_infection_grid <- false;
@@ -32,13 +40,12 @@ global{
 	int nb_cols <- int(75*1.5);
 	int nb_rows <- int(50*1.5);
 	
-
 	int nb_susceptible  <- 0 update: length(ViralPeople where (each.is_susceptible));
 	int nb_infected <- 0 update: length(ViralPeople where (each.is_infected));
 	int nb_recovered <- 0 update: length(ViralPeople where (each.is_recovered));
 	graph<people, people> infection_graph <- graph<people, people>([]);
 
-
+	
 	
 	init{
 			
@@ -51,26 +58,23 @@ global{
 	        is_infected <-  true;
 	        is_immune <-  false;
 	        is_recovered<-false;
-		}
-
-		
+		}	
 	}
 	
-	reflex updateMask{
+	reflex updateMask when: every(1 #mn){
 		ask ViralPeople{
 		  if (flip(maskRatio)){
-		    as_mask<-true;
+		    has_mask<-true;
 		  }
 	    }
 	}
 
 	
-	
-	reflex increaseRate when:cycle= 1440*7{
+	reflex increaseRate when:use_SIR_model and cycle= 1440*7{
 		//infection_rate<-0.0;//infection_rate/2;
 	}
 	
-	reflex computeRo when: (cycle mod 100 = 0){
+	reflex computeRo when: use_SIR_model and (cycle mod 100 = 0){
 		/*write "yo je suis le Ro ";
 		write "nbInfection" + totalNbInfection;
 		write "initial_nb_infected" + initial_nb_infected;
@@ -79,32 +83,54 @@ global{
 		list<float> tmp2 <- tmp collect (each.nb_people_infected_by_me*max((time_recovery/(0.00001+time- each.infected_time))),1);
 		R0<- mean(tmp2);
 	}
-	
 
 }
 
 
+
 species ViralPeople  mirrors:people{
 	point location <- target.location update: {target.location.x,target.location.y,target.location.z};
+	float infection_risk min: 0.0 max: 100.0;
 	bool is_susceptible <- true;
 	bool is_infected <- false;
     bool is_immune <- false;
     bool is_recovered<-false;
     float infected_time<-0.0;
-    geometry shape<-circle(1);
-    int nb_people_infected_by_me<-0;
+    geometry shape<-circle(1); 
+  	int nb_people_infected_by_me<-0;
     bool has_been_infected<-false;
-    bool as_mask<-false;
+    bool has_mask<-false;
 
+
+	reflex infected_contact_risk when:  not use_SIR_model and is_infected and not target.is_outside  {
+		ask (ViralPeople at_distance infectionDistance) where (not each.is_infected and not each.target.using_sanitation) {
+			if (not target.is_outside) {
+				geometry line <- line([myself,self]);
+				if empty(wall overlapping line) {
+					float direct_infection_factor_real <- direct_infection_factor;
+					if empty(separator_ag overlapping line) {
+						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_separator);
+					}
+					if myself.has_mask {
+						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_mask);
+					}
+					 infection_risk <- infection_risk + direct_infection_factor_real;
+					 ask (cell(self.target.location)){
+						
+	        		}
+				}
+			} 
+		}
+	}
 		
-	reflex infected_contact when: is_infected and not target.is_outside and !as_mask {
-		ask ViralPeople where !each.as_mask at_distance infectionDistance {
+	reflex infected_contact when:use_SIR_model and is_infected and not target.is_outside and !has_mask {
+		ask (ViralPeople where (!each.has_mask and not each.is_infected)) at_distance infectionDistance {
 			if (not target.is_outside) {
 				geometry line <- line([myself,self]);
 				if empty(wall overlapping line) {
 					float infectio_rate_real <- infection_rate;
 					if empty(separator_ag overlapping line) {
-						infectio_rate_real <- infectio_rate_real * (1 - diminution_infection_rate_separator);
+						infectio_rate_real <- infectio_rate_real * (1 - diminution_infection_risk_separator);
 					}
 					if (flip(infectio_rate_real)) {
 		        		is_susceptible <-  false;
@@ -125,17 +151,20 @@ species ViralPeople  mirrors:people{
 		}
 	}
 	
-	reflex recover when: (is_infected and (time - infected_time) >= time_recovery){
+	reflex recover when:use_SIR_model and (is_infected and (time - infected_time) >= time_recovery){
 		is_infected<-false;
 		is_recovered<-true;
 	}
 	
 	
 	aspect base {
+		
 		if(showPeople) and not target.is_outside{
-		  draw circle(is_infected ? peopleSize*1.25 : peopleSize) color:(is_susceptible) ? #green : ((is_infected) ? #red : #blue);	
+		  draw circle(is_infected ? peopleSize*1.25 : peopleSize) color:
+		  	use_SIR_model ? ((is_susceptible) ? #green : ((is_infected) ? #red : #blue)) :
+		  	((is_infected) ? #blue : rgb(#green,#green,infection_risk/100.0));
 		}
-		if (as_mask){
+		if (has_mask){
 		  draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
 		}	
 	}

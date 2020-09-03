@@ -60,10 +60,10 @@ experiment Episode2 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		/*create simulation with: [episode::2,title::"Scenario B: Air Conditioning",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",
+		create simulation with: [episode::2,title::"Scenario B: Air Conditioning",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",
 		timeSpent::45#mn,workplace_layer::"Labs",density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
 		show_droplet::true,droplet_livespan::5,droplet_distance::1.0];
-*/
+
 	}
 }
 

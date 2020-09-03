@@ -7,10 +7,10 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 global {
 	
-	string useCase <- "UDG/CUSUR";
+	string useCase <- "UDG/CUCS/Level 2";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
-	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee, furnitures ];
+	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee, furnitures, entrance ];
 	
 	bool recreate_walking_area <- true;
 	
@@ -79,7 +79,7 @@ global {
 		list<dxf_element> rooms_entrances <- dxf_element where (each.layer in [entrance, offices, supermarket, meeting_rooms,coffee]);
 		write "Number of dxf elements:" + length(dxf_element);
 		
-		ask rooms{
+		ask rooms_entrances{
 			geometry contour <- nil;
 			float dist <-0.3;
 			int cpt <- 0;
@@ -101,7 +101,7 @@ global {
 			} 
 			if contour != nil {
 				entrances <- points_on (contour, 2.0);
-			}		
+			}	
 		}
 		write "entrances created";
 		if (not recreate_walking_area) and file_exists(walking_area_path) {

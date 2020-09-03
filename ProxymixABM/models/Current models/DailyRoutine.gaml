@@ -19,14 +19,13 @@ global {
 	float normal_step <- 1#s;
 	float fast_step <- 5#mn;
 	bool use_change_step <- true;
-	bool change_step <- false update: false;
 	
 	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
 	float arrival_time_interval <- 0#mn;//15 #mn;
 	
 	float distance_queue <- 1#m;
-	bool queueing <- true;
+	bool queueing <- false;
 	float waiting_time_entrance <- 5#s;
 	bool first_end_sim <- true;
 	 	
@@ -39,7 +38,7 @@ global {
 	
 	map<date,int> people_to_create;
 	
-	float step <- normal_step on_change: {change_step <- true;};
+	float step <- normal_step;
 	float separator_proba <- 0.0;
 	
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
@@ -309,8 +308,6 @@ global {
 				waiting_sanitation <- true;
 				
 				list<room_entrance> re <- copy(target_room.entrances);
-				write re;
-				write re collect each.positions;
 				if (length(re) = 1) {
 					the_entrance <- first(re);
 				} else {
@@ -337,7 +334,6 @@ global {
 					if (empty(re)) {
 						re <- target_room.entrances;
 					}
-					write re;
 					the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / each distance_to self) )];
 				}
 				
@@ -454,11 +450,10 @@ global {
 				step <- normal_step;
 			}
 		} else {
-			if (time > arrival_time_interval and empty(people where (each.target != nil and each.waiting_sanitation) ))  {
+			
+			if (time > arrival_time_interval and empty(people where (each.target != nil or each.waiting_sanitation) ))  {
 				step <- fast_step;
-			} else {
-				step <- normal_step;
-			}
+			} 
 		}	
 		
 	}
@@ -721,6 +716,11 @@ species room {
 				}
 				if (not empty(places)) {
 					type <- workplace_layer;
+				} else {
+					create place_in_room number: min(10, 1 + shape.area / 2.0) {
+						location <-	any_location_in(myself.shape - 0.2);
+						myself.places << self;
+					}
 				}
 				room the_room <- self;
 				if (separator_proba > 0) and (length(places) > 1) {
@@ -852,7 +852,7 @@ species building_entrance parent: room {
 		draw shape color: standard_color_per_layer[type];
 		draw init_place color:#magenta border: #black;
 		loop e over: entrances {draw square(0.1) at: e.location color: #magenta border: #black;}
-		loop p over: available_places {draw square(0.1) at: p.location color: #cyan border: #black;}
+		loop p over: available_places {draw square(0.1) at: p.location color: #yellow border: #black;}
 	}
 }
 
@@ -966,6 +966,7 @@ species people skills: [escape_pedestrian] {
 		(after(agenda_day.keys[0])){
 		if(target_place != nil and (has_place) ) {target_room.available_places << target_place;}
 		string n <- current_activity = nil ? "" : copy(current_activity.name);
+		room prev_tr <- copy(target_room);
 		current_activity <- agenda_day.values[0];
 		agenda_day >> first(agenda_day);
 		target <- (target_room.entrances closest_to self).location;
@@ -974,6 +975,7 @@ species people skills: [escape_pedestrian] {
 		is_outside <- false;
 		goto_entrance <- false;
 		target_place <- nil;
+		world.step <- normal_step;
 		if (species(current_activity) = sanitation_activity) {
 			waiting_sanitation <- true;
 		}
@@ -1023,10 +1025,11 @@ species people skills: [escape_pedestrian] {
 		}
 		if(arrived) {
 			if (go_oustide_room) {
+				the_entrance <- (target_room.entrances closest_to self);
+					
 				if (!queueing) {
-					target <- (target_room.entrances closest_to self).location;
+					target <- the_entrance.location;
 				} else {
-					the_entrance <- (target_room.entrances closest_to self);
 					if (species(target_room) = building_entrance) {
 						target <- the_entrance.location;
 					} else {
