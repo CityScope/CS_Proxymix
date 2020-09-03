@@ -304,7 +304,7 @@ global {
 			
 			if (use_sanitation and not empty(sanitation_rooms) and flip(proba_using_before_work)) {
 				current_activity <- first(sanitation_activity);
-				target_room <- sanitation_rooms[rnd_choice(sanitation_rooms collect (1 / each distance_to self) )];
+				target_room <- sanitation_rooms[rnd_choice(sanitation_rooms collect (1 / (0.1 + each distance_to self)) )];
 				waiting_sanitation <- true;
 				
 				list<room_entrance> re <- copy(target_room.entrances);
@@ -316,7 +316,7 @@ global {
 					if (empty(re)) {
 						re <- target_room.entrances;
 					}
-					the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / each distance_to self) )];
+					the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / (0.1 + each distance_to self)) )];
 				}
 				
 			//	the_entrance <- (target_room.entrances closest_to self);
@@ -334,7 +334,7 @@ global {
 					if (empty(re)) {
 						re <- target_room.entrances;
 					}
-					the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / each distance_to self) )];
+					the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / (0.1 + each distance_to self)) )];
 				}
 				
 			//	the_entrance <- (target_room.entrances closest_to self);
