@@ -158,8 +158,11 @@ species ViralPeople  mirrors:people{
 			}
 		}
 		if (objects_infection) {
-			ask (ViralCell(self.target.location)){
-				do add_viral_load(indirect_infection_factor * step);
+			ViralCell vc <- ViralCell(self.target.location);
+			if (vc != nil) {
+				ask (vc){
+					do add_viral_load(indirect_infection_factor * step);
+				}
 			}
 		}
 		if (air_infection) {
