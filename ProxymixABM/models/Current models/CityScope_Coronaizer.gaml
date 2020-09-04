@@ -369,15 +369,17 @@ experiment Coronaizer type:gui autorun:true{
 	  	graphics "infectiousStatus"{
 	  		point infectiousLegendPos<-{world.shape.width*0.75,-world.shape.width*0.1};
 	  		draw "SIMULATION PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-	  		draw "Initial infected new comers:" + initial_nb_infected + " people" color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  		if (use_SIR_model) {
-	  			draw "Low Risk of Infection:" + nb_susceptible + " people"color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  			draw "Initial infected new comers:" + initial_nb_infected + " people" color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  			draw "Susceptible:" + nb_susceptible color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 		  		draw circle(peopleSize) color:#green at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+20#px-5#px,0.01} perspective: true;
-		  		draw "High Risk of Infection:" + nb_infected + " people" color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+		  		draw "Infected:" + nb_infected  color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 		  		draw circle(peopleSize) color:#red at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+40#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 		  	
 	  		}
 	  		else {
+	  			draw "Initial infected new comers:" + initial_nb_infected + " people" color: #blue at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  			draw circle(peopleSize) color:#blue at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y-5#px,0.01} perspective: true;
 	  			draw "Low Risk of Infection:" + (ViralPeople count (each.infection_risk < 30.0)) + " people"color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  			draw circle(peopleSize) color:#green at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+20#px-5#px,0.01} perspective: true;
 	  			draw "High Risk of Infection:" + (ViralPeople count (each.infection_risk > 70.0))  + " people" color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 

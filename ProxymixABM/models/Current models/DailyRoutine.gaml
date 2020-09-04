@@ -817,7 +817,7 @@ species room {
 		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
 		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
 		if(isVentilated ){
-		 draw shape color:rgb(255,0,255,0.5) empty:false;	
+		 draw shape*0.75 color:standard_color_per_layer[type]+50 empty:false;	
 		}
 	}
 	aspect available_places_info {
@@ -1126,75 +1126,5 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 	}	
 }
 
-experiment DailyRoutine type: gui parent: DXFDisplay{
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD" among: ["CUCS/CUAAD" ,"UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
-	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
-	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
-	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
-	parameter "unit" var: unit category: "file" <- #cm;
-	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
-	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
-	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
-	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
-	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
-	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
-	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-true;
-	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
-	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
-	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
-	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
-	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
-	
-	
-	output {
-		display map synchronized: true background:#black parent:floorPlan type:java2D draw_env:false
-		{
-			species room  refresh: false;
-			species room_entrance;
-			species room aspect: available_places_info refresh: true;
-			species building_entrance refresh: true;
-			species wall refresh: false;
-			species pedestrian_path ;
-			species people position:{0,0,0.001};
-			species separator_ag refresh: false;
-			//agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
-			//agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
-			//species bottleneck transparency: 0.5;
-			species droplet aspect:base;
-			
-		    graphics "social_graph" {
-				if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
-					loop eg over: social_distance_graph.edges {
-						geometry edge_geom <- geometry(eg);
-						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#gray;
-					}
 
-				}
-			}
-		}
-	}
-}
 
-experiment multiAnalysis type: gui parent:DailyRoutine
-{   
-	init
-	{  
-		create simulation with: [useCase::"CUCS",distance_people::2.0#m];
-		create simulation with: [useCase::"CUCS",distance_people::2.5#m];
-		create simulation with: [useCase::"CUCS",distance_people::3.0#m];
-
-	}
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["CUCS/Level 2","CUCS/Ground","CUCS","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
-	output
-	{	/*layout #split;
-		display map type: opengl background:#black toolbar:false draw_env:false
-		{
-			species dxf_element;
-			graphics 'legend'{
-			  draw useCase color: #white at: {-world.shape.width*0.1,-world.shape.height*0.1} perspective: true font:font("Helvetica", 20 , #bold);
-			}
-		}*/
-	}
-}
