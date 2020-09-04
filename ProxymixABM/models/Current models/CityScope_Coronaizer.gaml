@@ -158,8 +158,11 @@ species ViralPeople  mirrors:people{
 			}
 		}
 		if (objects_infection) {
-			ask (ViralCell(self.target.location)){
-				do add_viral_load(indirect_infection_factor * step);
+			ViralCell vc <- ViralCell(self.target.location);
+			if (vc != nil) {
+				ask (vc){
+					do add_viral_load(indirect_infection_factor * step);
+				}
 			}
 		}
 		if (air_infection) {
@@ -172,7 +175,8 @@ species ViralPeople  mirrors:people{
 		infection_risk <- infection_risk - diminution_infection_risk_sanitation * step;
 	}
 	reflex infection_by_objects when: objects_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
-		infection_risk <- infection_risk + step * ViralCell(location).viral_load;
+		ViralCell vrc <- ViralCell(location);
+		if (vrc != nil) {infection_risk <- infection_risk + step * vrc.viral_load;}
 	}
 	reflex infection_by_air when: air_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
