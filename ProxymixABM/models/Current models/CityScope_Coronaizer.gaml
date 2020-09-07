@@ -21,8 +21,8 @@ global{
 	float maskRatio <- 0.0;
 	float direct_infection_factor<-0.5; //increasement of the infection risk per second
 	
-	float indirect_infection_factor<-0.01; //increasement of the viral load of cells per second 
-	float basic_viral_decrease_cell <- 0.0001; //decreasement of the viral load of cells per second 
+	float indirect_infection_factor<-0.5; //increasement of the viral load of cells per second 
+	float basic_viral_decrease_cell <- 0.005; //decreasement of the viral load of cells per second 
 	
 	float air_infection_factor <- 0.003; //decreasement of the viral load of cells per second 
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
@@ -40,9 +40,6 @@ global{
 	float infection_rate<-0.05;
     //float step<-1#mn;
 	int totalNbInfection;
-	
-	
-	float ventilation_ratio <- 1.0;
 	
    	int initial_nb_infected<-10;
 	

@@ -28,14 +28,16 @@ experiment Episode1 type: gui parent: Coronaizer{
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.3#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
+	parameter "Ventilation:" category: "Policy" var: ventilation_ratio  <-0.0;
 
 
 	//Scenario 2
-	/*init
+	init
 	{   
-		create simulation with: [episode::1,title::"Scenario B: Mask and Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms and Offices",ventilationType::"Natural",
+		create simulation with: [episode::1,title::"Scenario B: Mask and Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms and Offices",
+		ventilationType::"Natural",ventilation_ratio::0.0,
 		timeSpent::3.0#h,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.7,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple"];
-	}*/
+	}
 }
 
 experiment Episode2 type: gui parent: Coronaizer{
@@ -54,7 +56,7 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.15#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	//DROPLET PARAMETER
-	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
+	parameter "Show droplets:" category: "Droplet" var:show_droplet <-true;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-20;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-3.0;
 	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
@@ -63,8 +65,8 @@ experiment Episode2 type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [episode::2,title::"Scenario B: Air Conditioning",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",
-		timeSpent::45#mn,workplace_layer::"Labs",density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
-		show_droplet::false,droplet_livespan::5,droplet_distance::1.0];
+		timeSpent::3.0#h,workplace_layer::"Labs",density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
+		show_droplet::true,droplet_livespan::5,droplet_distance::1.0];
 
 	}
 }

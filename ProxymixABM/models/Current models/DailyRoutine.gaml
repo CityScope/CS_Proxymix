@@ -99,7 +99,9 @@ global {
 	bool show_droplet <- false;  //show or not the bottleneck
 	int droplet_livespan <- 5; //to livespan of a bottleneck agent (to avoid glitching aspect) 
 	float droplet_distance<-2.0;
+	file fanPic <- file('./../../images/fan.png');
 	float ventilation_ratio;
+	
 	
 	init {
 		validator <- false;
@@ -115,7 +117,9 @@ global {
 				create building_entrance  with: [shape::polygon(se.points), type::type];
 			} else if type in [workplace_layer, meeting_rooms,coffee, sanitation] {
 				create room with: [shape::polygon(se.points), type::type]{
+					write "ventilation_ratio" +ventilation_ratio;
 					if flip (ventilation_ratio){
+						write"ya de la ventil!!";
 						isVentilated<-true;
 					}
 				}	
@@ -278,6 +282,19 @@ global {
 			// save the values of the variables name, speed and size to the csv file; the rewrite facet is set to false to continue to write in the same file
 			save [type,length(entrances), length(available_places)] to: outputFilePathName type:"csv" rewrite: false;
 		}
+	}
+	
+	reflex manageDroplet{
+	 if(show_droplet){
+	   ask people{
+	 	create droplet{
+	 		location<-myself.location+ {rnd(-droplet_distance,droplet_distance),rnd(-droplet_distance,droplet_distance)};
+	    }	
+ 	   }
+	   ask droplet where (each.live_span <= 0) {do die;}		
+	 }else{
+	 	ask droplet {do die;}
+	 }
 	}	
 	
 	action initialize_pedestrian_model {
@@ -817,7 +834,8 @@ species room {
 		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
 		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
 		if(isVentilated ){
-		 draw shape*0.75 color:standard_color_per_layer[type]+50 empty:false;	
+		 //draw shape*0.75 color:standard_color_per_layer[type]+50 empty:false;
+		 draw fanPic size: 3;	
 		}
 	}
 	aspect available_places_info {
@@ -898,7 +916,7 @@ species droplet skills:[moving]{
 	int live_span <- droplet_livespan update: live_span - 1;
 	int size<-14+rnd(200);
 	aspect base{
-		draw circle(size/1000) color:rgb(size*1.1,size*1.6,200,50);
+		draw circle(size/2000) color:rgb(size*1.1,size*1.6,200,50);
 	}
 }
 
