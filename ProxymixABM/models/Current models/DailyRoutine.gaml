@@ -117,9 +117,7 @@ global {
 				create building_entrance  with: [shape::polygon(se.points), type::type];
 			} else if type in [workplace_layer, meeting_rooms,coffee, sanitation] {
 				create room with: [shape::polygon(se.points), type::type]{
-					write "ventilation_ratio" +ventilation_ratio;
 					if flip (ventilation_ratio){
-						write"ya de la ventil!!";
 						isVentilated<-true;
 					}
 				}	
