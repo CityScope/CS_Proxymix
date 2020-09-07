@@ -166,7 +166,7 @@ species ViralPeople  mirrors:people{
 	}
 	reflex infection_by_objects when: objects_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralCell vrc <- ViralCell(location);
-		if (vrc != nil) {infection_risk <- infection_risk + step * vrc.viral_load;}
+		if (vrc != nil) {infection_risk <- infection_risk + step * vrc.viral_load_by_touching;}
 	}
 	reflex infection_by_air when: air_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
@@ -224,20 +224,20 @@ species ViralPeople  mirrors:people{
 grid ViralCell cell_width: 1.0 cell_height:1.0 neighbors: 8 {
 	rgb color <- #white;
 	
-	float viral_load min: 0.0 max: 10.0;
+	float viral_load_by_touching min: 0.0 max: 10.0;
 	
 	//Action to add viral load to the cell
 	action add_viral_load(float value){
-		viral_load <- viral_load+value;
+		viral_load_by_touching <- viral_load_by_touching+value;
 	}
 	//Action to update the viral load (i.e. trigger decreases)
 	reflex update_viral_load when: not use_SIR_model {
-		viral_load <- viral_load - (basic_viral_decrease_cell * step);
+		viral_load_by_touching <- viral_load_by_touching - (basic_viral_decrease_cell * step);
 	}
 	aspect default{
 		if (draw_infection_grid){
-			if not use_SIR_model and (viral_load > 0){
-				draw shape color:blend(#white, #red, viral_load/1.0);		
+			if not use_SIR_model and (viral_load_by_touching > 0){
+				draw shape color:blend(#white, #red, viral_load_by_touching/1.0);		
 			}
 		}
 	}	
