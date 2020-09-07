@@ -695,7 +695,7 @@ species room {
 	list<place_in_room> places;
 	list<place_in_room> available_places;
 	int num_places;
-	bool isVentilated;
+	bool isVentilated <- false;
 	list<people> people_inside;
 	
 	action intialization {
@@ -932,7 +932,7 @@ species people skills: [escape_pedestrian] {
 	bool go_oustide_room <- false;
 	bool is_outside;
 	rgb color <- #white;//rnd_color(255);
-	float speed <- min(5,gauss(4,1)) #km/#h;
+	float speed <- max(2,min(6,gauss(4,1))) #km/#h;
 	bool is_slow <- false update: false;
 	bool is_slow_real <- false;
 	int counter <- 0;

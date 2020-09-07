@@ -14,22 +14,22 @@ global{
 	
 	bool use_SIR_model <- false;
 	
-	bool direct_infection <- false;
+	bool direct_infection <- true;
 	bool objects_infection <- true;
-	bool air_infection <- false;
+	bool air_infection <- true;
 	float infectionDistance <- 1#m;
 	float maskRatio <- 0.0;
-	float direct_infection_factor<-0.5; //increasement of the infection risk per second
+	float direct_infection_factor<-0.05; //increasement of the infection risk per second
 	
-	float indirect_infection_factor<-0.5; //increasement of the viral load of cells per second 
-	float basic_viral_decrease_cell <- 0.005; //decreasement of the viral load of cells per second 
+	float indirect_infection_factor<-0.003; //increasement of the viral load of cells per second 
+	float basic_viral_decrease_cell <- 0.0003; //decreasement of the viral load of cells per second 
 	
-	float air_infection_factor <- 0.003; //decreasement of the viral load of cells per second 
+	float air_infection_factor <- 0.002; //decreasement of the viral load of cells per second 
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
 	float ventilated_viral_decrease_room <- 0.01; //decreasement of the viral load of cells per second 
 	
 	float diminution_infection_risk_sanitation <- 2.0;
-	float diminution_infection_risk_mask <- 0.75; //1.0 masks are totaly efficient to avoid direct transmission
+	float diminution_infection_risk_mask <- 0.8; //1.0 masks are totaly efficient to avoid direct transmission
 	float diminution_infection_risk_separator <- 0.9;
 	
 	
@@ -73,14 +73,6 @@ global{
 		}	
 	}
 	
-	reflex updateMask when: every(1 #mn){
-		ask ViralPeople{
-		  if (flip(maskRatio)){
-		    has_mask<-true;
-		  }
-	    }
-	}
-
 	
 	reflex increaseRate when:use_SIR_model and cycle= 1440*7{
 		//infection_rate<-0.0;//infection_rate/2;
@@ -135,7 +127,7 @@ species ViralPeople  mirrors:people{
     geometry shape<-circle(1); 
   	int nb_people_infected_by_me<-0;
     bool has_been_infected<-false;
-    bool has_mask<-false;
+    bool has_mask<-flip(maskRatio);
 
 
 	reflex infected_contact_risk when: not use_SIR_model and is_infected and not target.is_outside and not target.using_sanitation {
@@ -165,6 +157,7 @@ species ViralPeople  mirrors:people{
 		if (air_infection) {
 			ViralRoom my_room <- first(ViralRoom overlapping location);
 			if (my_room != nil) {ask my_room{do add_viral_load(air_infection_factor * step);}}
+			
 		}
 	}
 	
@@ -317,10 +310,9 @@ experiment Coronaizer type:gui autorun:true{
 		agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
 		agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
 		species bottleneck transparency: 0.5;
-		species droplet aspect:base;
+		species droplet aspect:base; 
 	    species ViralPeople aspect:base;
-		species droplet aspect:base;
-	
+		
 	  	species cell aspect:default;
 	  	graphics "infection_graph" {
 				if (infection_graph != nil and drawInfectionGraph = true) {
@@ -383,7 +375,7 @@ experiment Coronaizer type:gui autorun:true{
 	  			draw circle(peopleSize) color:#blue at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y-5#px,0.01} perspective: true;
 	  			draw "Low Risk of Infection:" + (ViralPeople count (each.infection_risk < 30.0)) + " people"color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  			draw circle(peopleSize) color:#green at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+20#px-5#px,0.01} perspective: true;
-	  			draw "High Risk of Infection:" + (ViralPeople count (each.infection_risk > 70.0))  + " people" color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  			draw "High Risk of Infection:" + (ViralPeople count (each.infection_risk > 50.0))  + " people" color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  			draw circle(peopleSize) color:#red at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+40#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  	
 	  		}

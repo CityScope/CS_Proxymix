@@ -36,7 +36,7 @@ experiment Episode1 type: gui parent: Coronaizer{
 	{   
 		create simulation with: [episode::1,title::"Scenario B: Mask and Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms and Offices",
 		ventilationType::"Natural",ventilation_ratio::0.0,
-		timeSpent::3.0#h,density_scenario::"data",distance_people::2.0#m,maskRatio::0.7,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple"];
+		timeSpent::3.0#h,density_scenario::"data",distance_people::2.0#m,maskRatio::1.0,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple"];
 	}
 }
 

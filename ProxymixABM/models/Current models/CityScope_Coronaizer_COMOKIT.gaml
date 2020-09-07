@@ -121,7 +121,7 @@ experiment Coronaizer type:gui autorun:true parent:DailyRoutine{
 	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory","MediaLab"];
 	
 	output{
-	  display CoronaMap type:opengl parent:map background:#black draw_env:false synchronized:false{
+	  display CoronaMap type:opengl  background:#black draw_env:false synchronized:false{
 
 	  	species BiologicalEntity aspect:base;
 	  	species cell aspect:default;
