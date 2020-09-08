@@ -104,6 +104,7 @@ global {
 	
 	
 	init {
+		seed<-10.0;
 		validator <- false;
 		outputFilePathName <-"../results/output_" + (#now).year+"_"+(#now).month+"_"+ (#now).day + "_"+ (#now).hour+"_"+ (#now).minute  + "_" + (#now).second+"_distance_"+distance_people+".csv";
 		do initiliaze_dxf;

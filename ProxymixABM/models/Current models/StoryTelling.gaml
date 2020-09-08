@@ -15,12 +15,10 @@ import 'CityScope_Coronaizer.gaml'
 
 experiment Episode1 type: gui parent: Coronaizer{
 	//Scenario 1
-	
 	parameter 'Episode:' var: episode category: 'file' <- 1;
 	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "Classrooms and Offices";
-//	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0 #h;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
