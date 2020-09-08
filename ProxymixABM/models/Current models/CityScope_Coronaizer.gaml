@@ -40,8 +40,9 @@ global{
 	float infection_rate<-0.05;
     //float step<-1#mn;
 	int totalNbInfection;
-	
    	int initial_nb_infected<-10;
+   	float Low_Risk_of_Infection_threshold<-0.3;
+   	float Medium_Risk_of_Infection_threshold<-0.6;
 	
 	bool drawInfectionGraph <- false;
 	bool draw_infection_grid <- false;
@@ -380,10 +381,12 @@ experiment Coronaizer type:gui autorun:true{
 	  		else {
 	  			draw "Initial infected new comers:" + initial_nb_infected + " people" color: #blue at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  			draw circle(peopleSize) color:#blue at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y-5#px,0.01} perspective: true;
-	  			draw "Low Risk of Infection:" + (ViralPeople count (each.infection_risk < 30.0)) + " people"color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  			draw "Low Risk of Infection:" + (ViralPeople count (each.infection_risk < Low_Risk_of_Infection_threshold*100)) + " people"color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  			draw circle(peopleSize) color:#green at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+20#px-5#px,0.01} perspective: true;
-	  			draw "High Risk of Infection:" + (ViralPeople count (each.infection_risk > 50.0))  + " people" color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-	  			draw circle(peopleSize) color:#red at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+40#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+	  			draw "Medium Risk of Infection:" + (ViralPeople count (each.infection_risk > Low_Risk_of_Infection_threshold*100 and each.infection_risk > Medium_Risk_of_Infection_threshold*100)) + " people"color: #orange at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  			draw circle(peopleSize) color:#orange at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+40#px-5#px,0.01} perspective: true;
+	  			draw "High Risk of Infection:" + (ViralPeople count (each.infection_risk > Medium_Risk_of_Infection_threshold*100))  + " people" color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  			draw circle(peopleSize) color:#red at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+60#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  	
 	  		}
 	  		//draw "R:" + nb_recovered color: #blue at: infectiousLegendPos+textOffSet+textOffSet perspective: true font:font("Helvetica", 20 , #plain); 
