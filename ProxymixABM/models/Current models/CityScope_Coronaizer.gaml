@@ -45,6 +45,8 @@ global{
 	
 	bool drawInfectionGraph <- false;
 	bool draw_infection_grid <- false;
+	bool draw_viral_load_by_touching_grid<-false;
+	bool draw_viral_load_per_room<-false;
 	bool showPeople<-true;
 	
 
@@ -111,7 +113,10 @@ species ViralRoom mirrors: room {
 	}
 	
 	aspect default {
-		if (air_infection) {draw square(1.0) color: blend(#red, #green, viral_load/1.0) border: #black depth:0.2;		}
+		if(draw_viral_load_per_room){
+		  if (air_infection) {draw shape color: blend(#red, #green, viral_load*1000) border: #black depth:0.2;	
+		}		
+		}
 	}
 }
 
@@ -235,7 +240,7 @@ grid ViralCell cell_width: 1.0 cell_height:1.0 neighbors: 8 {
 		viral_load_by_touching <- viral_load_by_touching - (basic_viral_decrease_cell * step);
 	}
 	aspect default{
-		if (draw_infection_grid){
+		if (draw_viral_load_by_touching_grid){
 			if not use_SIR_model and (viral_load_by_touching > 0){
 				draw shape color:blend(#white, #red, viral_load_by_touching/1.0);		
 			}
@@ -273,7 +278,9 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Infection Rate"   category: "Corona" var:infection_rate min:0.0 max:1.0;
 	parameter "Initial Infected"   category: "Corona" var: initial_nb_infected min:0 max:100;
 	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
-	parameter "Draw Infection Grid:" category: "Visualization" var:draw_infection_grid;
+	parameter "Draw Infection Grid (only available with SIR):" category: "Risk Visualization" var:draw_infection_grid;
+	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_viral_load_by_touching_grid;
+	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room;
 	parameter "Show People:" category: "Visualization" var:showPeople;
     parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
@@ -312,7 +319,7 @@ experiment Coronaizer type:gui autorun:true{
 		species bottleneck transparency: 0.5;
 		species droplet aspect:base; 
 	    species ViralPeople aspect:base;
-		
+	    species ViralCell aspect:default;
 	  	species cell aspect:default;
 	  	graphics "infection_graph" {
 				if (infection_graph != nil and drawInfectionGraph = true) {
