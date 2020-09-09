@@ -72,21 +72,23 @@ experiment Episode2 type: gui parent: Coronaizer{
 experiment Episode3 type: gui parent: Coronaizer{
 	//Scenario 1
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD";
+	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0#h;
+	parameter 'timeSpent:' var: timeSpent category: 'file' <- 1.0#h;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.2#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
+	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	//Scenario 2
 	init
 	{   
-		create simulation with: [useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
+		create simulation with: [title::"Scenario B: Sanitation",useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
 		proba_using_before_work::1.0, proba_using_after_work::0.5,
-		timeSpent::3.0#h,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.2#m,agenda_scenario::"simple"];
+		timeSpent::1.0#h,density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.2#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 
 	}
 }

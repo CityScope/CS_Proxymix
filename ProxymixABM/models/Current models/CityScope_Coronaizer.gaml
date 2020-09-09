@@ -28,7 +28,7 @@ global{
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
 	float ventilated_viral_decrease_room <- 0.01; //decreasement of the viral load of cells per second 
 	
-	float diminution_infection_risk_sanitation <- 2.0;
+	float diminution_infection_risk_sanitation <- 10.0;
 	float diminution_infection_risk_mask <- 0.8; //1.0 masks are totaly efficient to avoid direct transmission
 	float diminution_infection_risk_separator <- 0.9;
 	
