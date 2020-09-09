@@ -55,16 +55,16 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	//DROPLET PARAMETER
 	parameter "Show droplets:" category: "Droplet" var:show_droplet <-true;
-	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-20;
-	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-3.0;
-	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
+	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-5;
+	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-1.0;
+	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-1.0;
 	
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::2,title::"Scenario B: Air Conditioning",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",ventilation_ratio::1.0,
+		create simulation with: [episode::2,title::"Scenario B: Air Conditioning",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",ventilation_ratio::0.0,
 		timeSpent::3.0#h,workplace_layer::"Labs",density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
-		show_droplet::true,droplet_livespan::5,droplet_distance::1.0];
+		show_droplet::true,droplet_livespan::20,droplet_distance::3.0];
 
 	}
 }

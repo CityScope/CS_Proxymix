@@ -47,7 +47,7 @@ global{
 	bool drawInfectionGraph <- false;
 	bool draw_infection_grid <- false;
 	bool draw_viral_load_by_touching_grid<-false;
-	bool draw_viral_load_per_room<-false;
+	bool draw_viral_load_per_room<-true;
 	bool showPeople<-true;
 	
 
@@ -120,7 +120,7 @@ species ViralRoom mirrors: room {
 	
 	aspect default {
 		if(draw_viral_load_per_room){
-		  if (air_infection) {draw shape color: blend(#red, #green, viral_load*1000) border: #black depth:0.2;	
+		  if (air_infection) {draw shape color: blend(#red, #green, viral_load*1000);	
 		}		
 		}
 	}
@@ -287,7 +287,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
 	parameter "Draw Infection Grid (only available with SIR):" category: "Risk Visualization" var:draw_infection_grid;
 	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_viral_load_by_touching_grid;
-	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room;
+	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room<-true;
 	parameter "Show People:" category: "Visualization" var:showPeople;
     parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
@@ -314,7 +314,7 @@ experiment Coronaizer type:gui autorun:true{
 	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false{
 	  	species room  refresh: false;
 		species room aspect: available_places_info refresh: true;
-		species ViralRoom ;
+		species ViralRoom transparency:0.85 position:{0,0,0.001};
 		species building_entrance refresh: true;
 		species common_area refresh: true;
 		species wall refresh: false;
@@ -326,7 +326,7 @@ experiment Coronaizer type:gui autorun:true{
 		agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
 		species bottleneck transparency: 0.5;
 		species droplet aspect:base; 
-	    species ViralPeople aspect:base;
+	    species ViralPeople aspect:base position:{0,0,0.002};
 	    species ViralCell aspect:default;
 	  	species cell aspect:default;
 	  	graphics "infection_graph" {
