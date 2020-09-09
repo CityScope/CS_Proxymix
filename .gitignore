@@ -1,12 +1,7 @@
 
-MLgenerative/.DS_Store
-MLgenerative/includes/.DS_Store
 .DS_Store
 .DS_Store
 .DS_Store
-MLgenerative/includes/E14-15_3-gama3.dwl
-MLgenerative/includes/E14-15_3-gama3.dwl2
-MLgenerative/includes/E14-15_3-gama3.bak
 .DS_Store
 .DS_Store
 .DS_Store
@@ -18,10 +13,9 @@ MLgenerative/includes/E14-15_3-gama3.bak
 .DS_Store
 .DS_Store
 dataProcess/*.ipynb
-ProxymixABM/includes/MediaLab/ML_3_L.dwl
 
-ProxymixABM/includes/MediaLab/ML_3_L.dwl2
 
+<<<<<<< HEAD
 *.csv
 
 ProxymixABM/includes/UDG/CUT/lab/building.dwg
@@ -41,3 +35,5 @@ ProxymixABM/includes/UDG/CUT/lab/building_L.dwl2
 ProxymixABM/includes/UDG/CUT/lab/building_L.dxf
 
 ProxymixABM/includes/UDG/CUT/lab/building_L.dxf
+=======
+>>>>>>> origin/master
