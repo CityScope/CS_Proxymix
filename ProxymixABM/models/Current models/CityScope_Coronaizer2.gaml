@@ -28,7 +28,7 @@ global{
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
 	float ventilated_viral_decrease_room <- 0.01; //decreasement of the viral load of cells per second 
 	
-	float diminution_infection_risk_sanitation <- 10.0;
+	float diminution_infection_risk_sanitation <- 2.0;
 	float diminution_infection_risk_mask <- 0.8; //1.0 masks are totaly efficient to avoid direct transmission
 	float diminution_infection_risk_separator <- 0.9;
 	
@@ -321,14 +321,14 @@ experiment Coronaizer type:gui autorun:true{
 		species room_entrance;
 		species pedestrian_path ;
 		//species people position:{0,0,0.001};
-		species separator_ag refresh: false;
+/*		species separator_ag refresh: false;
 		agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
 		agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
 		species bottleneck transparency: 0.5;
 		species droplet aspect:base; 
-	    species ViralPeople aspect:base;
-	    species ViralCell aspect:default;
-	  	species cell aspect:default;
+ */	    species ViralPeople aspect:base;
+//	    species ViralCell aspect:default;
+//	  	species cell aspect:default;
 	  	graphics "infection_graph" {
 				if (infection_graph != nil and drawInfectionGraph = true) {
 					loop eg over: infection_graph.edges {
@@ -338,6 +338,8 @@ experiment Coronaizer type:gui autorun:true{
 
 				}
 		}
+		
+		
 		graphics "social_graph" {
 			if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
 				loop eg over: social_distance_graph.edges {

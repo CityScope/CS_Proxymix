@@ -460,22 +460,7 @@ global {
 		} else {
 			
 			if (time > arrival_time_interval and empty(people where (each.target != nil or each.waiting_sanitation) ))  {
-				if length(COVID_model) > 1 {
-					bool ready_change_step <- true;
-				 	loop s over: COVID_model {
-				 		if  (s.people first_with  (each.target != nil or each.waiting_sanitation) ) != nil {
-				 			ready_change_step <- false;
-				 		} 
-				 	}
-				 	if (ready_change_step) {
-				 		step <- fast_step;
-				 	} else {
-				 		step <- normal_step;
-				 	}
-				} else {
-					step <- fast_step;
-				}
-				
+				step <- fast_step;
 			} else {
 				step <- normal_step;
 			} 
@@ -966,6 +951,7 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 	bool using_sanitation <- false;
 	float sanitation_time <- 0.0;
 	bool end_of_day <- false;
+	
 	
 	aspect default {
 		if not is_outside and not end_of_day{
