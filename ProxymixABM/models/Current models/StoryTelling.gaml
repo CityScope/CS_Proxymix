@@ -26,7 +26,7 @@ experiment Episode1 type: gui parent: Coronaizer{
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.3#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
-	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
+	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 
 
 	//Scenario 2
@@ -57,7 +57,7 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter "Show droplets:" category: "Droplet" var:show_droplet <-true;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-20;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-3.0;
-	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
+	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	
 	//Scenario 2
 	init
@@ -82,7 +82,7 @@ experiment Episode3 type: gui parent: Coronaizer{
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.2#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
-	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
+	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	//Scenario 2
 	init
 	{   
@@ -97,6 +97,7 @@ experiment Episode4 type: gui parent: Coronaizer{
 	//Scenario 1
 
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA";
+	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0#h;
@@ -106,11 +107,12 @@ experiment Episode4 type: gui parent: Coronaizer{
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.4#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
+	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	//Scenario 2
 	init
 	{   
-		create simulation with: [useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",
-		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.4#m,agenda_scenario::"simple"];
+		create simulation with: [title::"Scenario B: Mask",useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",
+		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.4#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 
 	}
 }
@@ -118,6 +120,7 @@ experiment Episode4 type: gui parent: Coronaizer{
 experiment Episode5 type: gui parent: Coronaizer{
 	//Scenario 1
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUSUR";
+	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0#h;
@@ -127,11 +130,11 @@ experiment Episode5 type: gui parent: Coronaizer{
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-2.0#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
+	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	//Scenario 2
 	init
 	{   
-		create simulation with: [useCase::"UDG/CUSUR",useCaseType::"Labs",ventilationType::"Natural",
-		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::2.0#m,agenda_scenario::"simple"];
-
+		create simulation with: [title::"Scenario B: Dedicated path",useCase::"UDG/CUSUR",useCaseType::"Labs",ventilationType::"Natural",
+		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::2.0#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 	}
 }
