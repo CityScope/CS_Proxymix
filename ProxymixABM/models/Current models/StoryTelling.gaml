@@ -98,7 +98,7 @@ experiment Episode4 type: gui parent: Coronaizer{
 
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA";
 	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
-	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
+	parameter 'useCaseType:' var: useCaseType category: 'file' <- "Labs";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0#h;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];

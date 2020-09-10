@@ -295,7 +295,7 @@ global {
 	 if(show_droplet){
 	   ask people{
 	 	create droplet{
-	 		location<-myself.location+ {rnd(-droplet_distance,droplet_distance),rnd(-droplet_distance,droplet_distance)};
+	 		location<-myself.location+ {rnd(-droplet_distance,droplet_distance),rnd(-droplet_distance,droplet_distance),rnd(0,droplet_distance)};
 	    }	
  	   }
 	   ask droplet where (each.live_span <= 0) {do die;}		
@@ -952,7 +952,7 @@ species droplet skills:[moving]{
 	int live_span <- droplet_livespan update: live_span - 1;
 	int size<-14+rnd(200);
 	aspect base{
-		draw circle(size/2000) color:rgb(size*1.1,size*1.6,200,50);
+		draw sphere(size/3000) color:rgb(size*1.1,size*1.6,200,50);
 	}
 }
 

@@ -1,5 +1,5 @@
 import os
-def combine(outFname = 'test.mp4',quality=1,frameRate = '10',aspectRatio='2560x1049'):
+def combine(outFname = 'test.mp4',quality=0,frameRate = '30',aspectRatio='1920x1080'):
 	'''
 	Combine set of png files into a mp4 video.
 
@@ -7,7 +7,7 @@ def combine(outFname = 'test.mp4',quality=1,frameRate = '10',aspectRatio='2560x1
 	----------
 	outFname : str ('test.mp4')
 		Filename for outfile
-	quality : int (20)
+	quality : int (1)
 		Quality (lower is higher)
 	frameRate : int (60)
 		Frame rate of video.
@@ -27,7 +27,7 @@ def combine(outFname = 'test.mp4',quality=1,frameRate = '10',aspectRatio='2560x1
 		os.rename(src, dst)
 		j+=1
 
-	cmd = 'ffmpeg -r '+str(frameRate)+' -f image2 -s '+aspectRatio+' -i cycle_%0'+str(digits)+'d.png -vf scale=1280:-2 -vcodec libx264 -crf '+str(quality)+'  -pix_fmt yuv420p '+outFname
+	cmd = 'ffmpeg -r '+str(frameRate)+' -f image2 -s '+aspectRatio+' -i cycle_%0'+str(digits)+'d.png -vb 20M -vf scale=1280:-2 -vcodec mpeg4 -crf '+str(quality)+'  -pix_fmt yuv420p '+outFname 
 	print(cmd)
 	os.system(cmd)
 
