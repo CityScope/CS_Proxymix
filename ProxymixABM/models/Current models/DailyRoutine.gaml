@@ -24,10 +24,10 @@ global {
 	float step_arrival <- 5#s;
 	float arrival_time_interval <- 0#mn;//15 #mn;
 	
-	float proba_goto_common_area <- 0.3;
-	float proba_wander <- 0.01;
+	float proba_goto_common_area <- 0.4;
+	float proba_wander <- 0.003;
 	float wandering_time <- 1 #mn;
-	float proba_change_desk <- 0.01;
+	float proba_change_desk <- 0.003;
 	
 	float distance_queue <- 1#m;
 	bool queueing <- false;
@@ -730,7 +730,7 @@ species room {
 	geometry inside_geom;
 	
 	action intialization {
-		inside_geom <- (copy(shape) - 0.5);
+		inside_geom <- (copy(shape) - 0.2);
 		ask wall overlapping self {
 			geometry g <- myself.inside_geom - self;
 			if g != nil {
@@ -858,15 +858,15 @@ species room {
 	bool is_available {
 		return nb_affected < length(places);
 	}
-	place_in_room get_target(people p){
-		place_in_room place <- (available_places with_max_of each.dists);
+	place_in_room get_target(people p, bool random_place){
+		place_in_room place <- random_place ? one_of(available_places) : (available_places with_max_of each.dists);
 		available_places >> place;
 		return place;
 	}
 	
 	
 	aspect default {
-		draw shape color: standard_color_per_layer[type];
+		draw inside_geom color: standard_color_per_layer[type];
 		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
 		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
 		if(isVentilated ){
@@ -883,8 +883,8 @@ species room {
 
 
 species building_entrance parent: room {
-	place_in_room get_target(people p){
-		return place_in_room closest_to p;
+	place_in_room get_target(people p, bool random_place){
+		return random_place ? one_of(place_in_room) : place_in_room closest_to p;
 	}
 
 	aspect default {
@@ -996,25 +996,34 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 		if wandering {
 			if (wandering_time_ag > wandering_time) {
 				if (target_place != nil) {
-					do goto target: target_place speed: speed / 2.0;
-					if (location = target_place.location) {
+					if final_target = nil {
+						do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_place ;
+					}
+					do walk;
+					//do walk_on_path;
+					if not(location overlaps target_room.inside_geom) {
+						location <- (target_room.inside_geom closest_points_with location) [0];
+					}
+					if final_target =nil {
 						wandering <- false;
 					}
 				} else {
 					wandering <- false;
 				}
-				
+				if not(location overlaps target_room.inside_geom) {
+					location <- (target_room.inside_geom closest_points_with location) [0];
+				}
 			} else {
 				do wander amplitude: 140.0 bounds: target_room.inside_geom speed: speed / 5.0;
 				wandering_time_ag <- wandering_time_ag + step;	
 			}
 		} else if goto_a_desk {
-			
-			do goto target: target_desk speed: speed / 2.0; 
+			do walk;
+			//do walk_on_path;
 			if not(location overlaps target_room.inside_geom) {
 				location <- (target_room.inside_geom closest_points_with location) [0];
 			}
-			if (location = target_desk) {
+			if final_target =nil {
 				goto_a_desk <- false;
 			}
 		} else {
@@ -1024,13 +1033,14 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 				heading <- rnd(360.0);
 			} else if flip(proba_change_desk) { 
 				
-				point prev_loc <- copy(location);
 				goto_a_desk <- true;
 				place_in_room pir <- one_of (target_room.places);
-				target_desk <- {pir.location.x + rnd(-1.0,1.0),pir.location.y + rnd(-1.0,1.0)};
+				target_desk <- {pir.location.x + rnd(-0.5,0.5),pir.location.y + rnd(-0.5,0.5)};
 				if not(target_desk overlaps target_room.inside_geom) {
 					target_desk <- (target_room.inside_geom closest_points_with target_desk) [0];
 				}
+				
+				do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_desk ;
 			}
 		}
 	}
@@ -1086,6 +1096,7 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 				}
 				point prev_loc <- copy(location);
 				do walk;
+				//do walk_on_path;
 				float r_s <- prev_loc distance_to location;
 				is_slow <- r_s < (speed/coeff_speed_slow);
 				if (is_slow) {
@@ -1139,7 +1150,7 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 							
 					}
 				} else {
-					target_place <- target_room.get_target(self);
+					target_place <- target_room.get_target(self, species(target_room) = common_area);
 					if target_place != nil {
 						target <- target_place.location;
 						goto_entrance <- false;
