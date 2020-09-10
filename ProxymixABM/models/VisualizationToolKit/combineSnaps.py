@@ -40,7 +40,7 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 	else:
 		cmd = f'ffmpeg -r {frameRate} -f image2 -pattern_type glob -i cycle_%0{digits}d.png -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
 	print(cmd)
-	# os.system(cmd)
+	os.system(cmd)
 	
 
 if __name__ == "__main__":
