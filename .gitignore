@@ -1,21 +1,7 @@
+.DS_Store
 
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
-.DS_Store
 dataProcess/*.ipynb
 
-
-<<<<<<< HEAD
 *.csv
 
 ProxymixABM/includes/UDG/CUT/lab/building.dwg
@@ -35,5 +21,5 @@ ProxymixABM/includes/UDG/CUT/lab/building_L.dwl2
 ProxymixABM/includes/UDG/CUT/lab/building_L.dxf
 
 ProxymixABM/includes/UDG/CUT/lab/building_L.dxf
-=======
->>>>>>> origin/master
+
+ProxymixABM/results/*
