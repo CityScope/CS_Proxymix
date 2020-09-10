@@ -1000,7 +1000,6 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 						do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_place ;
 					}
 					do walk;
-					//do walk_on_path;
 					if not(location overlaps target_room.inside_geom) {
 						location <- (target_room.inside_geom closest_points_with location) [0];
 					}
@@ -1018,8 +1017,8 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 				wandering_time_ag <- wandering_time_ag + step;	
 			}
 		} else if goto_a_desk {
+			
 			do walk;
-			//do walk_on_path;
 			if not(location overlaps target_room.inside_geom) {
 				location <- (target_room.inside_geom closest_points_with location) [0];
 			}
@@ -1096,7 +1095,6 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 				}
 				point prev_loc <- copy(location);
 				do walk;
-				//do walk_on_path;
 				float r_s <- prev_loc distance_to location;
 				is_slow <- r_s < (speed/coeff_speed_slow);
 				if (is_slow) {

@@ -29,6 +29,7 @@ global{
 	float ventilated_viral_decrease_room <- 0.01; //decreasement of the viral load of cells per second 
 	
 	float diminution_infection_risk_sanitation <- 10.0;
+	float hand_cleaning_time_effect <- 1#h;
 	float diminution_infection_risk_mask <- 0.8; //1.0 masks are totaly efficient to avoid direct transmission
 	float diminution_infection_risk_separator <- 0.9;
 	
@@ -41,6 +42,7 @@ global{
     //float step<-1#mn;
 	int totalNbInfection;
    	int initial_nb_infected<-10;
+   	map<room, int> infected_per_room;
    	float Low_Risk_of_Infection_threshold<-0.3;
    	float Medium_Risk_of_Infection_threshold<-0.6;
 	
@@ -66,14 +68,55 @@ global{
 			
 	}
 	
+
 	reflex initCovid when:cycle=10{
-		ask initial_nb_infected among ViralPeople{
-			has_been_infected<-true;
-			is_susceptible <-  false;
-	        is_infected <-  true;
-	        is_immune <-  false;
-	        is_recovered<-false;
-		}	
+		int nb_i;
+		map<room,list<ViralPeople>> pp_per_room <- ViralPeople group_by each.target.working_place;
+		
+		loop r over: pp_per_room.keys {
+			list<ViralPeople> pps <- pp_per_room[r];
+			int nb_infected_room <- round(initial_nb_infected * length(pps)/ length(ViralPeople));
+			nb_infected_room <- min(nb_infected_room, initial_nb_infected - nb_i);
+			if nb_infected_room > 0 {
+				list<ViralPeople> vps <- nb_infected_room first(pps);
+				ask vps{
+					has_been_infected<-true;
+					is_susceptible <-  false;
+			        is_infected <-  true;
+			        is_immune <-  false;
+			        is_recovered<-false;
+			        pps >> self;
+				}
+				pp_per_room[r] <- pps;
+				nb_i <- nb_i + nb_infected_room;
+			}
+			
+		}
+		if nb_i < initial_nb_infected {
+			list<room> ror <- pp_per_room.keys sort_by length(pp_per_room[each]);
+			loop while: nb_i < initial_nb_infected {
+				loop r over: ror {
+					if (nb_i = initial_nb_infected) {
+						break;
+					} else {
+						list<ViralPeople> pps <- pp_per_room[r];
+						ViralPeople vps <- first(pps);
+						ask vps{
+							has_been_infected<-true;
+							is_susceptible <-  false;
+					        is_infected <-  true;
+					        is_immune <-  false;
+					        is_recovered<-false;
+					        pps >> self;
+						}
+						pp_per_room[r] <- pps;
+						nb_i <- nb_i + 1;
+							
+					}
+				}
+			}
+		}
+		
 	}
 	
 	
@@ -139,6 +182,7 @@ species ViralPeople  mirrors:people{
   	int nb_people_infected_by_me<-0;
     bool has_been_infected<-false;
     bool has_mask<-flip(maskRatio);
+    float time_since_last_hand_cleaning update: time_since_last_hand_cleaning + step;
 
 
 	reflex infected_contact_risk when: not target.end_of_day and not use_SIR_model and is_infected and not target.is_outside and not target.using_sanitation {
@@ -157,7 +201,7 @@ species ViralPeople  mirrors:people{
 				} 
 			}
 		}
-		if (objects_infection) {
+		if (objects_infection) and (time_since_last_hand_cleaning < hand_cleaning_time_effect){
 			ViralCell vc <- ViralCell(self.target.location);
 			if (vc != nil) {
 				ask (vc){
@@ -172,8 +216,9 @@ species ViralPeople  mirrors:people{
 		}
 	}
 	
-	reflex using_sanitation when: not target.end_of_day and use_SIR_model and target.using_sanitation {
+	reflex using_sanitation when: not target.end_of_day and not use_SIR_model and target.using_sanitation {
 		infection_risk <- infection_risk - diminution_infection_risk_sanitation * step;
+		time_since_last_hand_cleaning <- 0.0;
 	}
 	reflex infection_by_objects when:not target.end_of_day and  objects_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralCell vrc <- ViralCell(location);
