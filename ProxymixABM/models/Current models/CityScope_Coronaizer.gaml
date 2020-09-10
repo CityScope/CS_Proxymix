@@ -356,7 +356,7 @@ experiment Coronaizer type:gui autorun:true{
 		
 	output{
 	  layout #split;
-	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false{
+	  display Simulation type:opengl  background:#black draw_env:false synchronized:true autosave:true{
 	  	species room  refresh: false;
 		species room aspect: available_places_info refresh: true;
 		species ViralRoom transparency:0.85 position:{0,0,0.001};

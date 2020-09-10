@@ -10,7 +10,7 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 	----------
 	outFname : str ('test.mp4')
 		Filename for outfile
-	quality : int (20)
+	quality : int (1)
 		Quality (lower is higher)
 	frameRate : int (60)
 		Frame rate of video.
@@ -29,7 +29,6 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 		print(src,dst)
 		os.rename(src, dst)
 		j+=1
-
 	# cmd = f'ffmpeg -r {frameRate} -f image2 -s {aspectRatio} -i cycle_%0{digits}d.png -vf scale=1280:-2 -vcodec libx264 -crf {quality}  -pix_fmt yuv420p {outFname}'
 	cmd = f'ffmpeg -r {frameRate} -f image2 -pattern_type glob -i cycle_%0{digits}d.png -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
 	print(cmd)
