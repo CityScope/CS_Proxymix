@@ -1,7 +1,10 @@
 import os
-def combine(outFname = 'test.mp4',quality=1,frameRate = '10',aspectRatio='2560x1049'):
+import argparse
+
+def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x1049'):
 	'''
 	Combine set of png files into a mp4 video.
+	Images need to be in the same directory as the script.
 
 	Parameters
 	----------
@@ -27,9 +30,21 @@ def combine(outFname = 'test.mp4',quality=1,frameRate = '10',aspectRatio='2560x1
 		os.rename(src, dst)
 		j+=1
 
-	cmd = 'ffmpeg -r '+str(frameRate)+' -f image2 -s '+aspectRatio+' -i cycle_%0'+str(digits)+'d.png -vf scale=1280:-2 -vcodec libx264 -crf '+str(quality)+'  -pix_fmt yuv420p '+outFname
+	# cmd = f'ffmpeg -r {frameRate} -f image2 -s {aspectRatio} -i cycle_%0{digits}d.png -vf scale=1280:-2 -vcodec libx264 -crf {quality}  -pix_fmt yuv420p {outFname}'
+	cmd = f'ffmpeg -r {frameRate} -f image2 -pattern_type glob -i cycle_%0{digits}d.png -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
 	print(cmd)
 	os.system(cmd)
+	
 
 if __name__ == "__main__":
-	combine()
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-outfname', type=str, help='Filname for outfile')
+	parser.add_argument('-framerate', type=int, help='Video frame rate')
+	args = parser.parse_args()
+	
+	combine(
+		outFname = 'test.mp4' if args.outfname is None else args.outfname,
+		quality = 20,
+		frameRate = '24' if args.framerate is None else args.framerate,
+		aspectRatio='2560x1049'
+	)
