@@ -758,7 +758,7 @@ species room {
 						}
 					}
 				}
-				if (not empty(places)) {
+				if (not empty(places) and (species(self) = room)) {
 					type <- workplace_layer;
 				} else {
 					create place_in_room number: min(10, 1 + shape.area / 2.0) {
