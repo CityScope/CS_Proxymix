@@ -20,12 +20,12 @@ global {
 	float fast_step <- 10#s;
 	bool use_change_step <- true;
 	
-	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
+	string agenda_scenario <- "simple" among: ["simple", "classic day"];
 	float step_arrival <- 5#s;
 	float arrival_time_interval <- 0#mn;//15 #mn;
 	
-	float proba_goto_common_area <- 0.3;
-	float proba_wander <- 0.01;
+	float proba_goto_common_area <- 1.0;
+	float proba_wander <- 0.0;
 	float wandering_time <- 1 #mn;
 	float proba_change_desk <- 0.01;
 	
@@ -33,7 +33,8 @@ global {
 	bool queueing <- false;
 	float waiting_time_entrance <- 5#s;
 	bool first_end_sim <- true;
-	 	
+	
+	
 	
 	bool use_sanitation <- false;
 	float proba_using_before_work <- 0.7;
@@ -280,6 +281,7 @@ global {
 			}
 		}
 	}
+	
 	
 	reflex save_model_output when: (cycle = 1 and savetoCSV){
 		// save the values of the variables name, speed and size to the csv file; the rewrite facet is set to false to continue to write in the same file
@@ -995,15 +997,11 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 	reflex common_area_behavior when: species(target_room) = common_area and (location overlaps target_room) {
 		if wandering {
 			if (wandering_time_ag > wandering_time) {
-				if (target_place != nil) {
-					do goto target: target_place speed: speed / 2.0;
-					if (location = target_place.location) {
-						wandering <- false;
-					}
-				} else {
+				do goto target: target_place speed: speed / 2.0;
+				if (location = target_place.location) {
 					wandering <- false;
-				}
 				
+				}
 			} else {
 				do wander amplitude: 140.0 bounds: target_room.inside_geom speed: speed / 5.0;
 				wandering_time_ag <- wandering_time_ag + step;	
@@ -1225,6 +1223,4 @@ grid proximityCell cell_width: max(world.shape.width / proximityCellmaxNumber, p
 		}
 	}	
 }
-
-
 

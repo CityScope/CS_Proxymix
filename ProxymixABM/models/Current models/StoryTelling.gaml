@@ -109,11 +109,13 @@ experiment Episode4 type: gui parent: Coronaizer{
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	//Scenario 2
+	parameter use_change_step var: use_change_step <- false;
+	
 	init
 	{   
-		create simulation with: [title::"Scenario B: Mask",useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",
+		create simulation with: [title::"Scenario B: Mask",useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",use_change_step::false,
 		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.4#m,agenda_scenario::"simple",ventilation_ratio::0.0];
-
+		
 	}
 }
 
