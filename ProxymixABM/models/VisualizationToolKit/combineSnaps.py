@@ -36,12 +36,13 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 	# cmd = f'ffmpeg -r {frameRate} -f image2 -s {aspectRatio} -i cycle_%0{digits}d.png -vf scale=1280:-2 -vcodec libx264 -crf {quality}  -pix_fmt yuv420p {outFname}'
 	if inpath!='.':
 		inpath = os.path.join(inpath,f'cycle_%0{digits}d.png')
-		cmd = f'ffmpeg -r {frameRate} -f image2 -pattern_type glob -i {inpath} -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
+		cmd = f'ffmpeg -r {frameRate} -f image2 -i {inpath} -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
 	else:
-		cmd = f'ffmpeg -r {frameRate} -f image2 -pattern_type glob -i cycle_%0{digits}d.png -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
+		cmd = f'ffmpeg -r {frameRate} -f image2 -i cycle_%0{digits}d.png -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
+	print('Result will be written in:',outFname)
 	print(cmd)
 	os.system(cmd)
-	
+
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
@@ -51,7 +52,7 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 	
 	combine(
-		outFname = 'test.mp4' if args.outfname is None else args.outfname,
+		outFname = 'output.mp4' if args.outfname is None else args.outfname,
 		quality = 20,
 		frameRate = '24' if args.framerate is None else args.framerate,
 		aspectRatio='2560x1049',
