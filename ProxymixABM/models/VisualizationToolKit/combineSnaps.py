@@ -1,5 +1,7 @@
 import os
 import argparse
+from shutil import copyfile
+
 
 def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x1049', inpath='', fullQuality=False):
 	'''
@@ -26,6 +28,7 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 
 	digits = 5
 	j = 0
+	created_files = []
 	for i in order:
 		src = fnames[i]
 		dst = 'cycle_'+('0'*digits+str(j))[-digits:]+'.png'
@@ -33,8 +36,11 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 			src = os.path.join(inpath,src)
 			dst = os.path.join(inpath,dst)
 		print(src,dst)
-		os.rename(src, dst)
+		# os.rename(src, dst)
+		copyfile(src, dst)
+		created_files.append(dst)
 		j+=1
+
 	if inpath!='.':
 		inpath = os.path.join(inpath,f'cycle_%0{digits}d.png')
 	else:
@@ -49,6 +55,8 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 	print('Result will be written in:',outFname)
 	print(cmd)
 	os.system(cmd)
+	for dst in created_files:
+		os.remove(dst)
 
 
 if __name__ == "__main__":
