@@ -7,7 +7,7 @@
 
 
 
-model StroyTelling
+model StoryTelling
  
 import 'CityScope_Coronaizer.gaml'
 
