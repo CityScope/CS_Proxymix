@@ -398,14 +398,16 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
 	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-false;
 	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
-	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
+	parameter "Show droplets:" category: "Droplet" var:show_droplet <-true;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
 	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
 		
 	output{
 	  layout #split;
+
 	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false{
+
 	  	species room  refresh: false;
 		species room aspect: available_places_info refresh: true;
 		species ViralRoom transparency:0.85 position:{0,0,0.001};

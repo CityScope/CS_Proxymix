@@ -4,7 +4,7 @@
 * Description: 
 * Tags: Tag1, Tag2, TagN
 ***/
-
+ 
 model COVID
 
 import "Constants.gaml"
@@ -103,7 +103,7 @@ global {
 	
 	bool show_droplet <- false;  //show or not the bottleneck
 	int droplet_livespan <- 5; //to livespan of a bottleneck agent (to avoid glitching aspect) 
-	float droplet_distance<-2.0;
+	float droplet_distance <- 0.8#m;
 	file fanPic <- file('./../../images/fan.png');
 	float ventilation_ratio;
 	
@@ -305,10 +305,14 @@ global {
 	
 	reflex manageDroplet{
 	 if(show_droplet){
-	   ask people{
-	 	create droplet{
-	 		location<-myself.location+ {rnd(-droplet_distance,droplet_distance),rnd(-droplet_distance,droplet_distance),rnd(0,droplet_distance)};
-	    }	
+	   ask people {
+	   	if (mod (cycle+int(self),4)=0){
+	   	 create droplet{
+	 		location<-myself.location;
+	 		target <- myself.location + {cos(myself.heading),sin(myself.heading)} * droplet_distance; 
+	 		start_location <- myself.location;
+	    }		
+	   	}
  	   }
 	   ask droplet where (each.live_span <= 0) {do die;}		
 	 }else{
@@ -969,11 +973,20 @@ species place_in_room {
 	float dists;
 }
 
-species droplet skills:[moving]{
+species droplet {
+	point start_location;
+	point target;
 	int live_span <- droplet_livespan update: live_span - 1;
-	int size<-14+rnd(200);
+	float size <- 4.0#cm;
+	
+	reflex change{
+		size <- size * (1+0.8*live_span/droplet_livespan);
+		location <- target + (start_location - target)/(droplet_livespan-live_span+1);
+		location <- target + (start_location - target)*live_span/droplet_livespan;
+	}
+	
 	aspect base{
-		draw sphere(size/3000) color:rgb(size*1.1,size*1.6,200,50);
+		draw sphere(size)  color:rgb(100,100,255,0.2+0.3*live_span/droplet_livespan);
 	}
 }
 
