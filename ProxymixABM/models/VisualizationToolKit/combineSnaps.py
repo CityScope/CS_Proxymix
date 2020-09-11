@@ -1,7 +1,7 @@
 import os
 import argparse
 
-def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x1049', inpath=''):
+def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x1049', inpath='', fullQuality=False):
 	'''
 	Combine set of png files into a mp4 video.
 	Images need to be in the same directory as the script.
@@ -16,6 +16,8 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 		Frame rate of video.
 	aspectRatio : str ('2560x1049')
 		Aspect ratio of images.
+	fullQuality: boolean (default=False)
+	 	If True, it will run ffmpeg with -c:v copy and generate a high quality mkv.
 	'''
 	inpath = '.' if inpath =='' else inpath
 	fnames = [f for f in os.listdir(inpath) if 'png'==f.split('.')[-1]]
@@ -33,12 +35,17 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 		print(src,dst)
 		os.rename(src, dst)
 		j+=1
-	# cmd = f'ffmpeg -r {frameRate} -f image2 -s {aspectRatio} -i cycle_%0{digits}d.png -vf scale=1280:-2 -vcodec libx264 -crf {quality}  -pix_fmt yuv420p {outFname}'
 	if inpath!='.':
 		inpath = os.path.join(inpath,f'cycle_%0{digits}d.png')
-		cmd = f'ffmpeg -r {frameRate} -f image2 -i {inpath} -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
 	else:
-		cmd = f'ffmpeg -r {frameRate} -f image2 -i cycle_%0{digits}d.png -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
+		inpath = f'cycle_%0{digits}d.png'
+
+	if fullQuality:
+		outFname = outFname.split('.')[0]+'.mkv'
+		cmd = f'ffmpeg -framerate {frameRate} -i {inpath} -c:v copy {outFname}'
+	else:
+		cmd = f'ffmpeg -r {frameRate} -f image2 -i {inpath} -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
+
 	print('Result will be written in:',outFname)
 	print(cmd)
 	os.system(cmd)
@@ -49,6 +56,8 @@ if __name__ == "__main__":
 	parser.add_argument('-outfname', type=str, help='Filname for outfile')
 	parser.add_argument('-framerate', type=int, help='Video frame rate')
 	parser.add_argument('-inpath', type=str, help='Video frame rate')
+	parser.add_argument('-fullquality', type=bool, help='TRUE for full quality')
+	
 	args = parser.parse_args()
 	
 	combine(
@@ -56,5 +65,6 @@ if __name__ == "__main__":
 		quality = 20,
 		frameRate = '24' if args.framerate is None else args.framerate,
 		aspectRatio='2560x1049',
-		inpath = '' if args.inpath is None else args.inpath
+		inpath = '' if args.inpath is None else args.inpath,
+		fullQuality = False if args.fullquality is None else args.fullquality
 	)
