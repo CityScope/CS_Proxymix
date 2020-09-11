@@ -6,7 +6,7 @@
 */
 model DXFAgents
 
-import "../Current models/Constants.gaml"
+import "../CurrentModels/Constants.gaml"
 
 
 global
