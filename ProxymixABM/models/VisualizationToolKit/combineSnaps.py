@@ -54,7 +54,11 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 
 	print('Result will be written in:',outFname)
 	print(cmd)
-	os.system(cmd)
+	try:
+		os.system(cmd)
+	except Exception as exc:
+		print(traceback.format_exc())
+		print(exc)	
 	for dst in created_files:
 		os.remove(dst)
 
