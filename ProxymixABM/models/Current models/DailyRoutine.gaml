@@ -599,6 +599,7 @@ species room_entrance {
 		point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
 		float nb <- max(1, nb_places) * distance_queue ;
 		queue <- line([location,location + vector * nb ]);
+		geometry q_s <- copy(queue);
 		if (queue intersects my_room ) {
 			geometry line_g2 <- line(reverse(queue.points));
 			if (line_g2 inter my_room).perimeter < (queue inter my_room).perimeter {
@@ -615,11 +616,18 @@ species room_entrance {
 				} else {
 					queue <- qq;
 				}
-				queue <- queue.geometries with_min_of (each distance_to self);
+				if (queue != nil) {
+					queue <- queue.geometries with_min_of (each distance_to self);
+				}
 			}
 		}
-		vector <- (queue.points[1] - queue.points[0]);// / queue.perimeter;
-		queue <- line([location,location + vector * rnd(0.2,1.0)]);
+		if (queue != nil) {
+			vector <- (queue.points[1] - queue.points[0]);// / queue.perimeter;
+			queue <- line([location,location + vector * rnd(0.2,1.0)]);
+		} else {
+			vector <- (q_s.points[1] - q_s.points[0]);// / queue.perimeter;
+			queue <- line([location,location + vector * (0.1 / q_s.perimeter)]);
+		}
 		
 		int cpt <- 0;
 		loop while: (queue.perimeter / distance_queue) < nb_places {
