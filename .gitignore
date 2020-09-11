@@ -4,22 +4,4 @@ dataProcess/*.ipynb
 
 *.csv
 
-ProxymixABM/includes/UDG/CUT/lab/building.dwg
-
-ProxymixABM/includes/UDG/CUT/lab/building.dwl
-
-ProxymixABM/includes/UDG/CUT/lab/building.dwl2
-
-ProxymixABM/includes/UDG/CUT/lab/building.dxf
-
-ProxymixABM/includes/UDG/CUT/lab/building_L.bak
-
-ProxymixABM/includes/UDG/CUT/lab/building_L.dwl
-
-ProxymixABM/includes/UDG/CUT/lab/building_L.dwl2
-
-ProxymixABM/includes/UDG/CUT/lab/building_L.dxf
-
-ProxymixABM/includes/UDG/CUT/lab/building_L.dxf
-
 ProxymixABM/results/*
