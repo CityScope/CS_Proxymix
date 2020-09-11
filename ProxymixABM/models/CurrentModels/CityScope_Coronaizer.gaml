@@ -13,7 +13,7 @@ import "DailyRoutine.gaml"
 global{
 	
 	bool use_SIR_model <- false;
-	
+	bool fixed_infected_people_localization <- true;
 	bool direct_infection <- true;
 	bool objects_infection <- true;
 	bool air_infection <- true;
@@ -69,39 +69,31 @@ global{
 	}
 	
 
-	reflex initCovid when:cycle=10{
-		int nb_i;
-		map<room,list<ViralPeople>> pp_per_room <- ViralPeople group_by each.target.working_place;
-		
-		loop r over: pp_per_room.keys {
-			list<ViralPeople> pps <- pp_per_room[r];
-			int nb_infected_room <- round(initial_nb_infected * length(pps)/ length(ViralPeople));
-			nb_infected_room <- min(nb_infected_room, initial_nb_infected - nb_i);
-			if nb_infected_room > 0 {
-				list<ViralPeople> vps <- nb_infected_room first(pps);
-				ask vps{
-					has_been_infected<-true;
-					is_susceptible <-  false;
-			        is_infected <-  true;
-			        is_immune <-  false;
-			        is_recovered<-false;
-			        pps >> self;
-				}
-				pp_per_room[r] <- pps;
-				nb_i <- nb_i + nb_infected_room;
-			}
-			
-		}
-		if nb_i < initial_nb_infected {
-			list<room> ror <- pp_per_room.keys sort_by length(pp_per_room[each]);
-			loop while: nb_i < initial_nb_infected {
-				loop r over: ror {
-					if (nb_i = initial_nb_infected) {
-						break;
-					} else {
-						list<ViralPeople> pps <- pp_per_room[r];
-						ViralPeople vps <- first(pps);
-						ask vps{
+reflex initCovid when:cycle=10{
+		if fixed_infected_people_localization {
+			int nb_i;
+			map<room,list<ViralPeople>> pp_per_room <- ViralPeople group_by each.target.working_place;
+			list<room> r_ord <- pp_per_room.keys  sort_by each.name;
+			int direction_i <- 0;
+			loop r over: r_ord {
+				list<ViralPeople> pps <- pp_per_room[r];
+				int nb_infected_room <- round(initial_nb_infected * length(pps)/ length(ViralPeople));
+				nb_infected_room <- min(nb_infected_room, initial_nb_infected - nb_i);
+				if nb_infected_room > 0 and not empty(pps){
+					int direction <- direction_i;
+					
+					loop times: nb_infected_room {
+						ViralPeople vp;
+						if direction = 0 {
+							vp <- pps with_min_of (each.target.working_desk.location distance_to each.target.working_place.location);
+						}else if direction = 1 {
+							vp <- (pps sort_by (each.target.working_desk.location.y - each.target.working_desk.location.x)) [min(4, length(pps) - 1)];
+						} else if direction = 2 {
+							vp <- (pps sort_by (each.target.working_desk.location.x - each.target.working_desk.location.y)) [min(2, length(pps) - 1)];
+						} else {
+							vp <- pps with_max_of (each.target.working_desk.location distance_to each.target.working_place.location);
+						}
+						ask vp{
 							has_been_infected<-true;
 							is_susceptible <-  false;
 					        is_infected <-  true;
@@ -109,11 +101,64 @@ global{
 					        is_recovered<-false;
 					        pps >> self;
 						}
-						pp_per_room[r] <- pps;
-						nb_i <- nb_i + 1;
+						direction <- (direction + 1 ) mod 4;
+					}
+					
+					
+					pp_per_room[r] <- pps;
+					nb_i <- nb_i + nb_infected_room;
+				}
+				direction_i <- (direction_i + 1) mod 4;
+				
+				
+			}
+			if nb_i < initial_nb_infected {
+				list<room> ror <- pp_per_room.keys sort_by length(pp_per_room[each]);
+				
+				int direction <- 0;
+				
+				loop while: nb_i < initial_nb_infected {
+					loop r over: ror {
+						if (nb_i = initial_nb_infected) {
+							break;
+						} else {
+							list<ViralPeople> pps <- pp_per_room[r];
+							ViralPeople vp;
 							
+							if direction = 0 {
+								vp <- pps with_min_of (each.target.working_desk.location distance_to each.target.working_place.location);
+							}else if direction = 1 {
+								vp <- (pps sort_by (each.target.working_desk.location.y - each.target.working_desk.location.x)) [min(4, length(pps) - 1)];
+							} else if direction = 2 {
+								vp <- (pps sort_by (each.target.working_desk.location.x - each.target.working_desk.location.y)) [min(2, length(pps) - 1)];
+							} else {
+								vp <- pps with_max_of (each.target.working_desk.location distance_to each.target.working_place.location);
+							}
+							ask vp{
+								has_been_infected<-true;
+								is_susceptible <-  false;
+						        is_infected <-  true;
+						        is_immune <-  false;
+						        is_recovered<-false;
+						        pps >> self;
+							}
+							direction <- (direction + 1 ) mod 4;
+						
+							pp_per_room[r] <- pps;
+							nb_i <- nb_i + 1;
+								
+						}
 					}
 				}
+			}
+		
+		} else {
+			ask initial_nb_infected among ViralPeople{
+				has_been_infected<-true;
+				is_susceptible <-  false;
+				is_infected <-  true;
+				is_immune <-  false;
+				is_recovered<-false;
 			}
 		}
 		

@@ -343,6 +343,7 @@ global {
 					available_offices >> working_place;
 				}
 			}
+			working_desk <- working_place.get_target(self,false);
 			
 			
 			if (use_sanitation and not empty(sanitation_rooms) and flip(proba_using_before_work)) {
@@ -980,6 +981,7 @@ species droplet skills:[moving]{
 species people skills: [escape_pedestrian] schedules: people where not each.end_of_day{
 	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
 	room working_place;
+	place_in_room working_desk;
 	map<date, activity> agenda_day;
 	activity current_activity;
 	point target;
@@ -1168,7 +1170,8 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 							
 					}
 				} else {
-					target_place <- target_room.get_target(self, species(target_room) = common_area);
+					target_place <- (target_room = working_place) ? working_desk : target_room.get_target(self, species(target_room) = common_area);
+					//target_place <- target_room.get_target(self, species(target_room) = common_area);
 					if target_place != nil {
 						target <- target_place.location;
 						goto_entrance <- false;
