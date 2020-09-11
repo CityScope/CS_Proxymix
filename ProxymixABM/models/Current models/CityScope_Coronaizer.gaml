@@ -212,6 +212,8 @@ species ViralPeople  mirrors:people{
 		if (air_infection) {
 			ViralRoom my_room <- first(ViralRoom overlapping location);
 			if (my_room != nil) {ask my_room{do add_viral_load(air_infection_factor * step);}}
+			ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
+			if (my_rca != nil) {ask my_rca{do add_viral_load(air_infection_factor * step);}}
 			
 		}
 	}
@@ -227,6 +229,8 @@ species ViralPeople  mirrors:people{
 	reflex infection_by_air when: not target.end_of_day and air_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
 		if (my_room != nil) {infection_risk <- infection_risk + step * my_room.viral_load;}
+		ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
+		if (my_rca != nil) {infection_risk <- infection_risk + step * my_rca.viral_load;}
 	}
 	
 	reflex infected_contact when: not target.end_of_day and use_SIR_model and is_infected and not target.is_outside and !has_mask {
@@ -360,6 +364,7 @@ experiment Coronaizer type:gui autorun:true{
 	  	species room  refresh: false;
 		species room aspect: available_places_info refresh: true;
 		species ViralRoom transparency:0.85 position:{0,0,0.001};
+		species ViralCommonArea transparency:0.85 position:{0,0,0.001};
 		species building_entrance refresh: true;
 		species common_area refresh: true;
 		species wall refresh: false;
