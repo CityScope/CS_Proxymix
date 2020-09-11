@@ -124,11 +124,23 @@ global {
 				create common_area  with: [shape::polygon(se.points), type::type];
 			
 			} else if type in [workplace_layer, meeting_rooms,coffee, sanitation] {
-				create room with: [shape::polygon(se.points), type::type]{
+				create room with: [shape::clean(polygon(se.points)), type::type]{
 					if flip (ventilation_ratio){
 						isVentilated<-true;
 					}
 				}	
+			}
+		}
+		
+		ask room sort_by (-1 * each.shape.area){
+			ask(room overlapping self) {
+				if (type = myself.type) {
+					if ((self inter myself).area / shape.area) > 0.8 {
+						do die;	
+					} else {
+						shape <- shape - myself.shape;
+					}
+				}
 			}
 		} 
 		 
