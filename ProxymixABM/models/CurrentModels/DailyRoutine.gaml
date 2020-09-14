@@ -19,6 +19,7 @@ global {
 	float normal_step <- 1#s;
 	float fast_step <- 10#s;
 	bool use_change_step <- true;
+	bool synchronized_step <- false;
 	
 	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
@@ -484,7 +485,7 @@ global {
 		} else {
 			
 			if (time > arrival_time_interval and empty(people where (each.target != nil or each.waiting_sanitation) ))  {
-				if length(COVID_model) > 1 {
+				if synchronized_step and length(COVID_model) > 1 {
 					bool ready_change_step <- true;
 				 	loop s over: COVID_model {
 				 		if  (s.people first_with  (each.target != nil or each.waiting_sanitation) ) != nil {
