@@ -74,7 +74,7 @@ experiment Episode3 type: gui parent: Coronaizer{
 	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'file' <- 1.0#h;
+	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0#h;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
@@ -87,7 +87,7 @@ experiment Episode3 type: gui parent: Coronaizer{
 	{   
 		create simulation with: [title::"Scenario B: Sanitation",useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
 		proba_using_before_work::1.0, proba_using_after_work::0.5,
-		timeSpent::1.0#h,density_scenario::"data",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::0.2#m,agenda_scenario::"simple",ventilation_ratio::0.0];
+		timeSpent::45#mn,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::false, peopleSize::0.2#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 
 	}
 }
