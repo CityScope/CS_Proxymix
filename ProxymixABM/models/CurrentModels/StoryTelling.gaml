@@ -113,7 +113,7 @@ experiment Episode4 type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [title::"Scenario B: Mask",useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",use_change_step::false,
-		timeSpent::1.0#h,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::true, peopleSize::0.4#m,agenda_scenario::"simple",ventilation_ratio::0.0];
+		timeSpent::1.0#h,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.4#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 		
 	}
 }
