@@ -19,7 +19,7 @@ global {
 	float normal_step <- 1#s;
 	float fast_step <- 10#s;
 	bool use_change_step <- true;
-	bool synchronized_step <- false;
+	bool synchronized_step <- true;
 	
 	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
