@@ -398,7 +398,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
 	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-false;
 	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
-	parameter "Show droplets:" category: "Droplet" var:show_droplet <-true;
+	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
 	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
@@ -449,6 +449,7 @@ experiment Coronaizer type:gui autorun:true{
 		  point timeLegendPos<-{-world.shape.width*0.25,world.shape.height*0.5};
 	      draw "TIME:" color: #white font: font("Helvetica", 30, #bold) at:{timeLegendPos.x,timeLegendPos.y,0.01};
 	      draw string(current_date, "HH:mm:ss") color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+20#px,0.01};
+	      draw string("step: "+ step) color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+40#px,0.01};
 	  	}
 	  	
 	  	graphics "buildingLegend"{
@@ -504,8 +505,7 @@ experiment Coronaizer type:gui autorun:true{
 	  		draw "Agenda: " + agenda_scenario color:#white at:{simLegendPos.x+1.0#m,simLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 
 	  	}
-	  	
-	  	
+
 	  	graphics "simu"{
 	  		point simLegendPos<-{world.shape.width*0.25,world.shape.height*1.5};
 	  		draw "PARAMETERS" color:#white at:{simLegendPos.x,simLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
