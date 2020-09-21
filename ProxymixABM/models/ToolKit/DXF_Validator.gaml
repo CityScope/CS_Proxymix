@@ -32,6 +32,29 @@ experiment ValidatedDXF type: gui
 
 }
 
+
+experiment ValidatedAllUDGDXF type: gui
+{   
+	init
+	{   create simulation with: [useCase::"UDG/CUT/lab"];
+		create simulation with: [useCase::"UDG/CUAAD"];
+		create simulation with: [useCase::"UDG/CUCEA"];
+		create simulation with: [useCase::"UDG/CUSUR"];
+	}
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2";// among: ["Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
+	output
+	{	layout #split;
+		display map type: opengl background:#black toolbar:true draw_env:false
+		{
+			species dxf_element;
+			graphics 'legend'{
+			  draw useCase color: #white at: {-world.shape.width*0.1,-world.shape.height*0.1} perspective: true font:font("Helvetica", 20 , #bold);
+			}
+		}
+	}
+}
+
+
 experiment ValidatedAllDXF type: gui
 {   
 	init

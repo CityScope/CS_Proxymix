@@ -136,6 +136,6 @@ experiment Episode5 type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [title::"Scenario B: Dedicated path",useCase::"UDG/CUSUR",useCaseType::"Labs",ventilationType::"Natural",
-		timeSpent::45#mn,density_scenario::"distance",distance_people::4.0#m,maskRatio::0.5,queueing::false, peopleSize::2.0#m,agenda_scenario::"simple",ventilation_ratio::0.0];
+		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::2.0#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 	}
 }
