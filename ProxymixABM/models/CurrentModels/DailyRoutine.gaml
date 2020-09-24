@@ -12,10 +12,8 @@ import "./../ToolKit/DXF_Loader.gaml"
 
 
 global {
-	//string dataset <- "MediaLab";
 	
 	string workplace_layer <- offices;
-	
 	float normal_step <- 1#s;
 	float fast_step <- 10#s;
 	bool use_change_step <- true;
@@ -29,13 +27,12 @@ global {
 	float proba_wander <- 0.003;
 	float wandering_time <- 1 #mn;
 	float proba_change_desk <- 0.003;
-	
+	//QUEING PARAMETERS
 	float distance_queue <- 1#m;
 	bool queueing <- false;
 	float waiting_time_entrance <- 5#s;
 	bool first_end_sim <- true;
-	 	
-	
+	//SANITATION PARAMETERS 	
 	bool use_sanitation <- false;
 	float proba_using_before_work <- 0.7;
 	float proba_using_after_work <- 0.3;
@@ -566,7 +563,7 @@ species separator_ag {
 }
 species wall {
 	aspect default {
-		draw shape color: #gray;
+		draw shape color: #white;
 	}
 }
 
@@ -892,9 +889,9 @@ species room {
 	
 	
 	aspect default {
-		draw inside_geom color: standard_color_per_layer[type];
-		loop e over: entrances {draw square(0.2) at: {e.location.x,e.location.y,0.001} color: #magenta border: #black;}
-		loop p over: available_places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #cyan border: #black;}
+		//draw inside_geom color: standard_color_per_layer[type];
+		loop e over: entrances {draw circle(0.4)-circle(0.2) at: {e.location.x,e.location.y,0.001} color: #yellow border: #black;}
+		loop p over: available_places {draw square(0.3) at: {p.location.x,p.location.y,0.001} color: #gray border: #black;}
 		if(isVentilated ){
 		 //draw shape*0.75 color:standard_color_per_layer[type]+50 empty:false;
 		 draw fanPic size: 3;	

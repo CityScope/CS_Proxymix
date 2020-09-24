@@ -34,7 +34,7 @@ global
 	entrance::rgb(0, 169, 217),elevators::#orange,
 	coffee::rgb(25,25,25), furnitures::#maroon, 
 	toilets::rgb(25,25,25),  sanitation::#purple,
-	walls::#gray, windows::#white,doors::#lightgray,
+	walls::#white, windows::#white,doors::#lightgray,
 	stairs::rgb(125,125,125),
 	chairs::rgb(125,125,125)];
 	bool showLegend<-false;
