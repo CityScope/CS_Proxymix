@@ -30,7 +30,7 @@ global{
 	
 	float diminution_infection_risk_sanitation <- 10.0;
 	float hand_cleaning_time_effect <- 1#h;
-	float diminution_infection_risk_mask <- 0.8; //1.0 masks are totaly efficient to avoid direct transmission
+	float diminution_infection_risk_mask <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
 	float diminution_infection_risk_separator <- 0.9;
 	
 	
@@ -405,9 +405,7 @@ experiment Coronaizer type:gui autorun:true{
 		
 	output{
 	  layout #split;
-
 	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false{
-
 	  	species room  refresh: false;
 		species room aspect: available_places_info refresh: true;
 		species ViralRoom transparency:0.75 position:{0,0,0.00};
@@ -425,33 +423,17 @@ experiment Coronaizer type:gui autorun:true{
 	    species ViralPeople aspect:base position:{0,0,0.002};
 	    species ViralCell aspect:default;
 	  	species cell aspect:default;
-	  	graphics "infection_graph" {
-				if (infection_graph != nil and drawInfectionGraph = true) {
-					loop eg over: infection_graph.edges {
-						geometry edge_geom <- geometry(eg);
-						draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#red;
-					}
-
-				}
-		}
-		graphics "social_graph" {
-			if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
-				loop eg over: social_distance_graph.edges {
-					geometry edge_geom <- geometry(eg);
-					draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#gray;
-			}
-		  }
-		}
-			
-
-		graphics "text" {
+	
+		graphics 'title'{
+		  point titlePos<-{-world.shape.width*0.25,-world.shape.width*0.1};
+		  draw string(title) color: #white at: {titlePos.x,titlePos.y-200#px,0.01} perspective: true font:font("Helvetica", 90 , #bold);
+		}	
+		graphics "time" {
 		  point timeLegendPos<-{-world.shape.width*0.25,world.shape.height*0.5};
 	      draw "TIME:" color: #white font: font("Helvetica", 30, #bold) at:{timeLegendPos.x,timeLegendPos.y,0.01};
 	      draw string(current_date, "HH:mm:ss") color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+20#px,0.01};
 	      draw string("step: "+ step) color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+40#px,0.01};
 	  	}
-	  	
-	  	
 	  	graphics "infectiousStatus"{
 	  		point infectiousLegendPos<-{world.shape.width*0.25,-world.shape.width*0.2};
 	  		//draw "SIMULATION PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 50 , #bold);
@@ -483,54 +465,47 @@ experiment Coronaizer type:gui autorun:true{
 	  		draw "Type of Ventilation: " + ventilationType color:#white at:{simLegendPos.x,simLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw "Time Spent in classrooms: " + timeSpent/#hour + "h" color:#white at:{simLegendPos.x,simLegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  	}
-
-	  	
 	  	graphics "legend"{
 	  		point legendPos<-{world.shape.width*1,world.shape.height*1.5};
-	  		draw "LEGEND" color:#white at:{legendPos.x-30#px,legendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-	  		draw "Stairwell"color: #white at: {legendPos.x,legendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-	  		draw rectangle(20#px,10#px) color:rgb(0, 169, 217) at:{legendPos.x-20#px,legendPos.y+-5#px,0.01} perspective: true;
+	  		/*draw "LEGEND" color:#white at:{legendPos.x-30#px,legendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
+	  		draw "Stairwell"color: #darkgray at: {legendPos.x,legendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw rectangle(20#px,10#px) color:#darkgray at:{legendPos.x-20#px,legendPos.y+-5#px,0.01} perspective: true;
 	  		draw "Classrooms"color: #white at: {legendPos.x,legendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  		draw rectangle(20#px,10#px) color:#darkgrey at:{legendPos.x-20#px,legendPos.y+20#px-5#px,0.01} perspective: true;
 	  		draw "Meeting Rooms"color: #white at: {legendPos.x,legendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  		draw rectangle(20#px,10#px) color:#lightgrey at:{legendPos.x-20#px,legendPos.y+40#px-5#px,0.01} perspective: true;
-	  		draw "Desk"color: #white at: {legendPos.x,legendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-	  		draw rectangle(10#px,10#px) color:#white at:{legendPos.x-20#px,legendPos.y+60#px-5#px,0.01} perspective: true;
-	  		draw "Entrance"color: #white at: {legendPos.x,legendPos.y+80#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-	  		draw circle(8#px)-circle(4#px) color:#yellow at:{legendPos.x-20#px,legendPos.y+80#px-5#px,0.01} perspective: true;
-	  	}
-	  	
+	  		*/
+	  		draw "Desk"color: #white at: {legendPos.x,legendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw rectangle(10#px,10#px) color:#white at:{legendPos.x-20#px,legendPos.y-20#px-5#px,0.01} perspective: true;
+	  		draw "Entrance"color: #white at: {legendPos.x,legendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  		draw circle(8#px)-circle(4#px) color:#yellow at:{legendPos.x-20#px,legendPos.y-5#px,0.01} perspective: true;
+	  	}	  	
 	  	graphics 'site'{
 			  point sitlegendPos<-{world.shape.width*0.25,world.shape.height*1.5};
 			  draw string("SITE:" + useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
 		      draw string("Building Type: " +  useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 		      draw string("Floor area: " + with_precision(totalArea,2) + "m2") color: #white at: {sitlegendPos.x,sitlegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 	      
 		      draw string("Total Occupants: " +  length(people) ) color: #white at: {sitlegendPos.x,sitlegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);  	
-		}
-		
-		graphics 'title'{
-			  point titlePos<-{-world.shape.width*0.25,-world.shape.width*0.1};
-			  draw string(title) color: #white at: {titlePos.x,titlePos.y-200#px,0.01} perspective: true font:font("Helvetica", 90 , #bold);
 		}	
 		
-		
-		/*graphics 'droplet'{
-			if(episode=2){
-			point dropletLegendPos<-{world.shape.width*1.25,world.shape.width*0.25};
-	  		draw "DROPLET" color:#white at:{dropletLegendPos.x,dropletLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-	  		draw "Droplets lifespan:" + droplet_livespan  color: #white at: {dropletLegendPos.x,dropletLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-            draw "Droplets distance:" + droplet_distance  color: #white at: {dropletLegendPos.x,dropletLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  	graphics "infection_graph" {
+		if (infection_graph != nil and drawInfectionGraph = true) {
+			loop eg over: infection_graph.edges {
+				geometry edge_geom <- geometry(eg);
+				draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#red;
 			}
-		}*/
-		
 
-		 
-		
-	  	
-	  	 /*graphics 'ro'{
-			  point roPos<-{0,world.shape.height*1.1};
-			  draw string("Ro: " + R0) color: #white at: roPos perspective: true font:font("Helvetica", 20 , #bold); 	
-		 }*/
+		}
+		}
+		graphics "social_graph" {
+			if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
+				loop eg over: social_distance_graph.edges {
+					geometry edge_geom <- geometry(eg);
+					draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#gray;
+			}
+		  }
+		}
+
 	  }	
 	 /*display CoronaChart refresh:every(#mn) toolbar:false background:#black{
 		chart "Population in " size:{1.0,1.0}style:line background:#black type: series x_serie_labels: ("") x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
