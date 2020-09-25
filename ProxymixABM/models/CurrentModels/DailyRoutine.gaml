@@ -17,7 +17,7 @@ global {
 	float normal_step <- 1#s;
 	float fast_step <- 10#s;
 	bool use_change_step <- true;
-	bool synchronized_step <- true;
+	bool synchronized_step <- false;
 	
 	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
@@ -104,6 +104,8 @@ global {
 	float droplet_distance <- 0.8#m;
 	file fanPic <- file('./../../images/fan.png');
 	float ventilation_ratio;
+	
+	
 	
 	
 	init {
@@ -534,6 +536,8 @@ global {
 	reflex updateGraph when: (drawSocialDistanceGraph = true) {
 		social_distance_graph <- graph<people, people>(people as_distance_graph (distance_people - 0.1#m));
 	}
+	
+
 }
 
 
