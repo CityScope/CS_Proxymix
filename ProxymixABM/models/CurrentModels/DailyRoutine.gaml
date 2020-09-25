@@ -39,8 +39,8 @@ global {
 	int nb_people_per_sanitation <- 2;
 	float sanitation_usage_duration <- 20 #s;
 	
-	map<date,int> people_to_create;
 	
+	map<date,int> people_to_create;
 	float step <- normal_step;
 	float separator_proba <- 0.0;
 	
