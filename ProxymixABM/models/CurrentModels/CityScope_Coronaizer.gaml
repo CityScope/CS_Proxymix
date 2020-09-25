@@ -520,6 +520,16 @@ experiment Coronaizer type:gui autorun:true{
 			i<-0;
 			float tmpRisk;
 			rgb tmpC;
+			
+			list<float> tmpRiskList1 <- []; 
+			list<float> tmpRiskList2 <- []; 
+			list<float> tmpRiskList;			
+			loop i from:0 to:49{
+				tmpRiskList1 <+ infectionRiskList[int((2*i)*(length(infectionRiskList)-1)/99)].infection_risk/100;
+				tmpRiskList2 <+ infectionRiskList[int((2*i+1)*(length(infectionRiskList)-1)/99)].infection_risk/100;
+			}
+			tmpRiskList <- tmpRiskList1 + reverse(tmpRiskList2);		
+				
 			loop i from:0 to:99{
 				//draw rectangle(world.shape.width/length(people),world.shape.width/50) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};
 				tmpRisk<-infectionRiskList[int(i*(length(infectionRiskList)-1)/99)].infection_risk/100;
@@ -530,11 +540,17 @@ experiment Coronaizer type:gui autorun:true{
 				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-20#px};
 					
 				//draw circle(world.shape.width/length(people)) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};
+				i<-i+1;	
 				
-				
-				
-				i<-i+1;		
+				tmpC<-blend(#red, #green, tmpRiskList[i]);
+				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-40#px};
+				tmpC<-tmpRiskList[i]<0.3 ? #green : (tmpRiskList[i]>=0.3 and tmpRiskList[i]<0.6  ? #orange : #red);
+				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-60#px};
+					
 			}
+			
+
+			
 			//draw rectangle(world.shape.width/length(people),world.shape.width/50) color:#green at:triLegendPos;	
 		}
 
