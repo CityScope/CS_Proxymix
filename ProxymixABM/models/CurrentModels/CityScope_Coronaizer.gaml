@@ -76,16 +76,16 @@ global{
 reflex initCovid when:time = (4 + step_arrival){
 		if fixed_infected_people_localization {
 			int nb_i;
-			map<room,list<ViralPeople>> pp_per_room <- ViralPeople group_by each.target.working_place;
+			list<ViralPeople> concerned_people <- ViralPeople where (each.target.working_desk != nil);
+			map<room,list<ViralPeople>> pp_per_room <- concerned_people group_by each.target.working_place;
 			list<room> r_ord <- pp_per_room.keys  sort_by each.name;
 			int direction_i <- 0;
 			loop r over: r_ord {
 				list<ViralPeople> pps <- pp_per_room[r];
-				int nb_infected_room <- round(initial_nb_infected * length(pps)/ length(ViralPeople));
+				int nb_infected_room <- round(initial_nb_infected * length(pps)/ length(concerned_people));
 				nb_infected_room <- min(nb_infected_room, initial_nb_infected - nb_i);
 				if nb_infected_room > 0 and not empty(pps){
 					int direction <- direction_i;
-					
 					loop times: nb_infected_room {
 						ViralPeople vp;
 						if direction = 0 {
@@ -107,8 +107,6 @@ reflex initCovid when:time = (4 + step_arrival){
 						}
 						direction <- (direction + 1 ) mod 4;
 					}
-					
-					
 					pp_per_room[r] <- pps;
 					nb_i <- nb_i + nb_infected_room;
 				}
