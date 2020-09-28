@@ -73,17 +73,20 @@ global{
 	reflex updateListViral{
 		infectionRiskList <- list (ViralPeople sort_by each.infection_risk);
 	}
-reflex initCovid when:time = (4 + step_arrival){
+	
+	reflex initCovid when:cycle = 1{
 		if fixed_infected_people_localization {
 			int nb_i;
 			list<ViralPeople> concerned_people <- ViralPeople where (each.target.working_desk != nil);
 			map<room,list<ViralPeople>> pp_per_room <- concerned_people group_by each.target.working_place;
 			list<room> r_ord <- pp_per_room.keys  sort_by each.name;
 			int direction_i <- 0;
+			float sum_area <- r_ord sum_of each.shape.area;
 			loop r over: r_ord {
 				list<ViralPeople> pps <- pp_per_room[r];
-				int nb_infected_room <- round(initial_nb_infected * length(pps)/ length(concerned_people));
-				nb_infected_room <- min(nb_infected_room, initial_nb_infected - nb_i);
+				int nb_infected_room <- round(initial_nb_infected * r.shape.area/ sum_area);
+				//int nb_infected_room <- round(initial_nb_infected * length(pps)/ length(concerned_people));
+				nb_infected_room <- min([nb_infected_room, initial_nb_infected - nb_i, length(pps)]);
 				if nb_infected_room > 0 and not empty(pps){
 					int direction <- direction_i;
 					loop times: nb_infected_room {
@@ -125,30 +128,31 @@ reflex initCovid when:time = (4 + step_arrival){
 							break;
 						} else {
 							list<ViralPeople> pps <- pp_per_room[r];
-							ViralPeople vp;
-							
-							if direction = 0 {
-								vp <- pps with_min_of (each.target.working_desk.location distance_to each.target.working_place.location);
-							}else if direction = 1 {
-								vp <- (pps sort_by (each.target.working_desk.location.y - each.target.working_desk.location.x)) [min(4, length(pps) - 1)];
-							} else if direction = 2 {
-								vp <- (pps sort_by (each.target.working_desk.location.x - each.target.working_desk.location.y)) [min(2, length(pps) - 1)];
-							} else {
-								vp <- pps with_max_of (each.target.working_desk.location distance_to each.target.working_place.location);
-							}
-							ask vp{
-								has_been_infected<-true;
-								is_susceptible <-  false;
-						        is_infected <-  true;
-						        is_immune <-  false;
-						        is_recovered<-false;
-						        pps >> self;
-							}
-							direction <- (direction + 1 ) mod 4;
-						
-							pp_per_room[r] <- pps;
-							nb_i <- nb_i + 1;
+							if (not empty(pps))  {
+								ViralPeople vp;
 								
+								if direction = 0 {
+									vp <- pps with_min_of (each.target.working_desk.location distance_to each.target.working_place.location);
+								}else if direction = 1 {
+									vp <- (pps sort_by (each.target.working_desk.location.y - each.target.working_desk.location.x)) [min(4, length(pps) - 1)];
+								} else if direction = 2 {
+									vp <- (pps sort_by (each.target.working_desk.location.x - each.target.working_desk.location.y)) [min(2, length(pps) - 1)];
+								} else {
+									vp <- pps with_max_of (each.target.working_desk.location distance_to each.target.working_place.location);
+								}
+								ask vp{
+									has_been_infected<-true;
+									is_susceptible <-  false;
+							        is_infected <-  true;
+							        is_immune <-  false;
+							        is_recovered<-false;
+							        pps >> self;
+								}
+								direction <- (direction + 1 ) mod 4;
+							
+								pp_per_room[r] <- pps;
+								nb_i <- nb_i + 1;
+							}
 						}
 					}
 				}
@@ -232,9 +236,9 @@ species ViralPeople  mirrors:people{
     float time_since_last_hand_cleaning update: time_since_last_hand_cleaning + step;
 
 
-	reflex infected_contact_risk when: not target.end_of_day and not use_SIR_model and is_infected and not target.is_outside and not target.using_sanitation {
+	reflex infected_contact_risk when: not target.not_yet_active and not target.end_of_day and not use_SIR_model and is_infected and not target.is_outside and not target.using_sanitation {
 		if (direct_infection) {
-			ask (ViralPeople at_distance infectionDistance) where (not each.target.end_of_day and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
+			ask (ViralPeople at_distance infectionDistance) where (not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
 				geometry line <- line([myself,self]);
 				if empty(wall overlapping line) {
 					float direct_infection_factor_real <- direct_infection_factor * step;
@@ -265,23 +269,23 @@ species ViralPeople  mirrors:people{
 		}
 	}
 	
-	reflex using_sanitation when: not target.end_of_day and not use_SIR_model and target.using_sanitation {
+	reflex using_sanitation when: not target.not_yet_active and not target.end_of_day and not use_SIR_model and target.using_sanitation {
 		infection_risk <- infection_risk - diminution_infection_risk_sanitation * step;
 		time_since_last_hand_cleaning <- 0.0;
 	}
-	reflex infection_by_objects when:not target.end_of_day and  objects_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
+	reflex infection_by_objects when:not target.not_yet_active and not target.end_of_day and  objects_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralCell vrc <- ViralCell(location);
 		if (vrc != nil) {infection_risk <- infection_risk + step * vrc.viral_load_by_touching;}
 	}
-	reflex infection_by_air when: not target.end_of_day and air_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
+	reflex infection_by_air when: not target.not_yet_active and not target.end_of_day and air_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
 		if (my_room != nil) {infection_risk <- infection_risk + step * my_room.viral_load;}
 		ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
 		if (my_rca != nil) {infection_risk <- infection_risk + step * my_rca.viral_load;}
 	}
 	
-	reflex infected_contact when: not target.end_of_day and use_SIR_model and is_infected and not target.is_outside and !has_mask {
-		ask (ViralPeople where (not each.target.end_of_day and !each.has_mask and not each.is_infected)) at_distance infectionDistance {
+	reflex infected_contact when:not target.not_yet_active and not target.end_of_day and use_SIR_model and is_infected and not target.is_outside and !has_mask {
+		ask (ViralPeople where (not target.not_yet_active and not each.target.end_of_day and !each.has_mask and not each.is_infected)) at_distance infectionDistance {
 			if (not target.is_outside) {
 				geometry line <- line([myself,self]);
 				if empty(wall overlapping line) {
@@ -308,14 +312,14 @@ species ViralPeople  mirrors:people{
 		}
 	}
 	
-	reflex recover when:not target.end_of_day and use_SIR_model and (is_infected and (time - infected_time) >= time_recovery){
+	reflex recover when:not not target.not_yet_active and not target.end_of_day and use_SIR_model and (is_infected and (time - infected_time) >= time_recovery){
 		is_infected<-false;
 		is_recovered<-true;
 	}
 	
 	
 	aspect base {
-		if not target.end_of_day {
+		if not target.end_of_day and not target.not_yet_active{
 			if(showPeople) and not target.is_outside{
 			  draw circle(is_infected ? peopleSize*1.25 : peopleSize) color:
 			  	use_SIR_model ? ((is_susceptible) ? #green : ((is_infected) ? #red : #blue)) :
@@ -416,7 +420,7 @@ experiment Coronaizer type:gui autorun:true{
 		species building_entrance refresh: true;
 		species common_area refresh: true;
 		species wall refresh: false;
-		species room_entrance;
+		//species room_entrance;
 		species pedestrian_path ;
 		species separator_ag refresh: false;
 		agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;

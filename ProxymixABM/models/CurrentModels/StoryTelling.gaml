@@ -27,12 +27,15 @@ experiment Episode1 type: gui parent: Coronaizer{
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.3#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
+	parameter "step_arrival" var: step_arrival <- 1#s;
+	parameter "arrival_time_interval" var: arrival_time_interval <- 3 #mn;
 	//Scenario 2
 	init
 	{   
 		create simulation with: [episode::1,title::"Scenario B: Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms and Offices",
 		ventilationType::"Natural",ventilation_ratio::0.0,
-		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::1.0,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple"];
+		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::1.0,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple",
+		arrival_time_interval:: 3#mn, step_arrival::1#s];
 	}
 }
 
@@ -41,7 +44,7 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter 'Episode:' var: episode category: 'file' <- 2;
 	parameter 'title:' var: title category: 'file' <- "Scenario A: Air Conditioning";
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUT/lab";
-	parameter 'Workplace layer name' var: workplace_layer category: "file" <- "Labs";
+	parameter 'Workplace layer name' var: workplace_layer category: "file" <- ["Labs"];
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'initial infected:' var: initial_nb_infected category: 'Initialization' <- 5;
@@ -58,16 +61,17 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-1.0;
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "Normal step" var: normal_step <- 0.2;
-	parameter "step_arrival" var: step_arrival step: 1#s;
-	parameter "arrival_time_interval" var: arrival_time_interval step: 1 #mn;
+	parameter "step_arrival" var: step_arrival <- 0.2#s;
+	parameter "step_arrival" var: fast_step <- 5#s;
+	parameter "arrival_time_interval" var: arrival_time_interval <- 20#s;
 	parameter "limit_cpt_for_entrance_room_creation" var: limit_cpt_for_entrance_room_creation <-2;
  	
 	//Scenario 2
 	init
 	{   
 		create simulation with: [episode::2,title::"Scenario B: Natural Ventilation",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",ventilation_ratio::1.0,
-		initial_nb_infected::5,timeSpent::45#mn,workplace_layer::"Labs",density_scenario::"distance",distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
-		show_droplet::false,droplet_livespan::20,droplet_distance::1.0, normal_step::0.2,arrival_time_interval:: 1#mn, step_arrival::1#s,limit_cpt_for_entrance_room_creation::2];
+		initial_nb_infected::5,timeSpent::45#mn,workplace_layer::["Labs"],density_scenario::"distance",distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
+		show_droplet::false,droplet_livespan::20,droplet_distance::1.0, fast_step::5.0,normal_step::0.2,arrival_time_interval:: 20#s, step_arrival::0.2#s,limit_cpt_for_entrance_room_creation::2];
 
 	}
 }
@@ -86,12 +90,15 @@ experiment Episode3 type: gui parent: Coronaizer{
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.2#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
+	parameter "step_arrival" var: step_arrival <- 3#s;
+	parameter "arrival_time_interval" var: arrival_time_interval <- 5#mn;
+	parameter "tolerance_target_param" var: tolerance_target_param <- 2.0;
 	//Scenario 2
 	init
 	{   
 		create simulation with: [title::"Scenario B: Sanitation",useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
-		proba_using_before_work::1.0, proba_using_after_work::0.5,
-		timeSpent::45#mn,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::false, peopleSize::0.2#m,agenda_scenario::"simple",ventilation_ratio::0.0];
+		proba_using_before_work::1.0, proba_using_after_work::0.5,step_arrival::3, arrival_time_interval::5#mn,tolerance_target_param::2.0,
+		timeSpent::45#mn,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.2#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 
 	}
 }
@@ -111,12 +118,14 @@ experiment Episode4 type: gui parent: Coronaizer{
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.4#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
+	parameter "step_arrival" var: step_arrival <- 3#s;
+	parameter "arrival_time_interval" var: arrival_time_interval <- 10#mn;
 	//Scenario 2
 	parameter use_change_step var: use_change_step <- false;
 	
 	init
 	{   
-		create simulation with: [title::"Scenario B: Mask",useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",use_change_step::false,
+		create simulation with: [title::"Scenario B: Mask",useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",use_change_step::false,step_arrival::3, arrival_time_interval::10#mn,
 		timeSpent::1.0#h,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.4#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 		
 	}

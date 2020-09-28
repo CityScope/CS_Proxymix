@@ -13,12 +13,13 @@ import "./../ToolKit/DXF_Loader.gaml"
 
 global {
 	
-	string workplace_layer <- offices;
+	list<string> workplace_layer <- [offices, meeting_rooms];
 	float normal_step <- 1#s;
 	float fast_step <- 10#s;
 	bool use_change_step <- true;
 	bool synchronized_step <- false;
 	
+	float tolerance_target_param <- 1.0;
 	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
 	float step_arrival <- 5#s;
 	float arrival_time_interval <- 0#mn;//15 #mn;
@@ -28,7 +29,7 @@ global {
 	float wandering_time <- 1 #mn;
 	float proba_change_desk <- 0.003;
 	//QUEING PARAMETERS
-	float distance_queue <- 1#m;
+	float distance_queue <- 0.5#m;
 	bool queueing <- false;
 	float waiting_time_entrance <- 5#s;
 	bool first_end_sim <- true;
@@ -37,7 +38,7 @@ global {
 	float proba_using_before_work <- 0.7;
 	float proba_using_after_work <- 0.3;
 	int nb_people_per_sanitation <- 2;
-	float sanitation_usage_duration <- 20 #s;
+	float sanitation_usage_duration <- 5 #s;
 	
 	// DARK PARAMETERS
 	int limit_cpt_for_entrance_room_creation <- 10;
@@ -125,7 +126,7 @@ global {
 			} else if type = library {
 				create common_area  with: [shape::polygon(se.points), type::type];
 			
-			} else if type in [workplace_layer, meeting_rooms,coffee, sanitation] {
+			} else if type in (workplace_layer + [coffee, sanitation]) {
 				create room with: [shape::clean(polygon(se.points)), type::type]{
 					if flip (ventilation_ratio){
 						isVentilated<-true;
@@ -157,7 +158,7 @@ global {
 		
 		
 		if (density_scenario = "num_people_building") {
-			list<room> offices_list <- room where (each.type = workplace_layer);
+			list<room> offices_list <- room where (each.type in workplace_layer);
 			float tot_area <- offices_list sum_of each.shape.area;
 			ask offices_list {
 				num_places <- max(1,round(num_people_per_building * shape.area / tot_area));
@@ -252,7 +253,7 @@ global {
 		create going_home_act with:[activity_places:: building_entrance as list];
 		create eating_outside_act with:[activity_places:: building_entrance as list];
 		
-		available_offices <- rooms_type[workplace_layer] where each.is_available();	
+		available_offices <- (workplace_layer accumulate rooms_type[each]) where each.is_available();	
 		
 		if (movement_model = pedestrian_skill) {
 			do initialize_pedestrian_model;
@@ -287,19 +288,23 @@ global {
 			}
 		}
 		
-		nbOffices<-(room count (each.type=workplace_layer));
+		nbOffices<-(room count (each.type in workplace_layer));
 		totalArea<-sum((room) collect each.shape.area);
-		officeArea<-sum((room where (each.type=workplace_layer)) collect each.shape.area);
+		officeArea<-sum((room where (each.type in workplace_layer)) collect each.shape.area);
 		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
 		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
 		nbDesk<-length(room accumulate each.available_places);
+		do create_people(nbDesk);
 		if (arrival_time_interval = 0.0) {
 			people_to_create[current_date] <- nbDesk;
 		} else {
 			int nb <- 1 + int(step_arrival * nbDesk / arrival_time_interval);
-			loop i from: 0 to: arrival_time_interval step: step_arrival{
-				people_to_create[starting_date add_seconds i] <- nb;
+			float cpt <- 0.0;
+			loop while: cpt < arrival_time_interval {
+				people_to_create[starting_date add_ms (cpt * 1000)] <- nb;
+				cpt <- cpt + step_arrival ;
 			}
+			
 		}
 	}
 	
@@ -340,12 +345,18 @@ global {
 	}
 	
 	
+	action active_people(int nb) {
+		ask nb first (people where each.not_yet_active) {
+			not_yet_active <- false;
+		}
+	}
 	
 	action create_people(int nb) {
 		create people number: nb {
 			age <- rnd(18, 70); 
 			pedestrian_model <- SFM;
 			obstacle_species <- [people, wall];
+			tolerance_target <-tolerance_target_param;
 			bool goto_common_area <- (not empty(common_area)) and flip(proba_goto_common_area);
 			
 			location <- any_location_in (one_of(building_entrance).init_place);
@@ -353,14 +364,16 @@ global {
 				working_place <- common_area[rnd_choice(common_area collect each.shape.area)];
 			} else {
 				working_place <- one_of (available_offices);
+				if (working_place = nil) {do die;}
 				working_place.nb_affected <- working_place.nb_affected + 1;
 				if not(working_place.is_available()) {
 					available_offices >> working_place;
 				}
 			}
 			working_desk <- working_place.get_target(self,false);
-			
-			
+			if (working_place = nil) {
+				do die;
+			}
 			if (use_sanitation and not empty(sanitation_rooms) and flip(proba_using_before_work)) {
 				current_activity <- first(sanitation_activity);
 				target_room <- sanitation_rooms[rnd_choice(sanitation_rooms collect (1 / (0.1 + each distance_to self)) )];
@@ -500,7 +513,7 @@ global {
 			}
 		} else {
 			
-			if (time > arrival_time_interval and empty(people where (not each.end_of_day and each.target != nil or each.waiting_sanitation) ))  {
+			if (time > (arrival_time_interval + step * 2) and empty(people where ((not each.end_of_day) and ((each.target != nil) or each.waiting_sanitation)) ))  {
 				if synchronized_step and length(COVID_model) > 1 {
 					bool ready_change_step <- true;
 				 	loop s over: COVID_model {
@@ -540,14 +553,14 @@ global {
 	 	}
 	}
 	
-	reflex people_arriving when: not empty(available_offices) and not empty(people_to_create)
+	reflex people_arriving when: not empty(people_to_create)
 	{	
 		loop d over: people_to_create.keys {
 			if current_date >= d {
-				do create_people(max(0,min(people_to_create[d], length(available_offices accumulate each.available_places))));
+				do active_people (max(0,min(people_to_create[d], people count each.not_yet_active)));
 				remove key:d from: people_to_create;
 			}
-		} 
+		}
 		
 	}
 	reflex updateGraph when: (drawSocialDistanceGraph = true) {
@@ -603,6 +616,76 @@ species room_entrance {
 		}
 		
 	}
+	
+	geometry create_queue(geometry line_g, int nb_places) {
+		
+		//line_g <- line_g at_location (line_g.location );
+		bool consider_rooms <-  (room first_with ((each - 0.1) overlaps location)) = nil;
+		point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
+		float nb <- max(1, nb_places) * distance_queue ;
+		geometry queue_tmp <- line([location,location + vector * nb ]);
+		geometry q_s <- copy(queue_tmp);
+		if (queue_tmp intersects my_room ) {
+			geometry line_g2 <- line(reverse(queue_tmp.points));
+			if (line_g2 inter my_room).perimeter < (queue_tmp inter my_room).perimeter {
+				queue_tmp <- line_g2;
+			}
+		}
+		list<geometry> ws <- (wall overlapping (queue_tmp+ 0.2)) collect each.shape;
+		ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue_tmp + 0.2);
+		if not empty(ws) {
+			loop w over: ws {
+				geometry qq <- queue_tmp - (w + 0.2);
+				if (qq = nil) {
+					queue_tmp <- queue_tmp - (w + 0.01);
+				} else {
+					queue_tmp <- qq;
+				}
+				if (queue_tmp != nil) {
+					queue_tmp <- queue_tmp.geometries with_min_of (each distance_to self);
+				}
+			}
+		}
+		if (queue_tmp != nil) {
+			vector <- (queue_tmp.points[1] - queue_tmp.points[0]);// / queue.perimeter;
+			queue_tmp <- line([location,location + vector * rnd(0.2,1.0)]);
+		} else {
+			vector <- (q_s.points[1] - q_s.points[0]);// / queue.perimeter;
+			queue_tmp <- line([location,location + vector * (0.1 / q_s.perimeter)]);
+		}
+		
+		int cpt <- 0;
+		loop while: (queue_tmp.perimeter / distance_queue) < nb_places {
+			if (cpt = 10) {break;}
+			cpt <- cpt + 1;
+			point pt <- last(queue_tmp.points);
+			
+			line_g <- line([queue_tmp.points[length(queue_tmp.points) - 2],queue_tmp.points[length(queue_tmp.points) - 1]]) rotated_by 90;
+			if (line_g.perimeter = 0) {
+				break;
+			}
+			line_g <- line_g at_location last(queue_tmp.points );
+			point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
+			float nb <- max(0.5,(max(1, nb_places) * distance_queue) - queue_tmp.perimeter);
+			queue_tmp <-  line(queue_tmp.points + [pt + vector * nb ]);
+			list<geometry> ws <- wall overlapping (queue_tmp+ 0.2);
+			ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue_tmp + 0.2);
+			if (consider_rooms) {ws <- ws +  room overlapping (queue_tmp+ 0.2);}
+			
+			if not empty(ws) {
+				loop w over: ws {
+					geometry g <- queue_tmp - w ;
+					if (g != nil) {
+							queue_tmp <- g.geometries with_min_of (each distance_to pt);
+					}
+				
+				}
+			}
+			
+		}
+		return queue_tmp;
+		
+	}
 	action default_queue {
 		int nb_places <- my_room.type = sanitation ? 20 : length(my_room.places);
 		geometry line_g;
@@ -616,79 +699,38 @@ species room_entrance {
 				d <- self distance_to l;
 			}
 		}
-		line_g <- line_g rotated_by 90;
 		
-		//line_g <- line_g at_location (line_g.location );
-		bool consider_rooms <-  (room first_with ((each - 0.1) overlaps location)) = nil;
-		point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
-		float nb <- max(1, nb_places) * distance_queue ;
-		queue <- line([location,location + vector * nb ]);
-		geometry q_s <- copy(queue);
-		if (queue intersects my_room ) {
-			geometry line_g2 <- line(reverse(queue.points));
-			if (line_g2 inter my_room).perimeter < (queue inter my_room).perimeter {
-				queue <- line_g2;
-			}
-		}
-		list<geometry> ws <- (wall overlapping (queue+ 0.2)) collect each.shape;
-		ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue + 0.2);
-		if not empty(ws) {
-			loop w over: ws {
-				geometry qq <- queue - (w + 0.2);
-				if (qq = nil) {
-					queue <- queue - (w + 0.01);
-				} else {
-					queue <- qq;
-				}
-				if (queue != nil) {
-					queue <- queue.geometries with_min_of (each distance_to self);
-				}
-			}
-		}
-		if (queue != nil) {
-			vector <- (queue.points[1] - queue.points[0]);// / queue.perimeter;
-			queue <- line([location,location + vector * rnd(0.2,1.0)]);
+		geometry g1 <- create_queue(line_g rotated_by 90, nb_places);
+		geometry g2 <- create_queue(line_g rotated_by -90,nb_places);
+		
+		geometry l1 <- (g1 = nil) ? nil : line([last(g1.points), ((pedestrian_path with_min_of (each distance_to last(g1.points))) closest_points_with last(g1.points))[0]]);
+		geometry l2 <- (g2 = nil) ? nil :line([last(g2.points), ((pedestrian_path with_min_of (each distance_to last(g2.points))) closest_points_with last(g2.points))[0]]);
+		
+		if (g1 = nil) {
+			queue <- g2;
+		} else if (g2 = nil) {
+			queue <- g1;
 		} else {
-			vector <- (q_s.points[1] - q_s.points[0]);// / queue.perimeter;
-			queue <- line([location,location + vector * (0.1 / q_s.perimeter)]);
-		}
-		
-		int cpt <- 0;
-		loop while: (queue.perimeter / distance_queue) < nb_places {
-			if (cpt = 10) {break;}
-			cpt <- cpt + 1;
-			point pt <- last(queue.points);
-			
-			line_g <- line([queue.points[length(queue.points) - 2],queue.points[length(queue.points) - 1]]) rotated_by 90;
-			if (line_g.perimeter = 0) {
-				break;
-			}
-			line_g <- line_g at_location last(queue.points );
-			point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
-			float nb <- max(0.5,(max(1, nb_places) * distance_queue) - queue.perimeter);
-			queue <-  line(queue.points + [pt + vector * nb ]);
-			list<geometry> ws <- wall overlapping (queue+ 0.2);
-			ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue + 0.2);
-			if (consider_rooms) {ws <- ws +  room overlapping (queue+ 0.2);}
-			
-			if not empty(ws) {
-				loop w over: ws {
-					geometry g <- queue - w ;
-					if (g != nil) {
-							queue <- g.geometries with_min_of (each distance_to pt);
-					}
-				
+			if not empty (wall overlapping l1) {
+				if empty (wall overlapping l2) {
+					queue <- g2;
+				} else {
+					queue <- [g1,g2] with_max_of each.perimeter;
+				}
+			} else {
+				if not empty (wall overlapping l2) {
+					queue <- g1;
+				} else {
+					queue <- [g1,g2] with_max_of each.perimeter;
 				}
 			}
-			
 		}
-		
 		do manage_queue();
 	}
 	
 	action manage_queue {
 		positions <- queue.perimeter > 0 ?  queue points_on (distance_queue) : []; 
-		waiting_area <- (queue + 1.0)  - (queue + 0.1);
+		waiting_area <- queue;
 		list<wall> ws <- wall overlapping waiting_area;
 		if not empty(ws) {
 			loop w over: ws {
@@ -781,6 +823,9 @@ species room {
 				myself.inside_geom <- g.geometries with_max_of each.area;
 			}
 		}
+		if (inside_geom = nil) {
+			inside_geom <- shape;
+		}
 		list<geometry> squares;
 		map<geometry, place_in_room> pr;
 		
@@ -803,10 +848,10 @@ species room {
 					}
 				}
 				if (not empty(places) and (species(self) = room)) {
-					type <- workplace_layer;
+					//type <- workplace_layer;
 				} else {
-					create place_in_room number: min(10, 1 + shape.area / 2.0) {
-						location <-	any_location_in(myself.shape - 0.2);
+					create place_in_room number: min(10, 1 + inside_geom.area / 2.0) {
+						location <-	any_location_in(myself.inside_geom);
 						myself.places << self;
 					}
 				}
@@ -847,13 +892,13 @@ species room {
 			
 		} 
 		else if (density_scenario = "distance") or (type != workplace_layer) {
-			squares <-  to_squares(shape, distance_people, true) where (each.location overlaps shape);
+			squares <-  to_squares(inside_geom, distance_people, true) where (each.location overlaps inside_geom);
 		}
 		else if (density_scenario= "num_people_room"){
 			num_places <-num_people_per_room;
 			int nb <- num_places;
 			loop while: length(squares) < num_places {
-				squares <-  num_places = 0 ? []: to_squares(shape, nb, true) where (each.location overlaps shape);
+				squares <-  num_places = 0 ? []: to_squares(inside_geom, nb, true) where (each.location overlaps inside_geom);
 				nb <- nb +1;
 			}
 			if (length(squares) > num_places) {
@@ -863,7 +908,7 @@ species room {
 		else if density_scenario in ["num_people_building"] {
 			int nb <- num_places;
 			loop while: length(squares) < num_places {
-				squares <-  num_places = 0 ? []: to_squares(shape, nb, true) where (each.location overlaps shape);
+				squares <-  num_places = 0 ? []: to_squares(inside_geom, nb, true) where (each.location overlaps inside_geom);
 				nb <- nb +1;
 			}
 			if (length(squares) > num_places) {
@@ -928,7 +973,7 @@ species room {
 		}
 	}
 	aspect available_places_info {
-		if(showAvailableDesk and (type=workplace_layer or type="Meeeting rooms")){
+		if(showAvailableDesk and (type in workplace_layer)){
 		 	draw string(length(available_places)) at: {location.x-20#px,location.y,1.0} color:#white font:font("Helvetica", 20 , #bold) perspective:false; 	
 		} 
 	}
@@ -964,7 +1009,7 @@ species activity {
 	
 	room get_place(people p) {
 		if flip(0.3) {
-			return one_of(activity_places with_max_of length(each.available_places));
+			return activity_places with_max_of length(each.available_places);
 		} else {
 			list<room> rs <- (activity_places where not empty(each.available_places));
 			if empty(rs) {
@@ -1019,8 +1064,9 @@ species droplet {
 }
 
 
-species people skills: [escape_pedestrian] schedules: people where not each.end_of_day{
+species people skills: [escape_pedestrian] schedules: people where (not each.end_of_day and not each.not_yet_active){
 	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
+	bool not_yet_active <- true;
 	room working_place;
 	place_in_room working_desk;
 	map<date, activity> agenda_day;
@@ -1050,7 +1096,7 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 	bool finished_goto <- false;
 	
 	aspect default {
-		if not is_outside and not end_of_day{
+		if not is_outside and not end_of_day and not not_yet_active{
 			draw circle(peopleSize) color:color;// border: #black;
 		}
 		//draw obj_file(dataset_path+"/Obj/man.obj",-90::{1,0,0}) color:#gamablue size:2 rotate:heading+90;
@@ -1163,7 +1209,6 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 				if (final_target = nil) {
 					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target ;
 				}
-				point prev_loc <- copy(location);
 				do walk;
 				float r_s <- prev_loc distance_to location;
 				is_slow <- r_s < (speed/coeff_speed_slow);
