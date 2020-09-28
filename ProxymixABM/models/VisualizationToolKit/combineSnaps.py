@@ -50,7 +50,7 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 		outFname = outFname.split('.')[0]+'.mkv'
 		cmd = f'ffmpeg -framerate {frameRate} -s {aspectRatio} -i {inpath} -c:v copy {outFname}'
 	else:
-		cmd = f'ffmpeg -r {frameRate} -s {aspectRatio} -f image2 -i {inpath} -vcodec libx264 -crf {quality} -pix_fmt yuv420p {outFname}'
+		cmd = f'ffmpeg -r {frameRate} -s {aspectRatio} -f image2 -i {inpath} -vcodec libx264 -crf {quality} -pix_fmt yuv420p -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" {outFname}'
 
 	print('Result will be written in:',outFname)
 	print(cmd)
