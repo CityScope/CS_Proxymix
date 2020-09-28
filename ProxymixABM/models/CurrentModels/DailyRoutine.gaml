@@ -969,7 +969,7 @@ species room {
 		loop p over: available_places {draw square(0.3) at: {p.location.x,p.location.y,0.001} color: #gray border: #black;}
 		if(isVentilated ){
 		 //draw shape*0.75 color:standard_color_per_layer[type]+50 empty:false;
-		 draw fanPic size: 3;	
+		// draw fanPic size: 3;	
 		}
 	}
 	aspect available_places_info {
