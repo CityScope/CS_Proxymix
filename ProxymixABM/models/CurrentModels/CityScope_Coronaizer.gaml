@@ -73,7 +73,7 @@ global{
 	reflex updateListViral{
 		infectionRiskList <- list (ViralPeople sort_by each.infection_risk);
 	}
-reflex initCovid when:cycle=10{
+reflex initCovid when:time = (4 + step_arrival){
 		if fixed_infected_people_localization {
 			int nb_i;
 			map<room,list<ViralPeople>> pp_per_room <- ViralPeople group_by each.target.working_place;

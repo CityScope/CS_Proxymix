@@ -39,6 +39,8 @@ global {
 	int nb_people_per_sanitation <- 2;
 	float sanitation_usage_duration <- 20 #s;
 	
+	// DARK PARAMETERS
+	int limit_cpt_for_entrance_room_creation <- 10;
 	
 	map<date,int> people_to_create;
 	float step <- normal_step;
@@ -143,7 +145,15 @@ global {
 				}
 			}
 		} 
-		 
+		
+		ask room +building_entrance + common_area{
+			list<wall> ws <- wall overlapping self;
+			loop w over: ws {
+				if (w covers self) {
+					w.shape <- w.shape - (self + 0.5);
+				}
+			}
+		} 
 		
 		
 		if (density_scenario = "num_people_building") {
@@ -200,8 +210,8 @@ global {
 				ask wall at_distance 1.0 {
 					contour <- contour - (shape +dist);
 				}
-				if cpt < 10 {
-					ask (room + building_entrance + common_area) at_distance 1.0 {
+				if cpt < limit_cpt_for_entrance_room_creation {
+					ask (room  + common_area) at_distance 1.0 {
 						contour <- contour - (shape + dist);
 					}
 				}
@@ -338,6 +348,7 @@ global {
 			obstacle_species <- [people, wall];
 			bool goto_common_area <- (not empty(common_area)) and flip(proba_goto_common_area);
 			
+			location <- any_location_in (one_of(building_entrance).init_place);
 			if (goto_common_area) {
 				working_place <- common_area[rnd_choice(common_area collect each.shape.area)];
 			} else {
@@ -359,8 +370,7 @@ global {
 				if (length(re) = 1) {
 					the_entrance <- first(re);
 				} else {
-					re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room);
-		
+					re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room.inside_geom);
 					if (empty(re)) {
 						re <- target_room.entrances;
 					}
@@ -377,12 +387,19 @@ global {
 				if (length(re) = 1) {
 					the_entrance <- first(re);
 				} else {
-					re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room);
-		
-					if (empty(re)) {
-						re <- target_room.entrances;
-					}
-					the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / (0.1 + each distance_to self)) )];
+					room_entrance rec <- room_entrance closest_to self;
+					if rec distance_to self < 5.0 { 
+						the_entrance <- rec;
+					} else {
+						
+						re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room.inside_geom);
+					
+						if (empty(re)) {
+							re <- target_room.entrances;
+						}
+						
+						the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / (0.1 + each distance_to self)) )];
+					}	
 				}
 				
 			//	the_entrance <- (target_room.entrances closest_to self);
@@ -391,7 +408,7 @@ global {
 			}
 					
 			goto_entrance <- true;
-			location <- any_location_in (one_of(building_entrance).init_place);
+			//location <- any_location_in (one_of(building_entrance).init_place);
 			
 			switch agenda_scenario {
 				match "classic day" {
@@ -483,7 +500,7 @@ global {
 			}
 		} else {
 			
-			if (time > arrival_time_interval and empty(people where (each.target != nil or each.waiting_sanitation) ))  {
+			if (time > arrival_time_interval and empty(people where (not each.end_of_day and each.target != nil or each.waiting_sanitation) ))  {
 				if synchronized_step and length(COVID_model) > 1 {
 					bool ready_change_step <- true;
 				 	loop s over: COVID_model {
@@ -508,7 +525,7 @@ global {
 	}
 	
 	
-	reflex end_simulation when: ((people count not each.end_of_day) = 0) and time > 100 {
+	reflex end_simulation when: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {
 		if (first_end_sim) {
 			first_end_sim <- false;
 		}
@@ -817,6 +834,15 @@ species room {
 					}
 				} 
 			}
+			ask places where not (self overlaps each){
+				do die;
+			}
+			if empty(places) {
+				create place_in_room {
+					location <- myself.location;
+					myself.places << self;
+				}
+			}
 			
 			
 		} 
@@ -911,7 +937,7 @@ species room {
 
 species building_entrance parent: room {
 	place_in_room get_target(people p, bool random_place){
-		return random_place ? one_of(place_in_room) : place_in_room closest_to p;
+		return random_place ? one_of(places) : places closest_to p;
 	}
 
 	aspect default {
@@ -1021,6 +1047,8 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 	bool goto_a_desk <- false;
 	point target_desk;
 	float wandering_time_ag;
+	bool finished_goto <- false;
+	
 	aspect default {
 		if not is_outside and not end_of_day{
 			draw circle(peopleSize) color:color;// border: #black;
@@ -1101,8 +1129,12 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 		room prev_tr <- copy(target_room);
 		current_activity <- agenda_day.values[0];
 		agenda_day >> first(agenda_day);
-		target <- (target_room.entrances closest_to self).location;
 		target_room <- current_activity.get_place(self);
+		list<room_entrance> possible_entrances <- target_room.entrances where (not((each path_to target_room).shape overlaps prev_tr));
+		if (empty (possible_entrances)) {
+			possible_entrances <-  target_room.entrances;
+		}
+		target <- (target_room.entrances closest_to self).location;
 		go_oustide_room <- true;
 		is_outside <- false;
 		goto_entrance <- false;
@@ -1115,6 +1147,7 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 	
 	reflex goto_activity when: target != nil and not in_line{
 		bool arrived <- false;
+		point prev_loc <- copy(location);
 		if goto_entrance {
 			if (queueing) and (species(target_room) != building_entrance) and ((self distance_to target) < (2 * distance_queue))  and ((self distance_to target) > (1 * distance_queue))  {
 				point pt <- the_entrance.get_position();
@@ -1152,8 +1185,20 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 			}
 		}
 		else {
-			do goto target: target;
+			if (finished_goto) {
+				do goto target: target;
+			} else {
+				if (final_target = nil) {
+					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target ;
+				}
+				do walk;
+				finished_goto <- (final_target = nil) and (location != target);
+			}
+			//do goto target: target;
 			arrived <- location = target;
+			if (arrived) {
+				finished_goto <- false;
+			}
 		}
 		if(arrived) {
 			if (go_oustide_room) {
@@ -1167,6 +1212,9 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 					} else {
 						target <- the_entrance.get_position();
 					}
+				}
+				if (current_activity.name = going_home) and (location distance_to target < tolerance_target){
+					end_of_day <- true;
 				}
 				
 				go_oustide_room <- false;
@@ -1189,7 +1237,7 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 					//target_place <- target_room.get_target(self, species(target_room) = common_area);
 					if target_place != nil {
 						target <- target_place.location;
-						goto_entrance <- false;
+						
 						if (queueing and (species(target_room) != building_entrance)) {
 							ask room_entrance closest_to self {
 								do add_people(myself);
@@ -1203,6 +1251,7 @@ species people skills: [escape_pedestrian] schedules: people where not each.end_
 							target <- (target_room.entrances closest_to self).location;
 						}
 					}
+					goto_entrance <- false;
 				}
 			} else {
 				has_place <- true;

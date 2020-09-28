@@ -7,10 +7,10 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 global {
 	
-	string useCase <- "UDG/CUCS/Level 2";
+	string useCase <- "UDG/CUT/lab";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
-	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee, furnitures, entrance ];
+	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee, furnitures, entrance , lab];
 	
 	bool recreate_walking_area <- true;
 	
@@ -26,7 +26,7 @@ global {
 	float tol_triangulation <- 0.0; //tolerance for the triangulation 
 	float min_dist_obstacles_filtering <- 0.0;// minimal distance to obstacles to keep a path (float; if 0.0, no filtering), 
 	float dist_reconnection <- 0.1;
-	
+	bool get_only_inside_room <- false;
 	float dist_min_obst <- 0.2; //cut path closer than that;
 	
 	bool P_use_body_geometry <- false parameter: true ;
@@ -41,7 +41,7 @@ global {
 	bool display_triangles <- false parameter: true category:"Visualization";
 	
 	float step <- 1.0;
-	
+	int limit_cpt_for_entrance_room_creation <- 10;
 	
 	bool build_pedestrian_network <- true;
 	graph network;
@@ -50,7 +50,7 @@ global {
 			file csv_parameter <- csv_file(parameter_path, ",", true);
 			loop i from: 0 to: csv_parameter.contents.rows - 1 {
 				string parameter_name <- csv_parameter.contents[0,i];
-				if (parameter_name in ["add_points_open_area","random_densification","clean_network"]) {
+				if (parameter_name in ["add_points_open_area","random_densification","clean_network", "get_only_inside_room"]) {
 					bool val <- bool(csv_parameter.contents[1,i]);
 					world.shape.attributes[parameter_name] <- val;
 				}else {
@@ -74,9 +74,8 @@ global {
 			}
 		
 		}
-		
-		list<dxf_element> rooms <- dxf_element where (each.layer in [offices, supermarket, meeting_rooms,coffee]);
-		list<dxf_element> rooms_entrances <- dxf_element where (each.layer in [entrance, offices, supermarket, meeting_rooms,coffee]);
+		list<dxf_element> rooms <- dxf_element where (each.layer in [offices, supermarket, meeting_rooms,coffee,lab]);
+		list<dxf_element> rooms_entrances <- dxf_element where (each.layer in [entrance, offices, supermarket, meeting_rooms,coffee,lab]);
 		write "Number of dxf elements:" + length(dxf_element);
 		
 		ask rooms_entrances{
@@ -89,7 +88,7 @@ global {
 				ask wall at_distance 1.0 {
 					contour <- contour - (shape +dist);
 				}
-				if cpt < 10 {
+				if cpt < limit_cpt_for_entrance_room_creation {
 					ask (rooms) at_distance 1.0 {
 						contour <- contour - (shape + dist);
 					}
@@ -124,6 +123,9 @@ global {
 				ask wall {
 					walking_area_g <- walking_area_g - (shape );
 					walking_area_g <- walking_area_g.geometries with_max_of each.area;
+				}
+				if (get_only_inside_room) {
+					walking_area_g <- walking_area_g inter union(rooms_entrances);
 				}
 			}
 			
