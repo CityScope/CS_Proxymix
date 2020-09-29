@@ -489,13 +489,14 @@ experiment Coronaizer type:gui autorun:true{
 	  	
 	  	graphics "scale"{
 	  		point scalePos<-{world.shape.width*0.55,world.shape.height*0.85};
-	  		float base_scale <- 5#m;
+	  		int scale_size_in_px <- 300;
+	  		float base_scale <- 4#m;
+	  		write scale_size_in_px#px;
 	  		float rectangle_width <- base_scale/6;
 	  		list<float> scale_markers <- [0, 1*base_scale, 2*base_scale, 3*base_scale, 5*base_scale];
 	  		int side <- 1;
 	  		loop i from: 0 to: length(scale_markers)-2{
 	  			draw rectangle({scalePos.x+scale_markers[i],scalePos.y},{scalePos.x+scale_markers[i+1],scalePos.y-side*rectangle_width})  color:#white;
-	 	 		write scale_markers[i];
 	 	 		draw string(int(scale_markers[i])) color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+scale_markers[i]-3*(1+(scale_markers[i]=0?0:log(scale_markers[i]))/log(10))#px,scalePos.y+rectangle_width+16#px,0.01};
 				side <- - side;
 	  		}	  		
