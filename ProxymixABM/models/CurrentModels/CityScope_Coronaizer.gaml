@@ -62,9 +62,9 @@ global{
 	graph<people, people> infection_graph <- graph<people, people>([]);
 	
 	list<ViralPeople> infectionRiskList;
-
-
 	
+	float base_scale <- 5#m;
+
 	
 	init{
 			
@@ -409,6 +409,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
 	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
+	parameter "Map Scale :" category: "Ventilation" var:base_scale min:0.0 max:100.0 <-5#m;
 		
 	output{
 	  layout #split;
@@ -489,9 +490,6 @@ experiment Coronaizer type:gui autorun:true{
 	  	
 	  	graphics "scale"{
 	  		point scalePos<-{world.shape.width*0.55,world.shape.height*0.85};
-	  		int scale_size_in_px <- 300;
-	  		float base_scale <- 4#m;
-	  		write scale_size_in_px#px;
 	  		float rectangle_width <- base_scale/6;
 	  		list<float> scale_markers <- [0, 1*base_scale, 2*base_scale, 3*base_scale, 5*base_scale];
 	  		int side <- 1;
