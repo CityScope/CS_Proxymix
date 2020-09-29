@@ -3,7 +3,7 @@ import argparse
 from shutil import copyfile
 
 
-def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x1049', inpath='', fullQuality=False):
+def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x1049', inpath='', fullQuality=False, duration=None):
 	'''
 	Combine set of png files into a mp4 video.
 	Images need to be in the same directory as the script.
@@ -20,6 +20,8 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 		Aspect ratio of images.
 	fullQuality: boolean (default=False)
 	 	If True, it will run ffmpeg with -c:v copy and generate a high quality mkv.
+	duration: int (optional)
+		Duration of video in seconds. If provided, the frameRate is adjusted to fit within the given time. 
 	'''
 	inpath = '.' if inpath =='' else inpath
 	fnames = [f for f in os.listdir(inpath) if 'png'==f.split('.')[-1]]
@@ -40,6 +42,9 @@ def combine(outFname = 'test.mp4',quality=20,frameRate = '24',aspectRatio='2560x
 		copyfile(src, dst)
 		created_files.append(dst)
 		j+=1
+
+	if duration is not None:
+		frameRate = round(len(created_files)/duration,3)
 
 	if inpath!='.':
 		inpath = os.path.join(inpath,f'cycle_%0{digits}d.png')
@@ -69,6 +74,7 @@ if __name__ == "__main__":
 	parser.add_argument('-framerate', type=int, help='Video frame rate')
 	parser.add_argument('-inpath', type=str, help='Video frame rate')
 	parser.add_argument('-fullquality', type=bool, help='TRUE for full quality')
+	parser.add_argument('-duration', type=int, help='Duration of video, overrides framerate')
 	
 	args = parser.parse_args()
 	
@@ -78,5 +84,6 @@ if __name__ == "__main__":
 		frameRate = '24' if args.framerate is None else args.framerate,
 		aspectRatio='2560x1049',
 		inpath = '' if args.inpath is None else args.inpath,
-		fullQuality = False if args.fullquality is None else args.fullquality
+		fullQuality = False if args.fullquality is None else args.fullquality,
+		duration = args.duration
 	)

@@ -118,7 +118,7 @@ global{
 				
 			}
 			if nb_i < initial_nb_infected {
-				list<room> ror <- pp_per_room.keys sort_by length(pp_per_room[each]);
+				list<room> ror <- pp_per_room.keys sort_by each.name;
 				
 				int direction <- 0;
 				
@@ -157,7 +157,7 @@ global{
 					}
 				}
 			}
-		
+			
 		} else {
 			ask initial_nb_infected among ViralPeople{
 				has_been_infected<-true;
@@ -413,7 +413,7 @@ experiment Coronaizer type:gui autorun:true{
 	output{
 	  layout #split;
 	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false{
-	  	species room  refresh: false;
+	   	species room  refresh: false;
 		species room aspect: available_places_info refresh: true;
 		species ViralRoom transparency:0.75 position:{0,0,0.00};
 		species ViralCommonArea transparency:0.85 position:{0,0,0.001};
@@ -481,7 +481,7 @@ experiment Coronaizer type:gui autorun:true{
 	      //draw string("step: "+ step) color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+40#px,0.01};
 	    		
 	  	}
-	  	
+	  	 
 	 
 	  	/*graphics "legend"{
 	  		point legendPos<-{world.shape.width*1,world.shape.height*1.5};
@@ -510,7 +510,7 @@ experiment Coronaizer type:gui autorun:true{
 			}
 		  }
 		}
-		
+		 
 		graphics "trid"{
 			point triLegendPos<-{world.shape.width*0,-world.shape.width*0.025};
 			draw "Percent Risk:" color: #white font: font("Helvetica", 15, #bold) at:{triLegendPos.x-120#px,triLegendPos.y-15#px,0.01};

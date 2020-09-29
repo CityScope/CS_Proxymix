@@ -732,12 +732,12 @@ species room_entrance {
 		positions <- queue.perimeter > 0 ?  queue points_on (distance_queue) : []; 
 		waiting_area <- queue;
 		list<wall> ws <- wall overlapping waiting_area;
-		if not empty(ws) {
+		/*if not empty(ws) {
 			loop w over: ws {
 				waiting_area <- waiting_area - ws ;
 				waiting_area <- waiting_area.geometries with_min_of (each distance_to last(positions) );
 			}
-		}
+		}*/
 		
 	}
 	
@@ -1107,10 +1107,15 @@ species people skills: [escape_pedestrian] schedules: people where (not each.end
 		if wandering {
 			if (wandering_time_ag > wandering_time) {
 				if (target_place != nil) {
-					if final_target = nil {
+					if final_target = nil and ((location distance_to target_place) > 2.0){
 						do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_place ;
 					}
-					do walk;
+					if (final_target = nil) {
+						do goto target: target_place;
+					} else {
+						do walk;
+					}
+					
 					if not(location overlaps target_room.inside_geom) {
 						location <- (target_room.inside_geom closest_points_with location) [0];
 					}
@@ -1128,8 +1133,12 @@ species people skills: [escape_pedestrian] schedules: people where (not each.end
 				wandering_time_ag <- wandering_time_ag + step;	
 			}
 		} else if goto_a_desk {
+			if (final_target = nil) {
+				do goto target: target;
+			} else {
+				do walk;
 			
-			do walk;
+			}
 			if not(location overlaps target_room.inside_geom) {
 				location <- (target_room.inside_geom closest_points_with location) [0];
 			}
@@ -1149,8 +1158,9 @@ species people skills: [escape_pedestrian] schedules: people where (not each.end
 				if not(target_desk overlaps target_room.inside_geom) {
 					target_desk <- (target_room.inside_geom closest_points_with target_desk) [0];
 				}
-				
-				do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_desk ;
+				if ((location distance_to target_desk) > 2.0) {
+					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_desk ;
+				}
 			}
 		}
 	}
@@ -1206,20 +1216,22 @@ species people skills: [escape_pedestrian] schedules: people where (not each.end
 				do goto target: target on: pedestrian_network;
 				arrived <- location = target;
 			} else {
-				if (final_target = nil) {
+				if (final_target = nil) and ((location distance_to target) > 2.0)  {
 					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target ;
 				}
-				do walk;
-				float r_s <- prev_loc distance_to location;
-				is_slow <- r_s < (speed/coeff_speed_slow);
-				if (is_slow) {
-					counter <- counter + 1;
-					if (counter >= min_num_step_bottleneck) {
-						is_slow_real <- true;
+				if (final_target != nil) {
+					do walk;
+					float r_s <- prev_loc distance_to location;
+					is_slow <- r_s < (speed/coeff_speed_slow);
+					if (is_slow) {
+						counter <- counter + 1;
+						if (counter >= min_num_step_bottleneck) {
+							is_slow_real <- true;
+						}
+					} else {
+						is_slow_real <- false;
+						counter <- 0;
 					}
-				} else {
-					is_slow_real <- false;
-					counter <- 0;
 				}
 				
 				arrived <- final_target = nil;
