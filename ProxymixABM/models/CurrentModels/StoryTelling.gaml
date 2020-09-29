@@ -32,7 +32,7 @@ experiment Episode1 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::1,title::"Scenario B: Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms and Offices",
+		create simulation with: [episode::1,title::"Scenario B: Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
 		ventilationType::"Natural",ventilation_ratio::0.0,
 		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::1.0,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
@@ -51,7 +51,7 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 45#mn;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
-	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-1.0;
+	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-0.15#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
@@ -96,7 +96,7 @@ experiment Episode3 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [title::"Scenario B: Sanitation",useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
+		create simulation with: [title::"Scenario B: Sanitation ",useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
 		proba_using_before_work::1.0, proba_using_after_work::0.5,step_arrival::3, arrival_time_interval::5#mn,tolerance_target_param::2.0,
 		timeSpent::45#mn,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.2#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 
@@ -137,7 +137,7 @@ experiment Episode5 type: gui parent: Coronaizer{
 	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0#h;
+	parameter 'timeSpent:' var: timeSpent category: 'file' <- 45#mn;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 4.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
