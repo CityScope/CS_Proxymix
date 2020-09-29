@@ -965,8 +965,8 @@ species room {
 	
 	aspect default {
 		//draw inside_geom color: standard_color_per_layer[type];
-		loop e over: entrances {draw circle(0.4)-circle(0.2) at: {e.location.x,e.location.y,0.001} color: #yellow border: #black;}
-		loop p over: available_places {draw square(0.3) at: {p.location.x,p.location.y,0.001} color: #gray border: #black;}
+		loop e over: entrances {draw circle(0.2)-circle(0.1) at: {e.location.x,e.location.y,0.001} color: #yellow border: #black;}
+		loop p over: places {draw square(0.2) at: {p.location.x,p.location.y,0.001} color: #gray border: #black;}
 		if(isVentilated ){
 		 //draw shape*0.75 color:standard_color_per_layer[type]+50 empty:false;
 		// draw fanPic size: 3;	
