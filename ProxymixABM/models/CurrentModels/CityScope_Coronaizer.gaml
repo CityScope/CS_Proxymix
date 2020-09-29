@@ -488,11 +488,25 @@ experiment Coronaizer type:gui autorun:true{
 	  	}
 	  	
 	  	graphics "scale"{
-	  		point scalePos<-{world.shape.width*0.75,world.shape.height*0.75};
-	  		draw line([{scalePos.x,scalePos.y},{scalePos.x+world.shape.width*0.1,scalePos.y}]) width:3 color:#white;
-	  		draw line([{scalePos.x,scalePos.y-5#px},{scalePos.x,scalePos.y+5#px}]) width:3 color:#white;
-	  		draw line([{scalePos.x+world.shape.width*0.1,scalePos.y-5#px},{scalePos.x+world.shape.width*0.1,scalePos.y+5#px}]) width:3 color:#white;
-	  		draw string(with_precision(world.shape.width*0.1,0))+ "m" color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+world.shape.width*0.025,scalePos.y+20#px,0.01};
+//	  		point scalePos<-{world.shape.width*0.75,world.shape.height*0.75};
+//	  		draw line([{scalePos.x,scalePos.y},{scalePos.x+world.shape.width*0.1,scalePos.y}]) width:3 color:#white;
+//	  		draw line([{scalePos.x,scalePos.y-5#px},{scalePos.x,scalePos.y+5#px}]) width:3 color:#white;
+//	  		draw line([{scalePos.x+world.shape.width*0.1,scalePos.y-5#px},{scalePos.x+world.shape.width*0.1,scalePos.y+5#px}]) width:3 color:#white;
+//	  		draw string(with_precision(world.shape.width*0.1,0))+ "m" color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+world.shape.width*0.025,scalePos.y+20#px,0.01};
+	  		float base_scale <- 5#m;
+	  		float rectangle_width <- base_scale/6;
+	  		point scalePos<-{world.shape.width*0.55,world.shape.height*0.85};
+	  		draw rectangle({scalePos.x,scalePos.y},{scalePos.x+base_scale,scalePos.y-rectangle_width})  color:#white;
+	  		draw rectangle({scalePos.x+base_scale,scalePos.y},{scalePos.x+2*base_scale,scalePos.y+rectangle_width})  color:#white;
+	  		draw rectangle({scalePos.x+2*base_scale,scalePos.y},{scalePos.x+3*base_scale,scalePos.y-rectangle_width})  color:#white;
+	  		draw rectangle({scalePos.x+3*base_scale,scalePos.y},{scalePos.x+5*base_scale,scalePos.y+rectangle_width})  color:#white;
+	  		draw "0" color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x-3#px,scalePos.y+rectangle_width+16#px,0.01};
+	  		draw string(int(base_scale)) color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+base_scale-3*(1+log(base_scale)/log(10))#px,scalePos.y+rectangle_width+16#px,0.01};
+	  		draw string(int(2*base_scale)) color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+2*base_scale-3*(1+log(2*base_scale)/log(10))#px,scalePos.y+rectangle_width+16#px,0.01};
+	  		draw string(int(3*base_scale)) color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+3*base_scale-3*(1+log(3*base_scale)/log(10))#px,scalePos.y+rectangle_width+16#px,0.01};
+	  		draw string(int(5*base_scale))+ "m" color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+5*base_scale-3*(1+log(5*base_scale)/log(10))#px,scalePos.y+rectangle_width+16#px,0.01};
+
+			//draw string(with_precision(world.shape.width*0.1,0))+ "m" color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+world.shape.width*0.025,scalePos.y+20#px,0.01};
 	  	}
 	  	 
 
