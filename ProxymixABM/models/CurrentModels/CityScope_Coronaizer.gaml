@@ -495,10 +495,10 @@ experiment Coronaizer type:gui autorun:true{
 	  		int side <- 1;
 	  		loop i from: 0 to: length(scale_markers)-2{
 	  			draw rectangle({scalePos.x+scale_markers[i],scalePos.y},{scalePos.x+scale_markers[i+1],scalePos.y-side*rectangle_width})  color:#white;
-	 	 		draw string(int(scale_markers[i])) color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+scale_markers[i]-3*(1+(scale_markers[i]=0?0:log(scale_markers[i]))/log(10))#px,scalePos.y+rectangle_width+16#px,0.01};
+	 	 		draw string(int(scale_markers[i])) anchor: i=0? #bottom_left: #bottom_center color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+scale_markers[i],scalePos.y+rectangle_width+16#px,0.01};
 				side <- - side;
 	  		}	  		
-	  		draw string(int(last(scale_markers)))+ "m" color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+last(scale_markers)-3*(1+log(last(scale_markers))/log(10))#px,scalePos.y+rectangle_width+16#px,0.01};
+	  		draw string(int(last(scale_markers)))+ "m" anchor: #bottom_right color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+last(scale_markers),scalePos.y+rectangle_width+16#px,0.01};
 	  	}
 	  	 
 
