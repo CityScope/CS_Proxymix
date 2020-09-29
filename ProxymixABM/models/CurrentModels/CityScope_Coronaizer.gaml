@@ -390,7 +390,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_viral_load_by_touching_grid;
 	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room<-true;
 	parameter "Show People:" category: "Visualization" var:showPeople;
-    parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+    parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
 	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
@@ -488,7 +488,7 @@ experiment Coronaizer type:gui autorun:true{
 	  	}
 	  	
 	  	graphics "scale"{
-	  		point scalePos<-{-world.shape.width*0.25,world.shape.height+125#px};
+	  		point scalePos<-{world.shape.width*0.75,world.shape.height*0.75};
 	  		draw line([{scalePos.x,scalePos.y},{scalePos.x+world.shape.width*0.1,scalePos.y}]) width:3 color:#white;
 	  		draw line([{scalePos.x,scalePos.y-5#px},{scalePos.x,scalePos.y+5#px}]) width:3 color:#white;
 	  		draw line([{scalePos.x+world.shape.width*0.1,scalePos.y-5#px},{scalePos.x+world.shape.width*0.1,scalePos.y+5#px}]) width:3 color:#white;
