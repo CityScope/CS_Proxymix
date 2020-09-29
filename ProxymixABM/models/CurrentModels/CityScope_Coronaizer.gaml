@@ -322,8 +322,8 @@ species ViralPeople  mirrors:people{
 		if not target.end_of_day and not target.not_yet_active{
 			if(showPeople) and not target.is_outside{
 			  draw circle(is_infected ? peopleSize*1.25 : peopleSize) color:
-			  	use_SIR_model ? ((is_susceptible) ? #green : ((is_infected) ? #red : #blue)) :
-			  	((is_infected) ? #blue : blend(#red, #green, infection_risk/100.0));
+			  	use_SIR_model ? ((is_susceptible) ? color_map["green"] : ((is_infected) ? color_map["red"] : color_map["blue"])) :
+			  	((is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], infection_risk/100.0));
 								
 				if (has_mask){
 					draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
@@ -412,7 +412,7 @@ experiment Coronaizer type:gui autorun:true{
 		
 	output{
 	  layout #split;
-	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false	{
+	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false)	{
 	   	species room  refresh: false;
 		species room aspect: available_places_info refresh: true position:{0,0,0.001};
 		species ViralRoom transparency:0.75 position:{0,0,0.00};
@@ -468,13 +468,13 @@ experiment Coronaizer type:gui autorun:true{
 	  		}
 	  		else {
 	  			//draw "POPULATION: " + length(people) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01}  perspective: true font:font("Helvetica", 30 , #bold); 
-	 	        draw "Initial infected population:" + initial_nb_infected  color: #blue at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
+	 	        draw "Initial infected population:" + initial_nb_infected  color: color_map["blue"] at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
 	  			//draw circle(peopleSize*3) color:#blue at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y-15#px,0.01} perspective: true;
-	  			draw "Low Risk population:" + (ViralPeople count (each.infection_risk < Low_Risk_of_Infection_threshold)- initial_nb_infected) color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
+	  			draw "Low Risk population:" + (ViralPeople count (each.infection_risk < Low_Risk_of_Infection_threshold)- initial_nb_infected) color: color_map["green"] at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
 	  			//draw circle(peopleSize*3) color:#green at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y+30#px-5#px,0.01} perspective: true;
-	  			draw "Medium Risk population:" + (ViralPeople count (each.infection_risk >= Low_Risk_of_Infection_threshold and each.infection_risk < Medium_Risk_of_Infection_threshold)) color: #orange at: {infectiousLegendPos.x,infectiousLegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
+	  			draw "Medium Risk population:" + (ViralPeople count (each.infection_risk >= Low_Risk_of_Infection_threshold and each.infection_risk < Medium_Risk_of_Infection_threshold)) color: color_map["orange"] at: {infectiousLegendPos.x,infectiousLegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
 	  			//draw circle(peopleSize*3) color:#orange at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y+70#px-5#px,0.01} perspective: true;
-	  			draw "High Risk population:" + (ViralPeople count (each.infection_risk >= Medium_Risk_of_Infection_threshold))   color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+80#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
+	  			draw "High Risk population:" + (ViralPeople count (each.infection_risk >= Medium_Risk_of_Infection_threshold))   color: color_map["red"] at: {infectiousLegendPos.x,infectiousLegendPos.y+80#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
 	  			//draw circle(peopleSize*3) color:#red at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y+110#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
 	  		}
 	  	}
@@ -544,7 +544,7 @@ experiment Coronaizer type:gui autorun:true{
 				tmpC<-blend(#red, #green, tmpRisk);
 				//draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y};
 				
-				tmpC<-tmpRisk<0.3 ? #green : (tmpRisk>=0.3 and tmpRisk<0.6  ? #orange : #red);
+				tmpC<-tmpRisk<0.3 ? color_map["green"] : (tmpRisk>=0.3 and tmpRisk<0.6  ? color_map["orange"] : color_map["red"]);
 				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-20#px};		
 				//draw circle(world.shape.width/length(people)) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};				
 				/*tmpC<-blend(#red, #green, tmpRiskList[i]);
