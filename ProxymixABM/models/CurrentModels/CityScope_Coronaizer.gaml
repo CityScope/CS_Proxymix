@@ -449,7 +449,7 @@ experiment Coronaizer type:gui autorun:true{
 		      draw string("" + with_precision(totalArea,2) + "m2") color: #white at: {sitlegendPos.x,sitlegendPos.y+4*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 		      
 		}	
 		 graphics "intervention"{
-	  		point simLegendPos<-{-world.shape.width*0.5,world.shape.height*0.5};
+	  		point simLegendPos<-{-world.shape.width*0.5,world.shape.height*0.6};
 	  		int fontSize<-20;
 	  		draw "INTERVENTION" color:#white at:{simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
 	  		
@@ -472,14 +472,14 @@ experiment Coronaizer type:gui autorun:true{
 	  		//draw logoPic anchor:#left_center size:{192#px*2,41#px*2} at:logoPos perspective:true;	
 	  	}
 		graphics "time" {
-		  point timeLegendPos<-{world.shape.width*1.1,100#px};
+		  point timeLegendPos<-{world.shape.width*1.1,world.shape.height*0.1};
 	      draw "TIME" color: #white font: font("Helvetica", 20, #plain) at:{timeLegendPos.x,timeLegendPos.y,0.01};
 	      draw string(current_date, "HH:mm:ss") color: #white font: font("Helvetica", 30, #bold) at:{timeLegendPos.x,timeLegendPos.y+30#px,0.01};
 	      //draw string("step: "+ step) color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+40#px,0.01};
 	    		
 	  	}
 	  	graphics "Population"{
-	  		point infectiousLegendPos<-{world.shape.width*1.1,200#px};
+	  		point infectiousLegendPos<-{world.shape.width*1.1,world.shape.height*0.2};
 	  		draw "POPULATION"color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
 	  		draw "" + length(people) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y+30#px,0.01}  perspective: true font:font("Helvetica", 30 , #bold);  
 	  	}
@@ -487,8 +487,7 @@ experiment Coronaizer type:gui autorun:true{
 	  	
 	  	graphics "Projection"{
 	  		float bar_fill;
-	  		point infectiousLegendPos<-{world.shape.width*1.1,500#px};
-	  		//point infectiousLegendPos<-{world.shape.width*0.3,world.shape.height*0.5};
+	  		point infectiousLegendPos<-{world.shape.width*1.1,world.shape.height*0.5};
 	  		point bar_size <- {300#px,10#px};
 	  		float x_offset <- 300#px;
 	  		float y_offset <- 50#px;
@@ -513,9 +512,12 @@ experiment Coronaizer type:gui autorun:true{
 	  	graphics "scale"{
 	  		float base_scale<-5#m;
 	  		if(episode=2){
-	  		  base_scale<-2#m;	
+	  		  base_scale<-1#m;	
 	  		}
-	  		point scalePos<-{world.shape.width*1.1,world.shape.height*0.9};
+	  		if(episode=3){
+	  		  base_scale<-1.5#m;	
+	  		}
+	  		point scalePos<-{world.shape.width*1.1,world.shape.height};
 	  		draw "SCALE"color: #white at: {scalePos.x,scalePos.y-30#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
 	  		
 	  		float rectangle_width <- base_scale/6;
