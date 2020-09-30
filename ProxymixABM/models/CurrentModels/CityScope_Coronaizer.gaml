@@ -210,11 +210,16 @@ species ViralRoom mirrors: room {
 		viral_load <- viral_load + (value/ shape.area);
 	}
 	
-	aspect default {
+	aspect viraload {
 		if(draw_viral_load_per_room){
-		  if (air_infection) {draw shape color: blend(rgb(169,0,0), rgb(62,232,5), viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
+		  if (air_infection) {
+		  	draw shape color: blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
 		}		
-		}
+	 }
+	}
+	aspect default {
+
+		  	draw shape color: rgb(75,75,75);	
 	}
 }
 
@@ -415,8 +420,8 @@ experiment Coronaizer type:gui autorun:true{
 	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false	{
 	   	species room  refresh: false;
 		species room aspect: available_places_info refresh: true position:{0,0,0.001};
-		//species ViralRoom transparency:0.75 position:{0,0,0.00};
-		//species ViralCommonArea transparency:0.85 position:{0,0,0.001};
+		species ViralRoom transparency:0.75 position:{0,0,0.00};
+		species ViralCommonArea transparency:0.85 position:{0,0,0.001};
 		species building_entrance refresh: true;
 		species common_area refresh: true;
 		species wall refresh: false;
@@ -437,7 +442,7 @@ experiment Coronaizer type:gui autorun:true{
 		  draw string(title) color: #white at: {titlePos.x,titlePos.y+50#px,0.01} perspective: true font:font("Helvetica", 40 , #plain);
 		}
 		graphics 'site'{
-			  point sitlegendPos<-{-world.shape.width*0.5,world.shape.height*0.25};
+			  point sitlegendPos<-{-world.shape.width*0.5,world.shape.height*0.2};
 			  int fontSize<-20;
 			  draw string("SITE") color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
 		      draw string(useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 
@@ -517,6 +522,9 @@ experiment Coronaizer type:gui autorun:true{
 	  		if(episode=3){
 	  		  base_scale<-1.5#m;	
 	  		}
+	  		if(episode=5){
+	  			base_scale<-25#m;
+	  		}
 	  		point scalePos<-{world.shape.width*1.1,world.shape.height};
 	  		draw "SCALE"color: #white at: {scalePos.x,scalePos.y-30#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
 	  		
@@ -551,45 +559,45 @@ experiment Coronaizer type:gui autorun:true{
 		  }
 		}
 		 
-		graphics "trid"{
-			point triLegendPos<-{world.shape.width*0,-world.shape.width*0.025};
-			draw "Percent Risk:" color: #white font: font("Helvetica", 15, #bold) at:{triLegendPos.x,triLegendPos.y-40#px,0.01};
-	     
-			int i<-0;
-			loop inf over:infectionRiskList{
-				//draw rectangle(world.shape.width/length(people),world.shape.width/50) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};
-				//draw circle(world.shape.width/length(people)) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};
-				i<-i+1;		
-			}
-			i<-0;
-			float tmpRisk;
-			rgb tmpC;
-			
-			list<float> tmpRiskList1 <- []; 
-			list<float> tmpRiskList2 <- []; 
-			list<float> tmpRiskList;			
-			loop i from:0 to:49{
-				tmpRiskList1 <+ infectionRiskList[int((2*i)*(length(infectionRiskList)-1)/99)].infection_risk/100;
-				tmpRiskList2 <+ infectionRiskList[int((2*i+1)*(length(infectionRiskList)-1)/99)].infection_risk/100;
-			}
-			tmpRiskList <- tmpRiskList1 + reverse(tmpRiskList2);		
-				
-			loop i from:0 to:99{
-				//draw rectangle(world.shape.width/length(people),world.shape.width/50) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};
-				tmpRisk<-infectionRiskList[int(i*(length(infectionRiskList)-1)/99)].infection_risk/100;
-				tmpC<-blend(#red, #green, tmpRisk);
-				//draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y};
-				
-				tmpC<-tmpRisk<0.3 ? color_map["green"] : (tmpRisk>=0.3 and tmpRisk<0.6  ? color_map["orange"] : color_map["red"]);
-				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-20#px};		
-				//draw circle(world.shape.width/length(people)) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};				
-				/*tmpC<-blend(#red, #green, tmpRiskList[i]);
-				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-40#px};
-				tmpC<-tmpRiskList[i]<0.3 ? #green : (tmpRiskList[i]>=0.3 and tmpRiskList[i]<0.6  ? #orange : #red);
-				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-60#px};*/
-				i<-i+1;	
-			}
-		}
+//		graphics "trid"{
+//			point triLegendPos<-{world.shape.width*1.1,world.shape.height*0.4};
+//			draw "Percent Risk:" color: #white font: font("Helvetica", 15, #bold) at:{triLegendPos.x,triLegendPos.y-40#px,0.01};
+//	     
+//			int i<-0;
+//			loop inf over:infectionRiskList{
+//				//draw rectangle(world.shape.width/length(people),world.shape.width/50) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};
+//				//draw circle(world.shape.width/length(people)) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};
+//				i<-i+1;		
+//			}
+//			i<-0;
+//			float tmpRisk;
+//			rgb tmpC;
+//			
+//			list<float> tmpRiskList1 <- []; 
+//			list<float> tmpRiskList2 <- []; 
+//			list<float> tmpRiskList;			
+//			loop i from:0 to:49{
+//				tmpRiskList1 <+ infectionRiskList[int((2*i)*(length(infectionRiskList)-1)/99)].infection_risk/100;
+//				tmpRiskList2 <+ infectionRiskList[int((2*i+1)*(length(infectionRiskList)-1)/99)].infection_risk/100;
+//			}
+//			tmpRiskList <- tmpRiskList1 + reverse(tmpRiskList2);		
+//				
+//			loop i from:0 to:59{
+//				//draw rectangle(world.shape.width/length(people),world.shape.width/50) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};
+//				tmpRisk<-infectionRiskList[int(i*(length(infectionRiskList)-1)/99)].infection_risk/100;
+//				tmpC<-blend(#red, #green, tmpRisk);
+//				//draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y};
+//				
+//				tmpC<-tmpRisk<0.3 ? color_map["green"] : (tmpRisk>=0.3 and tmpRisk<0.6  ? color_map["orange"] : color_map["red"]);
+//				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-20#px};		
+//				//draw circle(world.shape.width/length(people)) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};				
+//				/*tmpC<-blend(#red, #green, tmpRiskList[i]);
+//				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-40#px};
+//				tmpC<-tmpRiskList[i]<0.3 ? #green : (tmpRiskList[i]>=0.3 and tmpRiskList[i]<0.6  ? #orange : #red);
+//				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-60#px};*/
+//				i<-i+1;	
+//			}
+//		}
 
 	  }	
 	}		
