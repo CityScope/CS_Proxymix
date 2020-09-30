@@ -409,7 +409,8 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
 	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
-	parameter "Map Scale :" category: "Ventilation" var:base_scale min:0.0 max:100.0 <-5#m;
+	parameter "Map Scale :" category: "Ventilation" var:base_scale min:1.0 max:100.0 <-5#m;
+		
 		
 	output{
 	  layout #split;
@@ -457,27 +458,36 @@ experiment Coronaizer type:gui autorun:true{
 	  		draw "POPULATION: " + length(people) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01}  perspective: true font:font("Helvetica", 20 , #bold); 
 	  	}
 	  	
+	  	
 	  	graphics "Projection"{
-	  		point infectiousLegendPos<-{world.shape.width*0.65,world.shape.height+25#px};
+	  		float bar_fill;
+	  		point infectiousLegendPos<-{world.shape.width*0.65,world.shape.height*0.75};
+	  		point bar_size <- {100#px,10#px};
+	  		float x_offset <- 250#px;
+	  		float y_offset <- 20#px;
+	  		map<string,int> infection_data <- ["Initial infected"::initial_nb_infected, 
+	  										   "Low risk"::(ViralPeople count (each.infection_risk < Low_Risk_of_Infection_threshold)- initial_nb_infected),
+	  										   "Medium risk"::(ViralPeople count (each.infection_risk >= Low_Risk_of_Infection_threshold and each.infection_risk < Medium_Risk_of_Infection_threshold)),
+	  										   "High risk"::(ViralPeople count (each.infection_risk >= Medium_Risk_of_Infection_threshold))
+	  					];
+	  		list<string> risk_colors <- ["blue", "green","orange","red"];
 	  		//draw "SIMULATION PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 50 , #bold);
-	  		if (use_SIR_model) {
-	  			draw "Initial infected new comers:" + initial_nb_infected + " people" color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-	  			draw "Susceptible:" + nb_susceptible color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-		  		draw circle(peopleSize) color:#green at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+20#px-5#px,0.01} perspective: true;
-		  		draw "Infected:" + nb_infected  color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-		  		draw circle(peopleSize) color:#red at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+40#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);	
-	  		}
-	  		else {
-	  			//draw "POPULATION: " + length(people) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01}  perspective: true font:font("Helvetica", 30 , #bold); 
-	 	        draw "Initial infected population:" + initial_nb_infected  color: color_map["blue"] at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			//draw circle(peopleSize*3) color:#blue at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y-15#px,0.01} perspective: true;
-	  			draw "Low Risk population:" + (ViralPeople count (each.infection_risk < Low_Risk_of_Infection_threshold)- initial_nb_infected) color: color_map["green"] at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			//draw circle(peopleSize*3) color:#green at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y+30#px-5#px,0.01} perspective: true;
-	  			draw "Medium Risk population:" + (ViralPeople count (each.infection_risk >= Low_Risk_of_Infection_threshold and each.infection_risk < Medium_Risk_of_Infection_threshold)) color: color_map["orange"] at: {infectiousLegendPos.x,infectiousLegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			//draw circle(peopleSize*3) color:#orange at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y+70#px-5#px,0.01} perspective: true;
-	  			draw "High Risk population:" + (ViralPeople count (each.infection_risk >= Medium_Risk_of_Infection_threshold))   color: color_map["red"] at: {infectiousLegendPos.x,infectiousLegendPos.y+80#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			//draw circle(peopleSize*3) color:#red at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y+110#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		}
+			loop i from:0 to: length(infection_data)-1{
+				draw infection_data.keys[i] + infection_data.values[i]  anchor: #left_center color: color_map[risk_colors[i]] at: {infectiousLegendPos.x,infectiousLegendPos.y+i*y_offset,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
+	  			draw circle(bar_size.y/2)  color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.01};
+	  			draw circle(bar_size.y/2) color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset+bar_size.x/2-bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.01};
+	  			draw rectangle(bar_size.x-bar_size.y,bar_size.y) color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset,infectiousLegendPos.y+i*y_offset,0.01};
+	  			bar_fill <- length(ViralPeople) = 0 ?0:(infection_data.values[i] / length(ViralPeople)*bar_size.x)#px;
+	  			
+	  			if bar_fill <= bar_size.y {
+	  				float offset <- (-bar_size.y + bar_fill)/2;
+	  				draw  (circle(bar_size.y/2)  at_location {0,0,0}) inter (circle(bar_size.y/2)  at_location {-bar_size.y + bar_fill,0})   color: color_map["blue"] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2+offset,infectiousLegendPos.y+i*y_offset,0.02};
+	  			}else{
+	  				draw circle(bar_size.y/2)  color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.02};
+	  				draw circle(bar_size.y/2)  color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill-bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.02};
+	  				draw rectangle(bar_fill-bar_size.y,bar_size.y) color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.01};
+	  			}
+			}
 	  	}
 	  	
 	  	graphics "time" {
