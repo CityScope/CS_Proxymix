@@ -8,6 +8,7 @@
 model CityScopeCoronaizer
 
 
+
 import "DailyRoutine.gaml"
 
 global{
@@ -483,6 +484,7 @@ experiment Coronaizer type:gui autorun:true{
 	  	graphics "Projection"{
 	  		float bar_fill;
 	  		point infectiousLegendPos<-{world.shape.width*1.1,500#px};
+	  		//point infectiousLegendPos<-{world.shape.width*0.3,world.shape.height*0.5};
 	  		point bar_size <- {300#px,10#px};
 	  		float x_offset <- 300#px;
 	  		float y_offset <- 50#px;
@@ -493,22 +495,14 @@ experiment Coronaizer type:gui autorun:true{
 	  					];
 	  		list<string> risk_colors <- ["blue", "green","orange","red"];
 	  		//draw "SIMULATION PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 50 , #bold);
+			geometry g <- (rectangle(bar_size.x-bar_size.y,bar_size.y) at_location {0,0,0})+(circle(bar_size.y/2) at_location {bar_size.x/2-bar_size.y/2,0})+(circle(bar_size.y/2) at_location {-bar_size.x/2+bar_size.y/2,0});	
 			loop i from:0 to: length(infection_data)-1{
 				draw infection_data.keys[i] anchor: #left_center color: color_map[risk_colors[i]] at: {infectiousLegendPos.x,infectiousLegendPos.y+i*y_offset,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  			draw string(infection_data.values[i])  anchor: #left_center color: color_map[risk_colors[i]] at: {infectiousLegendPos.x,infectiousLegendPos.y+i*y_offset+y_offset/2,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			
-	  			draw circle(bar_size.y/2)  color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.01};
-	  			draw circle(bar_size.y/2) color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset+bar_size.x/2-bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.01};
-	  			draw rectangle(bar_size.x-bar_size.y,bar_size.y) color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset,infectiousLegendPos.y+i*y_offset,0.01};
+	  			draw g color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset,infectiousLegendPos.y+i*y_offset,0.01};
 	  			bar_fill <- length(ViralPeople) = 0 ?0:(infection_data.values[i] / length(ViralPeople)*bar_size.x);
-	  			if bar_fill <= bar_size.y {
-	  				float offset <- (-bar_size.y + bar_fill)/2;
-	  				draw  (circle(bar_size.y/2)  at_location {0,0,0}) inter (circle(bar_size.y/2)  at_location {-bar_size.y + bar_fill,0})   color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2+offset,infectiousLegendPos.y+i*y_offset,0.02};
-	  			}else{
-	  				draw circle(bar_size.y/2)  color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.02};
-	  				draw circle(bar_size.y/2)  color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill-bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.02};
-	  				draw rectangle(bar_fill-bar_size.y,bar_size.y) color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.02};
-	  			}
+	  			geometry g2 <- (g at_location {0,0,0}) inter (g at_location {-bar_size.x+bar_fill,0,0}) ;
+	  			draw g2 color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.02};
 			}
 	  	}
 	  	
