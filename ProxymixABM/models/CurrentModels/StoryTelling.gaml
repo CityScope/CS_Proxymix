@@ -16,7 +16,7 @@ import 'CityScope_Coronaizer.gaml'
 experiment Episode1 type: gui parent: Coronaizer{
 	//Scenario 1
 	parameter 'Episode:' var: episode category: 'file' <- 1;
-	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
+	parameter 'title:' var: title category: 'file' <- "No intervention";
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "Classrooms";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0 #h;
@@ -32,7 +32,7 @@ experiment Episode1 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::1,title::"Scenario B: Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
+		create simulation with: [episode::1,title::"Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
 		ventilationType::"Natural",ventilation_ratio::0.0,
 		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::1.0,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
@@ -42,7 +42,7 @@ experiment Episode1 type: gui parent: Coronaizer{
 experiment Episode2 type: gui parent: Coronaizer{
 	//Scenario 1
 	parameter 'Episode:' var: episode category: 'file' <- 2;
-	parameter 'title:' var: title category: 'file' <- "Scenario A: Air Conditioning";
+	parameter 'title:' var: title category: 'file' <- "Air Conditioning";
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUT/lab";
 	parameter 'Workplace layer name' var: workplace_layer category: "file" <- ["Labs"];
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
@@ -69,7 +69,7 @@ experiment Episode2 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::2,title::"Scenario B: Natural Ventilation",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",ventilation_ratio::1.0,
+		create simulation with: [episode::2,title::"Natural Ventilation",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"AC",ventilation_ratio::1.0,
 		initial_nb_infected::5,timeSpent::45#mn,workplace_layer::["Labs"],density_scenario::"distance",distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
 		show_droplet::false,droplet_livespan::20,droplet_distance::1.0, fast_step::5.0,normal_step::0.2,arrival_time_interval:: 20#s, step_arrival::0.2#s,limit_cpt_for_entrance_room_creation::2];
 
@@ -79,7 +79,7 @@ experiment Episode2 type: gui parent: Coronaizer{
 experiment Episode3 type: gui parent: Coronaizer{
 	//Scenario 1
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD";
-	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
+	parameter 'title:' var: title category: 'file' <- "No intervention";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0#h;
@@ -96,7 +96,7 @@ experiment Episode3 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [title::"Scenario B: Sanitation ",useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
+		create simulation with: [title::"Sanitation ",useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
 		proba_using_before_work::1.0, proba_using_after_work::0.5,step_arrival::3, arrival_time_interval::5#mn,tolerance_target_param::2.0,
 		timeSpent::45#mn,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.2#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 
@@ -107,7 +107,7 @@ experiment Episode4 type: gui parent: Coronaizer{
 	//Scenario 1
 
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA";
-	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
+	parameter 'title:' var: title category: 'file' <- "No intervention";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "Labs";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 1.0#h;
@@ -125,7 +125,7 @@ experiment Episode4 type: gui parent: Coronaizer{
 	
 	init
 	{   
-		create simulation with: [title::"Scenario B: Mask",useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",use_change_step::false,step_arrival::3, arrival_time_interval::10#mn,
+		create simulation with: [title::"Mask",useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",use_change_step::false,step_arrival::3, arrival_time_interval::10#mn,
 		timeSpent::1.0#h,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.4#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 		
 	}
@@ -134,7 +134,7 @@ experiment Episode4 type: gui parent: Coronaizer{
 experiment Episode5 type: gui parent: Coronaizer{
 	//Scenario 1
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUSUR";
-	parameter 'title:' var: title category: 'file' <- "Scenario A: No intervention";
+	parameter 'title:' var: title category: 'file' <- "No intervention";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 45#mn;
@@ -149,7 +149,7 @@ experiment Episode5 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [title::"Scenario B: Dedicated path",useCase::"UDG/CUSUR",useCaseType::"Labs",ventilationType::"Natural",
+		create simulation with: [title::"Dedicated path",useCase::"UDG/CUSUR",useCaseType::"Labs",ventilationType::"Natural",
 		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::2.0#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 	}
 }
