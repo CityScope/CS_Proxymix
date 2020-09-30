@@ -8,6 +8,7 @@
 model CityScopeCoronaizer
 
 
+
 import "DailyRoutine.gaml"
 
 global{
@@ -62,9 +63,6 @@ global{
 	graph<people, people> infection_graph <- graph<people, people>([]);
 	
 	list<ViralPeople> infectionRiskList;
-
-
-	
 	
 	init{
 			
@@ -322,8 +320,8 @@ species ViralPeople  mirrors:people{
 		if not target.end_of_day and not target.not_yet_active{
 			if(showPeople) and not target.is_outside{
 			  draw circle(is_infected ? peopleSize*1.25 : peopleSize) color:
-			  	use_SIR_model ? ((is_susceptible) ? #green : ((is_infected) ? #red : #blue)) :
-			  	((is_infected) ? #blue : blend(#red, #green, infection_risk/100.0));
+			  	use_SIR_model ? ((is_susceptible) ? color_map["green"] : ((is_infected) ? color_map["red"] : color_map["blue"])) :
+			  	((is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], infection_risk/100.0));
 								
 				if (has_mask){
 					draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
@@ -378,6 +376,7 @@ grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 ne
 experiment Coronaizer type:gui autorun:true{
 
 	//float minimum_cycle_duration<-0.02;
+	parameter 'title:' var: title category: 'file' <- "No intervention";
 	parameter "Infection distance:" category: "Policy" var:infectionDistance min: 1.0 max: 100.0 step:1;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1;
 	bool a_boolean_to_disable_parameters <- true;
@@ -390,7 +389,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_viral_load_by_touching_grid;
 	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room<-true;
 	parameter "Show People:" category: "Visualization" var:showPeople;
-    parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+    parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
 	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
@@ -410,13 +409,14 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
 	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
 		
+		
 	output{
 	  layout #split;
-	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false{
+	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false	{
 	   	species room  refresh: false;
-		species room aspect: available_places_info refresh: true;
-		species ViralRoom transparency:0.75 position:{0,0,0.00};
-		species ViralCommonArea transparency:0.85 position:{0,0,0.001};
+		species room aspect: available_places_info refresh: true position:{0,0,0.001};
+		//species ViralRoom transparency:0.75 position:{0,0,0.00};
+		//species ViralCommonArea transparency:0.85 position:{0,0,0.001};
 		species building_entrance refresh: true;
 		species common_area refresh: true;
 		species wall refresh: false;
@@ -432,66 +432,104 @@ experiment Coronaizer type:gui autorun:true{
 	  	species cell aspect:default;
 	
 		graphics 'title'{
-		  point titlePos<-{-world.shape.width*0.25,-100#px};
-		  draw string(title) color: #white at: {titlePos.x,titlePos.y,0.01} perspective: true font:font("Helvetica", 90 , #bold);
+		  point titlePos<-{-world.shape.width*0.5,0};
+		  draw "SCENARIO" color: #white at: {titlePos.x,titlePos.y,0.01} perspective: true font:font("Helvetica", 20 , #bold);
+		  draw string(title) color: #white at: {titlePos.x,titlePos.y+50#px,0.01} perspective: true font:font("Helvetica", 40 , #plain);
 		}
 		graphics 'site'{
-			  point sitlegendPos<-{-world.shape.width*0.25,world.shape.height+50#px};
-			  draw string("SITE") color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-		      draw string(useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-		      draw string("Type: " +  useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #bold);
-		      draw string("Floor area: " + with_precision(totalArea,2) + "m2") color: #white at: {sitlegendPos.x,sitlegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 	      
+			  point sitlegendPos<-{-world.shape.width*0.5,world.shape.height*0.25};
+			  int fontSize<-20;
+			  draw string("SITE") color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
+		      draw string(useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 
+		      
+		      draw string("Building type" ) color: #white at: {sitlegendPos.x,sitlegendPos.y+2*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain);
+		      draw string(useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y+2*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold);
+		      
+		      draw string("Floor area ") color: #white at: {sitlegendPos.x,sitlegendPos.y+4*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain); 
+		      draw string("" + with_precision(totalArea,2) + "m2") color: #white at: {sitlegendPos.x,sitlegendPos.y+4*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 		      
 		}	
 		 graphics "intervention"{
-	  		point simLegendPos<-{world.shape.width*0,world.shape.height+50#px};
-	  		draw "INTERVENTION" color:#white at:{simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 30 , #bold);
-	  		draw string("Physical distance: " +  (density_scenario="data" ? "none" : with_precision(distance_people,2))) color: #white at: {simLegendPos.x,simLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #bold);
-	  		draw "Percentage of masks:" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  		draw "Type of Ventilation: " + ventilationType color:#white at:{simLegendPos.x,simLegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #bold);
-	  		draw "Time Spent in classrooms: " + timeSpent/#hour + "h" color:#white at:{simLegendPos.x,simLegendPos.y+80#px,0.01} perspective: true font:font("Helvetica", 20 , #bold);
-	  	}
-	
-	  	graphics "Population"{
-	  		point infectiousLegendPos<-{world.shape.width*0.35,world.shape.height+50#px};
-	  		//draw "SIMULATION PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 50 , #bold);
-	  		if (use_SIR_model) {
-	  			draw "Initial infected new comers:" + initial_nb_infected + " people" color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-	  			draw "Susceptible:" + nb_susceptible color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-		  		draw circle(peopleSize) color:#green at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+20#px-5#px,0.01} perspective: true;
-		  		draw "Infected:" + nb_infected  color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-		  		draw circle(peopleSize) color:#red at:{infectiousLegendPos.x-5#px,infectiousLegendPos.y+40#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);	
-	  		}
-	  		else {
-	  			draw "POPULATION: " + length(people) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01}  perspective: true font:font("Helvetica", 30 , #bold); 
-	 	        draw "Initial infected population:" + initial_nb_infected  color: #blue at: {infectiousLegendPos.x,infectiousLegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			//draw circle(peopleSize*3) color:#blue at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y-15#px,0.01} perspective: true;
-	  			draw "Low Risk population:" + (ViralPeople count (each.infection_risk < Low_Risk_of_Infection_threshold)- initial_nb_infected) color: #green at: {infectiousLegendPos.x,infectiousLegendPos.y+40#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			//draw circle(peopleSize*3) color:#green at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y+30#px-5#px,0.01} perspective: true;
-	  			draw "Medium Risk population:" + (ViralPeople count (each.infection_risk >= Low_Risk_of_Infection_threshold and each.infection_risk < Medium_Risk_of_Infection_threshold)) color: #orange at: {infectiousLegendPos.x,infectiousLegendPos.y+60#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			//draw circle(peopleSize*3) color:#orange at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y+70#px-5#px,0.01} perspective: true;
-	  			draw "High Risk population:" + (ViralPeople count (each.infection_risk >= Medium_Risk_of_Infection_threshold))   color: #red at: {infectiousLegendPos.x,infectiousLegendPos.y+80#px,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			//draw circle(peopleSize*3) color:#red at:{infectiousLegendPos.x-10#px,infectiousLegendPos.y+110#px-5#px,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-	  		}
+	  		point simLegendPos<-{-world.shape.width*0.5,world.shape.height*0.5};
+	  		int fontSize<-20;
+	  		draw "INTERVENTION" color:#white at:{simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
+	  		
+	  		draw string("Physical distance") color: #white at: {simLegendPos.x,simLegendPos.y+2*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain);
+	  		draw string(" " +  (density_scenario="data" ? "none" : with_precision(distance_people,2))) color: #white at: {simLegendPos.x,simLegendPos.y+2*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold);
+	  		
+	  		draw "Masks" color: #white at: {simLegendPos.x,simLegendPos.y+4*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain); 
+	  		draw "" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y+4*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 
+	  		
+	  		draw "Ventilation type "color:#white at:{simLegendPos.x,simLegendPos.y+6*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain);
+	  		draw "" + ventilationType color:#white at:{simLegendPos.x,simLegendPos.y+6*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold);
+	  		
+	  		draw "Time spent in classrooms"color:#white at:{simLegendPos.x,simLegendPos.y+8*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain);
+			draw "" + timeSpent/#hour + "hr" color:#white at:{simLegendPos.x,simLegendPos.y+8*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold);
+	  	  	
 	  	}
 	  	
-	  	graphics "time" {
-		  point timeLegendPos<-{world.shape.width*0.75,world.shape.height+50#px};
-	      draw "TIME:" color: #white font: font("Helvetica", 30, #bold) at:{timeLegendPos.x,timeLegendPos.y,0.01};
-	      draw string(current_date, "HH:mm:ss") color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+20#px,0.01};
+	  	graphics 'logo'{
+	  		point logoPos<-{-world.shape.width*0,world.shape.height};
+	  		//draw logoPic anchor:#left_center size:{192#px*2,41#px*2} at:logoPos perspective:true;	
+	  	}
+		graphics "time" {
+		  point timeLegendPos<-{world.shape.width*1.1,100#px};
+	      draw "TIME" color: #white font: font("Helvetica", 20, #plain) at:{timeLegendPos.x,timeLegendPos.y,0.01};
+	      draw string(current_date, "HH:mm:ss") color: #white font: font("Helvetica", 30, #bold) at:{timeLegendPos.x,timeLegendPos.y+30#px,0.01};
 	      //draw string("step: "+ step) color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+40#px,0.01};
 	    		
 	  	}
+	  	graphics "Population"{
+	  		point infectiousLegendPos<-{world.shape.width*1.1,200#px};
+	  		draw "POPULATION"color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
+	  		draw "" + length(people) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y+30#px,0.01}  perspective: true font:font("Helvetica", 30 , #bold);  
+	  	}
+	  	
+	  	
+	  	graphics "Projection"{
+	  		float bar_fill;
+	  		point infectiousLegendPos<-{world.shape.width*1.1,500#px};
+	  		//point infectiousLegendPos<-{world.shape.width*0.3,world.shape.height*0.5};
+	  		point bar_size <- {300#px,10#px};
+	  		float x_offset <- 300#px;
+	  		float y_offset <- 50#px;
+	  		map<string,int> infection_data <- ["Initial infected"::initial_nb_infected, 
+	  										   "Low risk"::(ViralPeople count (each.infection_risk < Low_Risk_of_Infection_threshold)- initial_nb_infected),
+	  										   "Medium risk"::(ViralPeople count (each.infection_risk >= Low_Risk_of_Infection_threshold and each.infection_risk < Medium_Risk_of_Infection_threshold)),
+	  										   "High risk"::(ViralPeople count (each.infection_risk >= Medium_Risk_of_Infection_threshold))
+	  					];
+	  		list<string> risk_colors <- ["blue", "green","orange","red"];
+	  		//draw "SIMULATION PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 50 , #bold);
+			geometry g <- (rectangle(bar_size.x-bar_size.y,bar_size.y) at_location {0,0,0})+(circle(bar_size.y/2) at_location {bar_size.x/2-bar_size.y/2,0})+(circle(bar_size.y/2) at_location {-bar_size.x/2+bar_size.y/2,0});	
+			loop i from:0 to: length(infection_data)-1{
+				draw infection_data.keys[i] anchor: #left_center color: color_map[risk_colors[i]] at: {infectiousLegendPos.x,infectiousLegendPos.y+i*y_offset,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
+	  			draw string(infection_data.values[i])  anchor: #left_center color: color_map[risk_colors[i]] at: {infectiousLegendPos.x,infectiousLegendPos.y+i*y_offset+y_offset/2,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
+	  			draw g color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset,infectiousLegendPos.y+i*y_offset,0.01};
+	  			bar_fill <- length(ViralPeople) = 0 ?0:(infection_data.values[i] / length(ViralPeople)*bar_size.x);
+	  			geometry g2 <- (g at_location {0,0,0}) inter (g at_location {-bar_size.x+bar_fill,0,0}) ;
+	  			draw g2 color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.02};
+			}
+	  	}
+	  	
+	  	graphics "scale"{
+	  		float base_scale<-5#m;
+	  		if(episode=2){
+	  		  base_scale<-2#m;	
+	  		}
+	  		point scalePos<-{world.shape.width*1.1,world.shape.height*0.9};
+	  		draw "SCALE"color: #white at: {scalePos.x,scalePos.y-30#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
+	  		
+	  		float rectangle_width <- base_scale/6;
+	  		list<float> scale_markers <- [0, 1*base_scale, 2*base_scale, 3*base_scale, 5*base_scale];
+	  		int side <- 1;
+	  		loop i from: 0 to: length(scale_markers)-2{
+	  			draw rectangle({scalePos.x+scale_markers[i],scalePos.y},{scalePos.x+scale_markers[i+1],scalePos.y-side*rectangle_width})  color:#white;
+	 	 		draw string(int(scale_markers[i])) anchor: i=0? #bottom_left: #bottom_center color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+scale_markers[i],scalePos.y+rectangle_width+16#px,0.01};
+				side <- - side;
+	  		}	  		
+	  		draw string(int(last(scale_markers)))+ "m" anchor: #bottom_right color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+last(scale_markers),scalePos.y+rectangle_width+16#px,0.01};
+	  	}
 	  	 
-	 
-	  	/*graphics "legend"{
-	  		point legendPos<-{world.shape.width*1,world.shape.height*1.5};
 
-	  		draw "Desk"color: #white at: {legendPos.x,legendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-	  		draw rectangle(10#px,10#px) color:#white at:{legendPos.x-20#px,legendPos.y-20#px-5#px,0.01} perspective: true;
-	  		draw "Entrance"color: #white at: {legendPos.x,legendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
-	  		draw circle(8#px)-circle(4#px) color:#yellow at:{legendPos.x-20#px,legendPos.y-5#px,0.01} perspective: true;
-	  	}	*/  	
-	  
 		
 	  	graphics "infection_graph" {
 		if (infection_graph != nil and drawInfectionGraph = true) {
@@ -513,7 +551,7 @@ experiment Coronaizer type:gui autorun:true{
 		 
 		graphics "trid"{
 			point triLegendPos<-{world.shape.width*0,-world.shape.width*0.025};
-			draw "Percent Risk:" color: #white font: font("Helvetica", 15, #bold) at:{triLegendPos.x-120#px,triLegendPos.y-15#px,0.01};
+			draw "Percent Risk:" color: #white font: font("Helvetica", 15, #bold) at:{triLegendPos.x,triLegendPos.y-40#px,0.01};
 	     
 			int i<-0;
 			loop inf over:infectionRiskList{
@@ -540,7 +578,7 @@ experiment Coronaizer type:gui autorun:true{
 				tmpC<-blend(#red, #green, tmpRisk);
 				//draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y};
 				
-				tmpC<-tmpRisk<0.3 ? #green : (tmpRisk>=0.3 and tmpRisk<0.6  ? #orange : #red);
+				tmpC<-tmpRisk<0.3 ? color_map["green"] : (tmpRisk>=0.3 and tmpRisk<0.6  ? color_map["orange"] : color_map["red"]);
 				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-20#px};		
 				//draw circle(world.shape.width/length(people)) color:blend(#red, #green, inf.infection_risk/100.0) at:{triLegendPos.x+i*world.shape.width/length(people),triLegendPos.y};				
 				/*tmpC<-blend(#red, #green, tmpRiskList[i]);
@@ -549,28 +587,9 @@ experiment Coronaizer type:gui autorun:true{
 				draw circle(world.shape.width/200) color:tmpC at:{triLegendPos.x+i*world.shape.width/100,triLegendPos.y-60#px};*/
 				i<-i+1;	
 			}
-			
-
-			
-			//draw rectangle(world.shape.width/length(people),world.shape.width/50) color:#green at:triLegendPos;	
 		}
 
 	  }	
-	 /*display CoronaChart refresh:every(#mn) toolbar:false background:#black{
-		chart "Population in " size:{1.0,1.0}style:line background:#black type: series x_serie_labels: ("") x_label: 'Infection rate: '+infection_rate y_label: 'Case'{
-			data "susceptible" value: nb_susceptible color: #green;
-			data "infected" value: nb_infected color: #red;	
-			//data "recovered" value: nb_recovered color: #blue;
-		}
-		
-		chart "People Distribution" background:#black  type: pie size: {1.0,1.0} position: {world.shape.width*1.1,world.shape.height*0.5} color: #white axes: #yellow title_font: 'Helvetica' title_font_size: 12.0 
-		tick_font: 'Helvetica' tick_font_size: 10 tick_font_style: 'bold' label_font: 'Helvetica' label_font_size: 32 label_font_style: 'bold' x_label: 'Nice Xlabel' y_label:'Nice Ylabel'
-		{
-			data "Low Risk" value: nb_susceptible color:#green;
-			data "High Risk" value: nb_infected color:#red;
-		}
-		
-	  }*/
 	}		
 }
 
