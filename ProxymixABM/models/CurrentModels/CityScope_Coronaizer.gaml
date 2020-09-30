@@ -437,29 +437,33 @@ experiment Coronaizer type:gui autorun:true{
 		  draw string(title) color: #white at: {titlePos.x,titlePos.y+50#px,0.01} perspective: true font:font("Helvetica", 40 , #plain);
 		}
 		graphics 'site'{
-			  point sitlegendPos<-{-world.shape.width*0.5,200#px};
-			  draw string("SITE") color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
-		      draw string(useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y+20#px,0.01} perspective: true font:font("Helvetica", 15 , #bold); 
-		      draw string("Building type" ) color: #white at: {sitlegendPos.x,sitlegendPos.y+50#px,0.01} perspective: true font:font("Helvetica", 15 , #plain);
-		      draw string(useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y+70#px,0.01} perspective: true font:font("Helvetica", 15 , #bold);
-		      draw string("Floor area ") color: #white at: {sitlegendPos.x,sitlegendPos.y+100#px,0.01} perspective: true font:font("Helvetica", 15 , #plain); 
-		      draw string("" + with_precision(totalArea,2) + "m2") color: #white at: {sitlegendPos.x,sitlegendPos.y+120#px,0.01} perspective: true font:font("Helvetica", 15 , #bold); 		      
+			  point sitlegendPos<-{-world.shape.width*0.5,world.shape.height*0.25};
+			  int fontSize<-20;
+			  draw string("SITE") color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
+		      draw string(useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 
+		      
+		      draw string("Building type" ) color: #white at: {sitlegendPos.x,sitlegendPos.y+2*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain);
+		      draw string(useCaseType ) color: #white at: {sitlegendPos.x,sitlegendPos.y+2*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold);
+		      
+		      draw string("Floor area ") color: #white at: {sitlegendPos.x,sitlegendPos.y+4*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain); 
+		      draw string("" + with_precision(totalArea,2) + "m2") color: #white at: {sitlegendPos.x,sitlegendPos.y+4*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 		      
 		}	
 		 graphics "intervention"{
-	  		point simLegendPos<-{-world.shape.width*0.5,500#px};
-	  		draw "INTERVENTION" color:#white at:{simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", 20 , #plain);
+	  		point simLegendPos<-{-world.shape.width*0.5,world.shape.height*0.5};
+	  		int fontSize<-20;
+	  		draw "INTERVENTION" color:#white at:{simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
 	  		
-	  		draw string("Physical distance") color: #white at: {simLegendPos.x,simLegendPos.y+50#px,0.01} perspective: true font:font("Helvetica", 15 , #plain);
-	  		draw string(" " +  (density_scenario="data" ? "none" : with_precision(distance_people,2))) color: #white at: {simLegendPos.x,simLegendPos.y+70#px,0.01} perspective: true font:font("Helvetica", 15 , #bold);
+	  		draw string("Physical distance") color: #white at: {simLegendPos.x,simLegendPos.y+2*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain);
+	  		draw string(" " +  (density_scenario="data" ? "none" : with_precision(distance_people,2))) color: #white at: {simLegendPos.x,simLegendPos.y+2*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold);
 	  		
-	  		draw "Masks" color: #white at: {simLegendPos.x,simLegendPos.y+100#px,0.01} perspective: true font:font("Helvetica", 15 , #plain); 
-	  		draw "" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y+120#px,0.01} perspective: true font:font("Helvetica", 15 , #bold); 
+	  		draw "Masks" color: #white at: {simLegendPos.x,simLegendPos.y+4*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain); 
+	  		draw "" + maskRatio*100 + "%" color: #white at: {simLegendPos.x,simLegendPos.y+4*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 
 	  		
-	  		draw "Ventilation type "color:#white at:{simLegendPos.x,simLegendPos.y+150#px,0.01} perspective: true font:font("Helvetica", 15 , #plain);
-	  		draw "" + ventilationType color:#white at:{simLegendPos.x,simLegendPos.y+170#px,0.01} perspective: true font:font("Helvetica", 15 , #bold);
+	  		draw "Ventilation type "color:#white at:{simLegendPos.x,simLegendPos.y+6*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain);
+	  		draw "" + ventilationType color:#white at:{simLegendPos.x,simLegendPos.y+6*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold);
 	  		
-	  		draw "Time spent in classrooms"color:#white at:{simLegendPos.x,simLegendPos.y+200#px,0.01} perspective: true font:font("Helvetica", 15 , #plain);
-			draw "" + timeSpent/#hour + "hr" color:#white at:{simLegendPos.x,simLegendPos.y+220#px,0.01} perspective: true font:font("Helvetica", 15 , #bold);
+	  		draw "Time spent in classrooms"color:#white at:{simLegendPos.x,simLegendPos.y+8*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain);
+			draw "" + timeSpent/#hour + "hr" color:#white at:{simLegendPos.x,simLegendPos.y+8*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold);
 	  	  	
 	  	}
 	  	
