@@ -63,7 +63,7 @@ global{
 	
 	list<ViralPeople> infectionRiskList;
 	
-	float base_scale <- 5#m;
+	//float base_scale <- 5#m;
 
 	
 	init{
@@ -409,7 +409,7 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
 	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
-	parameter "Map Scale :" category: "Ventilation" var:base_scale min:1.0 max:100.0 <-5#m;
+	//parameter "Map Scale :" category: "Ventilation" var:base_scale min:1.0#m max:100.0#m <-5#m;
 		
 		
 	output{
@@ -417,7 +417,7 @@ experiment Coronaizer type:gui autorun:true{
 	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false	{
 	   	species room  refresh: false;
 		species room aspect: available_places_info refresh: true position:{0,0,0.001};
-		species ViralRoom transparency:0.75 position:{0,0,0.00};
+		//species ViralRoom transparency:0.75 position:{0,0,0.00};
 		species ViralCommonArea transparency:0.85 position:{0,0,0.001};
 		species building_entrance refresh: true;
 		species common_area refresh: true;
@@ -477,15 +477,14 @@ experiment Coronaizer type:gui autorun:true{
 	  			draw circle(bar_size.y/2)  color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.01};
 	  			draw circle(bar_size.y/2) color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset+bar_size.x/2-bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.01};
 	  			draw rectangle(bar_size.x-bar_size.y,bar_size.y) color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset,infectiousLegendPos.y+i*y_offset,0.01};
-	  			bar_fill <- length(ViralPeople) = 0 ?0:(infection_data.values[i] / length(ViralPeople)*bar_size.x)#px;
-	  			
+	  			bar_fill <- length(ViralPeople) = 0 ?0:(infection_data.values[i] / length(ViralPeople)*bar_size.x);
 	  			if bar_fill <= bar_size.y {
 	  				float offset <- (-bar_size.y + bar_fill)/2;
-	  				draw  (circle(bar_size.y/2)  at_location {0,0,0}) inter (circle(bar_size.y/2)  at_location {-bar_size.y + bar_fill,0})   color: color_map["blue"] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2+offset,infectiousLegendPos.y+i*y_offset,0.02};
+	  				draw  (circle(bar_size.y/2)  at_location {0,0,0}) inter (circle(bar_size.y/2)  at_location {-bar_size.y + bar_fill,0})   color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2+offset,infectiousLegendPos.y+i*y_offset,0.02};
 	  			}else{
 	  				draw circle(bar_size.y/2)  color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.02};
 	  				draw circle(bar_size.y/2)  color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill-bar_size.y/2,infectiousLegendPos.y+i*y_offset,0.02};
-	  				draw rectangle(bar_fill-bar_size.y,bar_size.y) color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.01};
+	  				draw rectangle(bar_fill-bar_size.y,bar_size.y) color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.02};
 	  			}
 			}
 	  	}
@@ -499,6 +498,7 @@ experiment Coronaizer type:gui autorun:true{
 	  	}
 	  	
 	  	graphics "scale"{
+	  		float base_scale<-1#m;
 	  		point scalePos<-{world.shape.width*0.55,world.shape.height*0.85};
 	  		float rectangle_width <- base_scale/6;
 	  		list<float> scale_markers <- [0, 1*base_scale, 2*base_scale, 3*base_scale, 5*base_scale];
