@@ -191,6 +191,7 @@ species ViralBuildingEntrance mirrors: building_entrance parent: ViralRoom ;
 species ViralCommonArea mirrors: common_area parent: ViralRoom ;
 
 species ViralRoom mirrors: room {
+	list<rgb> room_color_map<-[rgb(109, 112, 0),rgb(175, 190, 49),rgb(211, 186, 25),rgb(247, 181, 0),rgb(246, 143, 18),rgb(245, 105, 36),rgb(244, 67, 54)];	
 	float viral_load min: 0.0 max: 10.0;
 	init {
 		shape <- target.shape;
@@ -210,17 +211,18 @@ species ViralRoom mirrors: room {
 		viral_load <- viral_load + (value/ shape.area);
 	}
 	
-	aspect viraload {
+	aspect default {
 		if(draw_viral_load_per_room){
 		  if (air_infection) {
-		  	draw shape color: blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
+		  	//draw shape color: room_color_map[int(min (1,viral_load/0.1)*(length(color_map)-1))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
+			//draw shape color: blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
+			//draw shape color: blend(rgb(75,0,0),rgb(0,0,0), min(1,viral_load/0.0001));//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
+			draw shape color: blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);
+		
 		}		
 	 }
 	}
-	aspect default {
 
-		  	draw shape color: rgb(75,75,75);	
-	}
 }
 
 
@@ -324,7 +326,7 @@ species ViralPeople  mirrors:people{
 	aspect base {
 		if not target.end_of_day and not target.not_yet_active{
 			if(showPeople) and not target.is_outside{
-			  draw circle(is_infected ? peopleSize*1.25 : peopleSize) color:
+			  draw circle(peopleSize) color:
 			  	use_SIR_model ? ((is_susceptible) ? color_map["green"] : ((is_infected) ? color_map["red"] : color_map["blue"])) :
 			  	((is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], infection_risk/100.0));
 								
@@ -420,7 +422,7 @@ experiment Coronaizer type:gui autorun:true{
 	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false	{
 	   	species room  refresh: false;
 		species room aspect: available_places_info refresh: true position:{0,0,0.001};
-		species ViralRoom transparency:0.75 position:{0,0,0.00};
+		species ViralRoom transparency:0.75 position:{0,0,0.001};
 		species ViralCommonArea transparency:0.85 position:{0,0,0.001};
 		species building_entrance refresh: true;
 		species common_area refresh: true;

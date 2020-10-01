@@ -140,8 +140,8 @@ experiment Episode5 type: gui parent: Coronaizer{
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'file' <- 45#mn;
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 4.0#m;
+	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <-1.5#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Policy" var: peopleSize  <-2.0#m;
@@ -152,6 +152,6 @@ experiment Episode5 type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [episode::5,title::"Dedicated path",useCase::"UDG/CUSUR",useCaseType::"Labs",ventilationType::"Natural",
-		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::0.5,queueing::false, peopleSize::2.0#m,agenda_scenario::"simple",ventilation_ratio::0.0];
+		timeSpent::45#mn,density_scenario::"distance",distance_people::3.0#m,maskRatio::1.0,queueing::false, peopleSize::2.0#m,agenda_scenario::"simple",ventilation_ratio::0.0];
 	}
 }

@@ -110,7 +110,6 @@ global {
 	float ventilation_ratio;
 	
 	map<string,rgb> color_map <- [ "blue"::rgb(50, 197, 255), "red"::rgb(244, 67, 54),"green"::rgb(109, 212, 0), "orange"::rgb(247, 181, 0)];
-	//list<rgb> room_color_map<-[rgb(109, 112, 0),rgb(175, 190, 49),rgb(211, 186, 25),rgb(247, 181, 0),rgb(246, 143, 18),rgb(245, 105, 36),rgb(244, 67, 54)];	
 	
 	
 	
