@@ -27,7 +27,7 @@ global{
 	
 	float air_infection_factor <- 0.002; //decreasement of the viral load of cells per second 
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
-	float ventilated_viral_decrease_room <- 0.01; //decreasement of the viral load of cells per second 
+	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
 	
 	float diminution_infection_risk_sanitation <- 10.0;
 	float hand_cleaning_time_effect <- 1#h;
@@ -200,8 +200,12 @@ species ViralRoom mirrors: room {
 	reflex update_viral_load when: not use_SIR_model and air_infection{
 		if (target.isVentilated) {
 			viral_load <- viral_load - (ventilated_viral_decrease_room * step);
+			//NON LINEAR
+			//viral_load <- viral_load * (1-(ventilated_viral_decrease_room *step));
 		} else {
 			viral_load <- viral_load - (basic_viral_decrease_room * step);
+			//NON LINEAR
+			//viral_load <- viral_load * (1-(basic_viral_decrease_room * step));
 		}
 		
 	}
@@ -214,15 +218,14 @@ species ViralRoom mirrors: room {
 	aspect default {
 		if(draw_viral_load_per_room){
 		  if (air_infection) {
+		  	//draw shape color: room_color_map[rnd(length(color_map))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
+			
 		  	//draw shape color: room_color_map[int(min (1,viral_load/0.1)*(length(color_map)-1))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
-			//draw shape color: blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
-			//draw shape color: blend(rgb(75,0,0),rgb(0,0,0), min(1,viral_load/0.0001));//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
-			draw shape color: blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);
+			draw shape color: blend(color_map["red"], color_map["green"], min(1,viral_load*1000));//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);
 		
 		}		
 	 }
 	}
-
 }
 
 
@@ -288,41 +291,7 @@ species ViralPeople  mirrors:people{
 		ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
 		if (my_rca != nil) {infection_risk <- infection_risk + step * my_rca.viral_load;}
 	}
-	
-	reflex infected_contact when:not target.not_yet_active and not target.end_of_day and use_SIR_model and is_infected and not target.is_outside and !has_mask {
-		ask (ViralPeople where (not target.not_yet_active and not each.target.end_of_day and !each.has_mask and not each.is_infected)) at_distance infectionDistance {
-			if (not target.is_outside) {
-				geometry line <- line([myself,self]);
-				if empty(wall overlapping line) {
-					float infectio_rate_real <- infection_rate;
-					if empty(separator_ag overlapping line) {
-						infectio_rate_real <- infectio_rate_real * (1 - diminution_infection_risk_separator);
-					}
-					if (flip(infectio_rate_real)) {
-		        		is_susceptible <-  false;
-		            	is_infected <-  true;
-		            	infected_time <- time; 
-		            	ask (cell overlapping self.target){
-							nbInfection<-nbInfection+1;
-							myself.nb_people_infected_by_me<-myself.nb_people_infected_by_me+1;
-							myself.has_been_infected<-true;
-							if(firstInfectionTime=0){
-								firstInfectionTime<-time;
-							}
-						}
-						infection_graph <<edge(self,myself);
-	        		}
-				}
-			} 
-		}
-	}
-	
-	reflex recover when:not not target.not_yet_active and not target.end_of_day and use_SIR_model and (is_infected and (time - infected_time) >= time_recovery){
-		is_infected<-false;
-		is_recovered<-true;
-	}
-	
-	
+			
 	aspect base {
 		if not target.end_of_day and not target.not_yet_active{
 			if(showPeople) and not target.is_outside{
@@ -472,8 +441,7 @@ experiment Coronaizer type:gui autorun:true{
 		 		simLegendPos<-{world.shape.width*0.22,-300#px};
 		 	}else{
 		 	    simLegendPos<-{-world.shape.width*0.5,world.shape.height*0.6};	
-		 	}
-	  		
+		 	}	
 	  		int fontSize<-20;
 	  		draw "INTERVENTION" color:#white at:{simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
 	  		
@@ -542,7 +510,7 @@ experiment Coronaizer type:gui autorun:true{
 	  			draw g color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset,infectiousLegendPos.y+i*y_offset,0.01};
 	  			bar_fill <- length(ViralPeople) = 0 ?0:(infection_data.values[i] / length(ViralPeople)*bar_size.x);
 	  			geometry g2 <- (g at_location {0,0,0}) inter (g at_location {-bar_size.x+bar_fill,0,0}) ;
-	  			draw g2 color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.02};
+	  			draw g2 color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.011};
 			}
 	  	}
 	  	
@@ -599,8 +567,7 @@ experiment Coronaizer type:gui autorun:true{
 			}
 		  }
 		}
-
+	  }
 	  }	
-	}		
 }
 
