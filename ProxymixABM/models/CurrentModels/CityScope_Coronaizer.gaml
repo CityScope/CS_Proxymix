@@ -7,13 +7,9 @@
 
 model CityScopeCoronaizer
 
-
-
 import "DailyRoutine.gaml"
 
 global{
-	
-	bool use_SIR_model <- false;
 	bool fixed_infected_people_localization <- true;
 	bool direct_infection <- true;
 	bool objects_infection <- true;
@@ -34,7 +30,6 @@ global{
 	float diminution_infection_risk_mask <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
 	float diminution_infection_risk_separator <- 0.9;
 	
-	
 	bool a_boolean_to_disable_parameters <- true;
     
     int number_day_recovery<-10;
@@ -53,7 +48,6 @@ global{
 	bool draw_viral_load_per_room<-true;
 	bool showPeople<-true;
 	
-
 	int nb_cols <- int(75*1.5);
 	int nb_rows <- int(50*1.5);
 	
@@ -83,7 +77,6 @@ global{
 			loop r over: r_ord {
 				list<ViralPeople> pps <- pp_per_room[r];
 				int nb_infected_room <- round(initial_nb_infected * r.shape.area/ sum_area);
-				//int nb_infected_room <- round(initial_nb_infected * length(pps)/ length(concerned_people));
 				nb_infected_room <- min([nb_infected_room, initial_nb_infected - nb_i, length(pps)]);
 				if nb_infected_room > 0 and not empty(pps){
 					int direction <- direction_i;
@@ -167,22 +160,6 @@ global{
 		}
 		
 	}
-	
-	
-	reflex increaseRate when:use_SIR_model and cycle= 1440*7{
-		//infection_rate<-0.0;//infection_rate/2;
-	}
-	
-	reflex computeRo when: use_SIR_model and (cycle mod 100 = 0){
-		/*write "yo je suis le Ro ";
-		write "nbInfection" + totalNbInfection;
-		write "initial_nb_infected" + initial_nb_infected;
-		write "totalNbInfection/initial_nb_infected" + totalNbInfection/initial_nb_infected;*/
-		list<ViralPeople> tmp<-ViralPeople where (each.has_been_infected=true);
-		list<float> tmp2 <- tmp collect (each.nb_people_infected_by_me*max((time_recovery/(0.00001+time- each.infected_time))),1);
-		R0<- mean(tmp2);
-	}
-
 }
 
 
@@ -196,8 +173,7 @@ species ViralRoom mirrors: room {
 	init {
 		shape <- target.shape;
 	}
-	
-	reflex update_viral_load when: not use_SIR_model and air_infection{
+	reflex update_viral_load when: air_infection{
 		if (target.isVentilated) {
 			viral_load <- viral_load - (ventilated_viral_decrease_room * step);
 			//NON LINEAR
@@ -207,9 +183,7 @@ species ViralRoom mirrors: room {
 			//NON LINEAR
 			//viral_load <- viral_load * (1-(basic_viral_decrease_room * step));
 		}
-		
 	}
-	
 	//Action to add viral load to the room
 	action add_viral_load(float value){
 		viral_load <- viral_load + (value/ shape.area);
@@ -218,11 +192,9 @@ species ViralRoom mirrors: room {
 	aspect default {
 		if(draw_viral_load_per_room){
 		  if (air_infection) {
-		  	//draw shape color: room_color_map[rnd(length(color_map))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
-			
+		  	//draw shape color: room_color_map[rnd(length(color_map))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);		
 		  	//draw shape color: room_color_map[int(min (1,viral_load/0.1)*(length(color_map)-1))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
 			draw shape color: blend(color_map["red"], color_map["green"], min(1,viral_load*1000));//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);
-		
 		}		
 	 }
 	}
@@ -243,8 +215,7 @@ species ViralPeople  mirrors:people{
     bool has_mask<-flip(maskRatio);
     float time_since_last_hand_cleaning update: time_since_last_hand_cleaning + step;
 
-
-	reflex infected_contact_risk when: not target.not_yet_active and not target.end_of_day and not use_SIR_model and is_infected and not target.is_outside and not target.using_sanitation {
+	reflex infected_contact_risk when: not target.not_yet_active and not target.end_of_day and is_infected and not target.is_outside and not target.using_sanitation {
 		if (direct_infection) {
 			ask (ViralPeople at_distance infectionDistance) where (not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
 				geometry line <- line([myself,self]);
@@ -272,20 +243,19 @@ species ViralPeople  mirrors:people{
 			ViralRoom my_room <- first(ViralRoom overlapping location);
 			if (my_room != nil) {ask my_room{do add_viral_load(air_infection_factor * step);}}
 			ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
-			if (my_rca != nil) {ask my_rca{do add_viral_load(air_infection_factor * step);}}
-			
+			if (my_rca != nil) {ask my_rca{do add_viral_load(air_infection_factor * step);}}	
 		}
 	}
 	
-	reflex using_sanitation when: not target.not_yet_active and not target.end_of_day and not use_SIR_model and target.using_sanitation {
+	reflex using_sanitation when: not target.not_yet_active and not target.end_of_day  and target.using_sanitation {
 		infection_risk <- infection_risk - diminution_infection_risk_sanitation * step;
 		time_since_last_hand_cleaning <- 0.0;
 	}
-	reflex infection_by_objects when:not target.not_yet_active and not target.end_of_day and  objects_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
+	reflex infection_by_objects when:not target.not_yet_active and not target.end_of_day and  objects_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralCell vrc <- ViralCell(location);
 		if (vrc != nil) {infection_risk <- infection_risk + step * vrc.viral_load_by_touching;}
 	}
-	reflex infection_by_air when: not target.not_yet_active and not target.end_of_day and air_infection and not use_SIR_model and not is_infected and not target.is_outside and not target.using_sanitation {
+	reflex infection_by_air when: not target.not_yet_active and not target.end_of_day and air_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
 		if (my_room != nil) {infection_risk <- infection_risk + step * my_room.viral_load;}
 		ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
@@ -295,10 +265,7 @@ species ViralPeople  mirrors:people{
 	aspect base {
 		if not target.end_of_day and not target.not_yet_active{
 			if(showPeople) and not target.is_outside{
-			  draw circle(peopleSize) color:
-			  	use_SIR_model ? ((is_susceptible) ? color_map["green"] : ((is_infected) ? color_map["red"] : color_map["blue"])) :
-			  	((is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], infection_risk/100.0));
-								
+			  draw circle(peopleSize) color:(is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], infection_risk/100.0);					
 				if (has_mask){
 					draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
 				}
@@ -312,18 +279,17 @@ grid ViralCell cell_width: 1.0 cell_height:1.0 neighbors: 8 {
 	rgb color <- #white;
 	
 	float viral_load_by_touching min: 0.0 max: 10.0;
-	
 	//Action to add viral load to the cell
 	action add_viral_load(float value){
 		viral_load_by_touching <- viral_load_by_touching+value;
 	}
 	//Action to update the viral load (i.e. trigger decreases)
-	reflex update_viral_load when: not use_SIR_model {
+	reflex update_viral_load {
 		viral_load_by_touching <- viral_load_by_touching - (basic_viral_decrease_cell * step);
 	}
 	aspect default{
 		if (draw_viral_load_by_touching_grid){
-			if not use_SIR_model and (viral_load_by_touching > 0){
+			if (viral_load_by_touching > 0){
 				draw shape color:blend(#white, #red, viral_load_by_touching/1.0);		
 			}
 		}
@@ -336,17 +302,7 @@ grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 ne
 	bool is_exit <- false;
 	rgb color <- #white;
 	float firstInfectionTime<-0.0;
-	int nbInfection;
-	
-	aspect default{
-		if (draw_infection_grid){
-			if use_SIR_model {
-				if(nbInfection>0){
-				  draw shape color:blend(#white, #red, firstInfectionTime/time)  depth:nbInfection;		
-				}
-			} 
-		}
-	}	
+	int nbInfection;	
 }
 
 experiment Coronaizer type:gui autorun:true{
@@ -405,7 +361,6 @@ experiment Coronaizer type:gui autorun:true{
 		species droplet aspect:base; 
 	    species ViralPeople aspect:base position:{0,0,0.002};
 	    species ViralCell aspect:default;
-	  	species cell aspect:default;
 	
 		graphics 'title'{
 		  point titlePos;

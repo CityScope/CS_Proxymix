@@ -105,7 +105,6 @@ experiment Episode3 type: gui parent: Coronaizer{
 
 experiment Episode4 type: gui parent: Coronaizer{
 	//Scenario 1
-
 	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA";
 	parameter 'title:' var: title category: 'file' <- "No intervention";
 	parameter 'useCaseType:' var: useCaseType category: 'file' <- "Labs";
@@ -147,9 +146,6 @@ experiment Episode5 type: gui parent: Coronaizer{
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "Initial Infected:" category: "Ventilation" var:initial_nb_infected  <-100;
-	
-	
-
 	//Scenario 2
 	init
 	{   
