@@ -80,7 +80,6 @@ global {
 	
 	date time_first_lunch <- nil;
 	
-	bool drawSimuInfo<-true;
 	bool drawSocialDistanceGraph <- false;
 	graph<people, people> social_distance_graph <- graph<people, people>([]);
 	float R0;

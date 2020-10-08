@@ -37,8 +37,6 @@ global{
    	float Low_Risk_of_Infection_threshold<-30.0;
    	float Medium_Risk_of_Infection_threshold<-60.0;
 	
-	bool drawInfectionGraph <- false;
-	bool draw_infection_grid <- false;
 	bool draw_viral_load_by_touching_grid<-false;
 	bool draw_viral_load_per_room<-true;
 	bool showPeople<-true;
@@ -315,14 +313,11 @@ experiment Coronaizer type:gui autorun:true{
 	
 	parameter "Infection distance:" category: "Corona" var:infectionDistance min: 1.0 max: 100.0 step:1;
 	
-	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
-	parameter "Draw Infection Grid (only available with SIR):" category: "Risk Visualization" var:draw_infection_grid;
 	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_viral_load_by_touching_grid;
 	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room<-true;
 	parameter "Show People:" category: "Visualization" var:showPeople;
     parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
 	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
-	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
 	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
 	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
@@ -346,10 +341,10 @@ experiment Coronaizer type:gui autorun:true{
 		species common_area refresh: true;
 		species wall refresh: false;
 		//species room_entrance;
-		species pedestrian_path ;
+		species pedestrian_path position:{0.0,0.0,0.01};
 		species separator_ag refresh: false;
-		agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5;
-		agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] ;
+		agents "flowCell" value:draw_flow_grid ? flowCell : [] transparency:0.5 position:{0.0,0.0,0.01};
+		agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] position:{0.0,0.0,0.01};
 		species bottleneck transparency: 0.5;
 		species droplet aspect:base; 
 	    species ViralPeople aspect:base position:{0,0,0.002};
