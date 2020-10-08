@@ -21,13 +21,13 @@ experiment Episode1 type: gui parent: Coronaizer{
 	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Classrooms";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0 #h;
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
+	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
-	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
-	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "step_arrival" var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 3 #mn;
 	//Scenario 2
@@ -50,17 +50,16 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "AC";
 	parameter 'initial infected:' var: initial_nb_infected category: 'Initialization' <- 5;
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 45#mn;
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
+	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.15#m;
-	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
-	//DROPLET PARAMETER
 	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-5;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-1.0;
-	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "Normal step" var: normal_step <- 0.2;
 	parameter "step_arrival" var: step_arrival <- 0.2#s;
 	parameter "step_arrival" var: fast_step <- 5#s;
@@ -83,13 +82,13 @@ experiment Episode3 type: gui parent: Coronaizer{
 	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0#h;
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";	
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
+	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.2#m;
-	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
-	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "step_arrival" var: step_arrival <- 3#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 5#mn;
 	parameter "tolerance_target_param" var: tolerance_target_param <- 2.0;
@@ -110,13 +109,13 @@ experiment Episode4 type: gui parent: Coronaizer{
 	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Labs";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0#h;
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";	
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
+	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.4#m;
-	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
-	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "step_arrival" var: step_arrival <- 3#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 10#mn;
 	//Scenario 2
@@ -138,13 +137,13 @@ experiment Episode5 type: gui parent: Coronaizer{
 	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "lab";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3#h;
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <-2.0#m;
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <-2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
+	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-2.0#m;
-	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
-	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "Initial Infected:" category: "Ventilation" var:initial_nb_infected  <-100;
 	//Scenario 2
 	init

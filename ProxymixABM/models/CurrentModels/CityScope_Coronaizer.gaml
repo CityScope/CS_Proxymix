@@ -307,18 +307,18 @@ experiment Coronaizer type:gui autorun:true{
 	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Generic";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0 #h;
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter "Agenda Scenario:" category: "Initialization" var: agenda_scenario  <-"simple";
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
+	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
-	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
-	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "step_arrival" category:'Initialization' var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" category:'Initialization' var: arrival_time_interval <- 3 #mn;
 	
 	
-	parameter "Infection distance:" category: "Policy" var:infectionDistance min: 1.0 max: 100.0 step:1;
+	parameter "Infection distance:" category: "Corona" var:infectionDistance min: 1.0 max: 100.0 step:1;
 	bool a_boolean_to_disable_parameters <- true;
 	parameter "Disable following parameters" category:"Corona" var: a_boolean_to_disable_parameters disables: [time_recovery,infection_rate,initial_nb_infected,step];
 	parameter "Nb recovery day"   category: "Corona" var:number_day_recovery min: 1 max: 30;
