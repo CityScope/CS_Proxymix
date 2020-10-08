@@ -15,17 +15,17 @@ import 'CityScope_Coronaizer.gaml'
 
 experiment Episode1 type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'Episode:' var: episode category: 'file' <- 1;
-	parameter 'title:' var: title category: 'file' <- "No intervention";
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2";
-	parameter 'useCaseType:' var: useCaseType category: 'file' <- "Classrooms";
-	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0 #h;
+	parameter 'Episode:' var: episode category: 'Initialization' <- 1;
+	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCS/Level 2";
+	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Classrooms";
+	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0 #h;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "People Size:" category: "Policy" var: peopleSize  <-0.3#m;
+	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "step_arrival" var: step_arrival <- 1#s;
@@ -42,19 +42,19 @@ experiment Episode1 type: gui parent: Coronaizer{
 
 experiment Episode2 type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'Episode:' var: episode category: 'file' <- 2;
-	parameter 'title:' var: title category: 'file' <- "Air Conditioning";
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUT/lab";
-	parameter 'Workplace layer name' var: workplace_layer category: "file" <- ["Labs"];
-	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
-	parameter 'ventilationType:' var: ventilationType category: 'file' <- "AC";
+	parameter 'Episode:' var: episode category: 'Initialization' <- 2;
+	parameter 'title:' var: title category: 'Initialization' <- "Air Conditioning";
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUT/lab";
+	parameter 'Workplace layer name' var: workplace_layer category: "Initialization" <- ["Labs"];
+	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "lab";
+	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "AC";
 	parameter 'initial infected:' var: initial_nb_infected category: 'Initialization' <- 5;
-	parameter 'timeSpent:' var: timeSpent category: 'file' <- 45#mn;
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 45#mn;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "People Size:" category: "Policy" var: peopleSize  <-0.15#m;
+	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.15#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	//DROPLET PARAMETER
 	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
@@ -77,17 +77,17 @@ experiment Episode2 type: gui parent: Coronaizer{
 
 experiment Episode3 type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUAAD";
-	parameter 'title:' var: title category: 'file' <- "No intervention";
-	parameter 'Episode:' var: episode category: 'file' <- 3;
-	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
-	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3.0#h;
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUAAD";
+	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
+	parameter 'Episode:' var: episode category: 'Initialization' <- 3;
+	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "lab";
+	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0#h;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "People Size:" category: "Policy" var: peopleSize  <-0.2#m;
+	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.2#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "step_arrival" var: step_arrival <- 3#s;
@@ -105,16 +105,16 @@ experiment Episode3 type: gui parent: Coronaizer{
 
 experiment Episode4 type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA";
-	parameter 'title:' var: title category: 'file' <- "No intervention";
-	parameter 'useCaseType:' var: useCaseType category: 'file' <- "Labs";
-	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'file' <- 1.0#h;
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCEA";
+	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
+	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Labs";
+	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0#h;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "People Size:" category: "Policy" var: peopleSize  <-0.4#m;
+	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.4#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "step_arrival" var: step_arrival <- 3#s;
@@ -132,17 +132,17 @@ experiment Episode4 type: gui parent: Coronaizer{
 
 experiment Episode5 type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'Episode:' var: episode category: 'file' <- 5;
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUSUR";
-	parameter 'title:' var: title category: 'file' <- "No intervention";
-	parameter 'useCaseType:' var: useCaseType category: 'file' <- "lab";
-	parameter 'ventilationType:' var: ventilationType category: 'file' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'file' <- 3#h;
+	parameter 'Episode:' var: episode category: 'Initialization' <- 5;
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUSUR";
+	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
+	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "lab";
+	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3#h;
 	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <-2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "People Size:" category: "Policy" var: peopleSize  <-2.0#m;
+	parameter "People Size:" category: "Visualization" var: peopleSize  <-2.0#m;
 	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
 	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "Initial Infected:" category: "Ventilation" var:initial_nb_infected  <-100;

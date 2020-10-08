@@ -301,10 +301,24 @@ grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 ne
 
 experiment Coronaizer type:gui autorun:true{
 
-	//float minimum_cycle_duration<-0.02;
-	parameter 'title:' var: title category: 'file' <- "No intervention";
+	parameter 'title:' var: title category: 'Initialization' <- "Generic";
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCEA" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'Episode:' var: episode category: 'Initialization' <- 0;
+	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Generic";
+	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0 #h;
+	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Initialization' min:0.0 max:5.0#m <- 2.0#m;
+	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
+	parameter "Queueing:" category: "Policy" var: queueing  <-false;
+	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
+	parameter "Agenda Scenario:" category: "Policy" var: agenda_scenario  <-"simple";
+	parameter "Ventilated room ratio:" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
+	parameter "step_arrival" category:'Initialization' var: step_arrival <- 1#s;
+	parameter "arrival_time_interval" category:'Initialization' var: arrival_time_interval <- 3 #mn;
+	
+	
 	parameter "Infection distance:" category: "Policy" var:infectionDistance min: 1.0 max: 100.0 step:1;
-	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1;
 	bool a_boolean_to_disable_parameters <- true;
 	parameter "Disable following parameters" category:"Corona" var: a_boolean_to_disable_parameters disables: [time_recovery,infection_rate,initial_nb_infected,step];
 	parameter "Nb recovery day"   category: "Corona" var:number_day_recovery min: 1 max: 30;
@@ -315,13 +329,10 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_viral_load_by_touching_grid;
 	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room<-true;
 	parameter "Show People:" category: "Visualization" var:showPeople;
-    parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter "Density Scenario" var: density_scenario category:'Initialization'  <- "num_people_room" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Visualization' min:0.0 max:5.0#m <- 5.0#m;
-	parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
+    parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
 	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
 	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
-	parameter "unit" var: unit category: "file" <- #cm;
+	parameter "unit" var: unit category: "Initialization" <- #cm;
 	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
 	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
@@ -333,7 +344,6 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
-	parameter "Ventilated room ratio (appears in Green):" category: "Ventilation" var:ventilation_ratio min:0.0 max:1.0 <-0.2;
 		
 		
 	output{
