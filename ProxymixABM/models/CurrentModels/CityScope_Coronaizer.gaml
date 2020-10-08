@@ -30,11 +30,6 @@ global{
 	float diminution_infection_risk_mask <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
 	float diminution_infection_risk_separator <- 0.9;
 	
-	bool a_boolean_to_disable_parameters <- true;
-    
-    int number_day_recovery<-10;
-	int time_recovery<-1440*number_day_recovery*60;
-	float infection_rate<-0.05;
     //float step<-1#mn;
 	int totalNbInfection;
    	int initial_nb_infected<-10;
@@ -54,7 +49,6 @@ global{
 	int nb_susceptible  <- 0 update: length(ViralPeople where (each.is_susceptible));
 	int nb_infected <- 0 update: length(ViralPeople where (each.is_infected));
 	int nb_recovered <- 0 update: length(ViralPeople where (each.is_recovered));
-	graph<people, people> infection_graph <- graph<people, people>([]);
 	
 	list<ViralPeople> infectionRiskList;
 	
@@ -307,7 +301,8 @@ experiment Coronaizer type:gui autorun:true{
 	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Generic";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0 #h;
-	parameter "Agenda Scenario:" category: "Initialization" var: agenda_scenario  <-"simple";
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
+	parameter "Initial Infected"   category: 'Initialization' var: initial_nb_infected min:0 max:100 <-10;
 	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
@@ -319,11 +314,7 @@ experiment Coronaizer type:gui autorun:true{
 	
 	
 	parameter "Infection distance:" category: "Corona" var:infectionDistance min: 1.0 max: 100.0 step:1;
-	bool a_boolean_to_disable_parameters <- true;
-	parameter "Disable following parameters" category:"Corona" var: a_boolean_to_disable_parameters disables: [time_recovery,infection_rate,initial_nb_infected,step];
-	parameter "Nb recovery day"   category: "Corona" var:number_day_recovery min: 1 max: 30;
-	parameter "Infection Rate"   category: "Corona" var:infection_rate min:0.0 max:1.0;
-	parameter "Initial Infected"   category: "Corona" var: initial_nb_infected min:0 max:100;
+	
 	parameter "Infection Graph:" category: "Visualization" var:drawInfectionGraph ;
 	parameter "Draw Infection Grid (only available with SIR):" category: "Risk Visualization" var:draw_infection_grid;
 	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_viral_load_by_touching_grid;
@@ -331,8 +322,6 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Show People:" category: "Visualization" var:showPeople;
     parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
 	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
-	parameter "Simulation Step"   category: "Corona" var:step min:0.0 max:100.0;
-	parameter "unit" var: unit category: "Initialization" <- #cm;
 	parameter "Simulation information:" category: "Visualization" var:drawSimuInfo ;
 	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
@@ -507,17 +496,6 @@ experiment Coronaizer type:gui autorun:true{
 	  		draw string(int(last(scale_markers)))+ "m" anchor: #bottom_right color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+last(scale_markers),scalePos.y+rectangle_width+16#px,0.01};
 	  	}
 	  	 
-
-		
-	  	graphics "infection_graph" {
-		if (infection_graph != nil and drawInfectionGraph = true) {
-			loop eg over: infection_graph.edges {
-				geometry edge_geom <- geometry(eg);
-				draw curve(edge_geom.points[0],edge_geom.points[1], 0.5, 200, 90) color:#red;
-			}
-
-		}
-		}
 		graphics "social_graph" {
 			if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
 				loop eg over: social_distance_graph.edges {

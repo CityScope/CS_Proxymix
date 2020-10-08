@@ -138,13 +138,14 @@ experiment Episode5 type: gui parent: Coronaizer{
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3#h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
+	parameter "Initial Infected:" category: 'Initialization' var:initial_nb_infected  <-100;
 	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <-2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-2.0#m;
-	parameter "Initial Infected:" category: "Ventilation" var:initial_nb_infected  <-100;
+	
 	//Scenario 2
 	init
 	{   
