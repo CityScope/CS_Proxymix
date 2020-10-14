@@ -20,7 +20,7 @@ experiment Episode1 type: gui parent: Coronaizer{
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCS/Level 2";
 	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Classrooms";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0 #h;
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
 	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
@@ -35,7 +35,7 @@ experiment Episode1 type: gui parent: Coronaizer{
 	{   
 		create simulation with: [episode::1,title::"Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
 		ventilationType::"Natural",ventilation_ratio::0.0,
-		timeSpent::45#mn,density_scenario::"distance",distance_people::2.0#m,maskRatio::1.0,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple",
+		timeSpent::1.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::0.0,queueing::true, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 	}
 }

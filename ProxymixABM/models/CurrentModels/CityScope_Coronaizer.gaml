@@ -27,7 +27,8 @@ global{
 	
 	float diminution_infection_risk_sanitation <- 10.0;
 	float hand_cleaning_time_effect <- 1#h;
-	float diminution_infection_risk_mask <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
+	float diminution_infection_risk_mask_emission <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
+	float diminution_infection_risk_mask_reception <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
 	float diminution_infection_risk_separator <- 0.9;
 	
     //float step<-1#mn;
@@ -160,15 +161,12 @@ species ViralRoom mirrors: room {
 	init {
 		shape <- target.shape;
 	}
+	
 	reflex update_viral_load when: air_infection{
 		if (target.isVentilated) {
-			viral_load <- viral_load - (ventilated_viral_decrease_room * step);
-			//NON LINEAR
-			//viral_load <- viral_load * (1-(ventilated_viral_decrease_room *step));
+			viral_load <- viral_load * (1-ventilated_viral_decrease_room)^ step;
 		} else {
-			viral_load <- viral_load - (basic_viral_decrease_room * step);
-			//NON LINEAR
-			//viral_load <- viral_load * (1-(basic_viral_decrease_room * step));
+			viral_load <- viral_load * (1-basic_viral_decrease_room) ^ step;
 		}
 	}
 	//Action to add viral load to the room
@@ -201,7 +199,7 @@ species ViralPeople  mirrors:people{
     bool has_mask<-flip(maskRatio);
     float time_since_last_hand_cleaning update: time_since_last_hand_cleaning + step;
 
-	reflex infected_contact_risk when: not target.not_yet_active and not target.end_of_day and is_infected and not target.is_outside and not target.using_sanitation {
+	reflex virus_propagation when: not target.not_yet_active and not target.end_of_day and is_infected and not target.is_outside and not target.using_sanitation {
 		if (direct_infection) {
 			ask (ViralPeople at_distance infectionDistance) where (not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
 				geometry line <- line([myself,self]);
@@ -211,9 +209,12 @@ species ViralPeople  mirrors:people{
 						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_separator);
 					}
 					if myself.has_mask {
-						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_mask);
+						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_mask_emission);
 					}
-					 infection_risk[0] <- infection_risk[0] + direct_infection_factor_real;
+					if self.has_mask{
+						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_mask_reception);
+					}
+					infection_risk[0] <- infection_risk[0] + direct_infection_factor_real;
 				} 
 			}
 		}
@@ -271,7 +272,7 @@ grid ViralCell cell_width: 1.0 cell_height:1.0 neighbors: 8 {
 	}
 	//Action to update the viral load (i.e. trigger decreases)
 	reflex update_viral_load {
-		viral_load_by_touching <- viral_load_by_touching - (basic_viral_decrease_cell * step);
+		viral_load_by_touching <- viral_load_by_touching * (1- basic_viral_decrease_cell) ^ step;
 	}
 	aspect default{
 		if (draw_viral_load_by_touching_grid){
@@ -328,7 +329,6 @@ experiment Coronaizer type:gui autorun:true{
 	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
 	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
-		
 		
 	output{
 	  layout #split;
