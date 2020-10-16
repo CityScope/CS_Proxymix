@@ -199,6 +199,7 @@ species ViralPeople  mirrors:people{
     bool has_mask<-flip(maskRatio);
     float time_since_last_hand_cleaning update: time_since_last_hand_cleaning + step;
 
+
 	reflex virus_propagation when: not target.not_yet_active and not target.end_of_day and is_infected and not target.is_outside and not target.using_sanitation {
 		if (direct_infection) {
 			ask (ViralPeople at_distance infectionDistance) where (not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
@@ -215,6 +216,7 @@ species ViralPeople  mirrors:people{
 						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_mask_reception);
 					}
 					infection_risk[0] <- infection_risk[0] + direct_infection_factor_real;
+					write "infection_risk[0]" + infection_risk[0];
 				} 
 			}
 		}
@@ -292,17 +294,17 @@ grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 ne
 	int nbInfection;	
 }
 
-experiment Coronaizer type:gui autorun:true{
+experiment Coronaizer type:gui autorun:false{
 
 	parameter 'title:' var: title category: 'Initialization' <- "Generic";
-	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCEA" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter 'Episode:' var: episode category: 'Initialization' <- 0;
 	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Generic";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0 #h;
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
 	parameter "Initial Infected"   category: 'Initialization' var: initial_nb_infected min:0 max:100 <-10;
-	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
@@ -503,7 +505,7 @@ experiment Coronaizer type:gui autorun:true{
 	  
   	  display "style_cumulative_style_chart" type: java2D
 	  {
-		chart "Style Cumulative chart" type: series
+		chart "Style Cumulative chart" type: series y_range:{0,5000}
 		{
 			data "Direct Contact" value: sum(ViralPeople collect each.infection_risk[0]) color: # orange style: "area";
 			data "Object Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1]) color: # red style: "area";
