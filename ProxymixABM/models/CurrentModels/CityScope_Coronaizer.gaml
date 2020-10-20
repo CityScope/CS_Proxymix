@@ -216,7 +216,6 @@ species ViralPeople  mirrors:people{
 						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_mask_reception);
 					}
 					infection_risk[0] <- infection_risk[0] + direct_infection_factor_real;
-					write "infection_risk[0]" + infection_risk[0];
 				} 
 			}
 		}
@@ -505,7 +504,7 @@ experiment Coronaizer type:gui autorun:false{
 	  
   	  display "style_cumulative_style_chart" type: java2D
 	  {
-		chart "Style Cumulative chart" type: series y_range:{0,5000}
+		chart "Style Cumulative chart" type: series //y_range:{0,5000}
 		{
 			data "Direct Contact" value: sum(ViralPeople collect each.infection_risk[0]) color: # orange style: "area";
 			data "Object Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1]) color: # red style: "area";
