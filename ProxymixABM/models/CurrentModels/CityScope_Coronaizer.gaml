@@ -502,15 +502,24 @@ experiment Coronaizer type:gui autorun:false{
 		}
 	  }
 	  
-  	  display "style_cumulative_style_chart" type: java2D
+  	  display "Infection Risk" type: java2D
 	  {
-		chart "Style Cumulative chart" type: series //y_range:{0,5000}
+		chart "Cumulative Infection Risk" type: series size:{0.5,0.5}//y_range:{0,5000}
 		{
 			data "Direct Contact" value: sum(ViralPeople collect each.infection_risk[0]) color: # orange style: "area";
 			data "Object Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1]) color: # red style: "area";
 			data "Air Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1])+sum(ViralPeople collect each.infection_risk[2]) color: # yellow style: "area";
 			
 			
+		}
+		chart "Direct Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.0}{
+				data ("direct") value: (ViralPeople sort_by each.infection_risk[0] collect each.infection_risk[0]) color:#orange;
+		}
+		chart "Object Infection distribution" type: histogram size:{0.5,0.5} position:{0.0,0.5}{
+			data ("object") value: (ViralPeople sort_by each.infection_risk[1] collect each.infection_risk[1]) color:#red;
+		}
+		chart "Air Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.5}{
+			data ("air") value: (ViralPeople sort_by each.infection_risk[2] collect each.infection_risk[2]) color:#yellow;
 		}
 
 	  }
