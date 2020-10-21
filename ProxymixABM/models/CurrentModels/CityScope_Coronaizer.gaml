@@ -20,13 +20,13 @@ global{
 	
 	float indirect_infection_factor<-0.003; //increasement of the viral load of cells per second 
 	float basic_viral_decrease_cell <- 0.0003; //decreasement of the viral load of cells per second 
-	float mask_indirect_infection_factor<-0.1;// Effect of the mask on the air transmission
+	float mask_indirect_infection_factor<-0.25;// Effect of the mask on the air transmission
 	
 	
 	float air_infection_factor <- 0.002; //decreasement of the viral load of cells per second 
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
 	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
-	float mask_air_infection_factor<-0.1;// Effect of the mask on the air transmission
+	float mask_air_infection_factor<-0.25;// Effect of the mask on the air transmission
 	
 	float diminution_infection_risk_sanitation <- 10.0;
 	float hand_cleaning_time_effect <- 1#h;
@@ -493,8 +493,7 @@ experiment Coronaizer type:gui autorun:false{
 				side <- - side;
 	  		}	  		
 	  		draw string(int(last(scale_markers)))+ "m" anchor: #bottom_right color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+last(scale_markers),scalePos.y+rectangle_width+16#px,0.01};
-	  	}
-	  	 
+	  	} 
 		graphics "social_graph" {
 			if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
 				loop eg over: social_distance_graph.edges {
@@ -505,24 +504,33 @@ experiment Coronaizer type:gui autorun:false{
 		}
 	  }
 	  
-  	  display "Infection Risk" type: java2D
+//  	  display "Infection Risk" type: java2D
+//	  {
+//		chart "Cumulative Infection Risk" type: series size:{0.5,0.5}//y_range:{0,5000}
+//		{
+//			data "Direct Contact" value: sum(ViralPeople collect each.infection_risk[0]) color: # orange style: "area";
+//			data "Object Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1]) color: # red style: "area";
+//			data "Air Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1])+sum(ViralPeople collect each.infection_risk[2]) color: # yellow style: "area";
+//		}
+//		chart "Direct Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.0}{
+//			data ("") value: (ViralPeople sort_by each.infection_risk[0] collect each.infection_risk[0]) color:#orange;
+//		}
+//		chart "Object Infection distribution" type: histogram size:{0.5,0.5} position:{0.0,0.5}{
+//			data ("") value: (ViralPeople sort_by each.infection_risk[1] collect each.infection_risk[1]) color:#red;
+//		}
+//		chart "Air Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.5}{
+//			data ("") value: (ViralPeople sort_by each.infection_risk[2] collect each.infection_risk[2]) color:#yellow;
+//		}
+//
+//	  }
+	  display "Infection Risk" type: java2D background:#black
 	  {
-		chart "Cumulative Infection Risk" type: series size:{0.5,0.5}//y_range:{0,5000}
+		chart "Cumulative Infection Risk" type: series color:#white background:#black//y_range:{0,5000}
 		{
 			data "Direct Contact" value: sum(ViralPeople collect each.infection_risk[0]) color: # orange style: "area";
 			data "Object Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1]) color: # red style: "area";
 			data "Air Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1])+sum(ViralPeople collect each.infection_risk[2]) color: # yellow style: "area";
 		}
-		chart "Direct Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.0}{
-			data ("") value: (ViralPeople sort_by each.infection_risk[0] collect each.infection_risk[0]) color:#orange;
-		}
-		chart "Object Infection distribution" type: histogram size:{0.5,0.5} position:{0.0,0.5}{
-			data ("") value: (ViralPeople sort_by each.infection_risk[1] collect each.infection_risk[1]) color:#red;
-		}
-		chart "Air Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.5}{
-			data ("") value: (ViralPeople sort_by each.infection_risk[2] collect each.infection_risk[2]) color:#yellow;
-		}
-
 	  }
 	}	
 }
