@@ -28,11 +28,11 @@ global{
 	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
 	float mask_air_infection_factor<-0.25;// Effect of the mask on the air transmission
 	
-	float diminution_infection_risk_sanitation <- 0.1;
+	float diminution_absorbed_viral_load_sanitation <- 0.1;
 	float hand_cleaning_time_effect <- 1#h;
-	float diminution_infection_risk_mask_emission <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
-	float diminution_infection_risk_mask_reception <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
-	float diminution_infection_risk_separator <- 0.9;
+	float diminution_absorbed_viral_load_mask_emission <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
+	float diminution_absorbed_viral_load_mask_reception <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
+	float diminution_absorbed_viral_load_separator <- 0.9;
 	
     //float step<-1#mn;
 	int totalNbInfection;
@@ -190,7 +190,7 @@ species ViralRoom mirrors: room {
 
 species ViralPeople  mirrors:people{
 	point location <- target.location update: {target.location.x,target.location.y,target.location.z};
-	list<float> infection_risk<-[0.0,0.0,0.0];
+	list<float> absorbed_viral_load<-[0.0,0.0,0.0];
 	bool is_susceptible <- true;
 	bool is_infected <- false;
     bool is_immune <- false;
@@ -210,15 +210,15 @@ species ViralPeople  mirrors:people{
 				if empty(wall overlapping line) {
 					float direct_infection_factor_real <- direct_infection_factor * step;
 					if empty(separator_ag overlapping line) {
-						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_separator);
+						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_absorbed_viral_load_separator);
 					}
 					if myself.has_mask {
-						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_mask_emission);
+						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_absorbed_viral_load_mask_emission);
 					}
 					if self.has_mask{
-						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_infection_risk_mask_reception);
+						direct_infection_factor_real <- direct_infection_factor_real * (1 - diminution_absorbed_viral_load_mask_reception);
 					}
-					infection_risk[0] <- infection_risk[0] + direct_infection_factor_real;
+					absorbed_viral_load[0] <- absorbed_viral_load[0] + direct_infection_factor_real;
 				} 
 			}
 		}
@@ -239,24 +239,24 @@ species ViralPeople  mirrors:people{
 	}
 	
 	reflex using_sanitation when: not target.not_yet_active and not target.end_of_day  and target.using_sanitation {
-		infection_risk[1] <- infection_risk[1] * (1- diminution_infection_risk_sanitation)  ^ step;
+		absorbed_viral_load[1] <- absorbed_viral_load[1] * (1- diminution_absorbed_viral_load_sanitation)  ^ step;
 		time_since_last_hand_cleaning <- 0.0;
 	}
 	reflex infection_by_objects when:not target.not_yet_active and not target.end_of_day and  objects_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralCell vrc <- ViralCell(location);
-		if (vrc != nil) {infection_risk[1] <- infection_risk[1] + (self.has_mask? mask_indirect_infection_factor* step * vrc.viral_load_by_touching: step * vrc.viral_load_by_touching);}
+		if (vrc != nil) {absorbed_viral_load[1] <- absorbed_viral_load[1] + (self.has_mask? mask_indirect_infection_factor* step * vrc.viral_load_by_touching: step * vrc.viral_load_by_touching);}
 	}
 	reflex infection_by_air when: not target.not_yet_active and not target.end_of_day and air_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
-		if (my_room != nil) {infection_risk[2] <- infection_risk[2] + (self.has_mask ? mask_air_infection_factor* step * my_room.viral_load: step * my_room.viral_load);}
+		if (my_room != nil) {absorbed_viral_load[2] <- absorbed_viral_load[2] + (self.has_mask ? mask_air_infection_factor* step * my_room.viral_load: step * my_room.viral_load);}
 		ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
-		if (my_rca != nil) {infection_risk[2] <- infection_risk[2] + (self.has_mask ? mask_air_infection_factor* step * my_room.viral_load: step * my_rca.viral_load);}
+		if (my_rca != nil) {absorbed_viral_load[2] <- absorbed_viral_load[2] + (self.has_mask ? mask_air_infection_factor* step * my_room.viral_load: step * my_rca.viral_load);}
 	}
 			
 	aspect base {
 		if not target.end_of_day and not target.not_yet_active{
 			if(showPeople) and not target.is_outside{
-			  draw circle(peopleSize) color:(is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], sum(infection_risk)/100.0);					
+			  draw circle(peopleSize) color:(is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], sum(absorbed_viral_load)/100.0);					
 				if (has_mask){
 					draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
 				}
@@ -444,9 +444,9 @@ experiment Coronaizer type:gui autorun:false{
 	  		float x_offset <- 300#px;
 	  		float y_offset <- 50#px;
 	  		map<string,int> infection_data <- ["Initial infected"::initial_nb_infected, 
-	  										   "Low risk"::(ViralPeople count (sum(each.infection_risk) < Low_Risk_of_Infection_threshold)- initial_nb_infected),
-	  										   "Medium risk"::(ViralPeople count (sum(each.infection_risk) >= Low_Risk_of_Infection_threshold and sum(each.infection_risk) < Medium_Risk_of_Infection_threshold)),
-	  										   "High risk"::(ViralPeople count (sum(each.infection_risk) >= Medium_Risk_of_Infection_threshold))
+	  										   "Low risk"::(ViralPeople count (sum(each.absorbed_viral_load) < Low_Risk_of_Infection_threshold)- initial_nb_infected),
+	  										   "Medium risk"::(ViralPeople count (sum(each.absorbed_viral_load) >= Low_Risk_of_Infection_threshold and sum(each.absorbed_viral_load) < Medium_Risk_of_Infection_threshold)),
+	  										   "High risk"::(ViralPeople count (sum(each.absorbed_viral_load) >= Medium_Risk_of_Infection_threshold))
 	  					];
 	  		list<string> risk_colors <- ["blue", "green","orange","red"];
 	  		//draw "SIMULATION PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 50 , #bold);
@@ -508,18 +508,18 @@ experiment Coronaizer type:gui autorun:false{
 //	  {
 //		chart "Cumulative Infection Risk" type: series size:{0.5,0.5}//y_range:{0,5000}
 //		{
-//			data "Direct Contact" value: sum(ViralPeople collect each.infection_risk[0]) color: # orange style: "area";
-//			data "Object Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1]) color: # red style: "area";
-//			data "Air Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1])+sum(ViralPeople collect each.infection_risk[2]) color: # yellow style: "area";
+//			data "Direct Contact" value: sum(ViralPeople collect each.absorbed_viral_load[0]) color: # orange style: "area";
+//			data "Object Infection" value: sum(ViralPeople collect each.absorbed_viral_load[0])+ sum(ViralPeople collect each.absorbed_viral_load[1]) color: # red style: "area";
+//			data "Air Infection" value: sum(ViralPeople collect each.absorbed_viral_load[0])+ sum(ViralPeople collect each.absorbed_viral_load[1])+sum(ViralPeople collect each.absorbed_viral_load[2]) color: # yellow style: "area";
 //		}
 //		chart "Direct Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.0}{
-//			data ("") value: (ViralPeople sort_by each.infection_risk[0] collect each.infection_risk[0]) color:#orange;
+//			data ("") value: (ViralPeople sort_by each.absorbed_viral_load[0] collect each.absorbed_viral_load[0]) color:#orange;
 //		}
 //		chart "Object Infection distribution" type: histogram size:{0.5,0.5} position:{0.0,0.5}{
-//			data ("") value: (ViralPeople sort_by each.infection_risk[1] collect each.infection_risk[1]) color:#red;
+//			data ("") value: (ViralPeople sort_by each.absorbed_viral_load[1] collect each.absorbed_viral_load[1]) color:#red;
 //		}
 //		chart "Air Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.5}{
-//			data ("") value: (ViralPeople sort_by each.infection_risk[2] collect each.infection_risk[2]) color:#yellow;
+//			data ("") value: (ViralPeople sort_by each.absorbed_viral_load[2] collect each.absorbed_viral_load[2]) color:#yellow;
 //		}
 //
 //	  }
@@ -527,9 +527,9 @@ experiment Coronaizer type:gui autorun:false{
 	  {
 		chart "Cumulative Infection Risk" type: series color:#white background:#black //y_range:{0,5000}
 		{
-			data "Direct Contact" value: sum(ViralPeople collect each.infection_risk[0]) color: # orange style: "area";
-			data "Object Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1]) color: # red style: "area";
-			data "Air Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1])+sum(ViralPeople collect each.infection_risk[2]) color: # yellow style: "area";
+			data "Direct Contact" value: sum(ViralPeople collect each.absorbed_viral_load[0]) color: # orange style: "area";
+			data "Object Infection" value: sum(ViralPeople collect each.absorbed_viral_load[0])+ sum(ViralPeople collect each.absorbed_viral_load[1]) color: # red style: "area";
+			data "Air Infection" value: sum(ViralPeople collect each.absorbed_viral_load[0])+ sum(ViralPeople collect each.absorbed_viral_load[1])+sum(ViralPeople collect each.absorbed_viral_load[2]) color: # yellow style: "area";
 		}
 	  }
 	}	
