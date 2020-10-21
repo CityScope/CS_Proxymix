@@ -20,6 +20,8 @@ global{
 	
 	float indirect_infection_factor<-0.003; //increasement of the viral load of cells per second 
 	float basic_viral_decrease_cell <- 0.0003; //decreasement of the viral load of cells per second 
+	float mask_indirect_infection_factor<-0.1;// Effect of the mask on the air transmission
+	
 	
 	float air_infection_factor <- 0.002; //decreasement of the viral load of cells per second 
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
@@ -224,7 +226,7 @@ species ViralPeople  mirrors:people{
 			ViralCell vc <- ViralCell(self.target.location);
 			if (vc != nil) {
 				ask (vc){
-					do add_viral_load(indirect_infection_factor * step);
+					do add_viral_load(myself.has_mask? mask_indirect_infection_factor*indirect_infection_factor * step:indirect_infection_factor * step);
 				}
 			}
 		}
@@ -242,7 +244,7 @@ species ViralPeople  mirrors:people{
 	}
 	reflex infection_by_objects when:not target.not_yet_active and not target.end_of_day and  objects_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralCell vrc <- ViralCell(location);
-		if (vrc != nil) {infection_risk[1] <- infection_risk[1] + step * vrc.viral_load_by_touching;}
+		if (vrc != nil) {infection_risk[1] <- infection_risk[1] + (self.has_mask? mask_indirect_infection_factor* step * vrc.viral_load_by_touching: step * vrc.viral_load_by_touching);}
 	}
 	reflex infection_by_air when: not target.not_yet_active and not target.end_of_day and air_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
