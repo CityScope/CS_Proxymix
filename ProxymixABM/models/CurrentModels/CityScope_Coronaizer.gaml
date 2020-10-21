@@ -28,7 +28,7 @@ global{
 	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
 	float mask_air_infection_factor<-0.25;// Effect of the mask on the air transmission
 	
-	float diminution_infection_risk_sanitation <- 10.0;
+	float diminution_infection_risk_sanitation <- 0.1;
 	float hand_cleaning_time_effect <- 1#h;
 	float diminution_infection_risk_mask_emission <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
 	float diminution_infection_risk_mask_reception <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
@@ -239,7 +239,7 @@ species ViralPeople  mirrors:people{
 	}
 	
 	reflex using_sanitation when: not target.not_yet_active and not target.end_of_day  and target.using_sanitation {
-		infection_risk[1] <- infection_risk[1] - diminution_infection_risk_sanitation * step;
+		infection_risk[1] <- infection_risk[1] * (1- diminution_infection_risk_sanitation)  ^ step;
 		time_since_last_hand_cleaning <- 0.0;
 	}
 	reflex infection_by_objects when:not target.not_yet_active and not target.end_of_day and  objects_infection and not is_infected and not target.is_outside and not target.using_sanitation {
@@ -525,7 +525,7 @@ experiment Coronaizer type:gui autorun:false{
 //	  }
 	  display "Infection Risk" type: java2D background:#black
 	  {
-		chart "Cumulative Infection Risk" type: series color:#white background:#black//y_range:{0,5000}
+		chart "Cumulative Infection Risk" type: series color:#white background:#black //y_range:{0,5000}
 		{
 			data "Direct Contact" value: sum(ViralPeople collect each.infection_risk[0]) color: # orange style: "area";
 			data "Object Infection" value: sum(ViralPeople collect each.infection_risk[0])+ sum(ViralPeople collect each.infection_risk[1]) color: # red style: "area";
