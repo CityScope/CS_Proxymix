@@ -23,7 +23,7 @@ global{
 	float mask_indirect_infection_factor<-0.25;// Effect of the mask on the air transmission
 	
 	
-	float air_infection_factor <- 0.002; //decreasement of the viral load of cells per second 
+	float air_infection_factor <- 0.0005; //decreasement of the viral load of cells per second 
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
 	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
 	float mask_air_infection_factor<-0.25;// Effect of the mask on the air transmission
@@ -527,9 +527,9 @@ experiment Coronaizer type:gui autorun:false{
 	  {
 		chart "Cumulative Infection Risk" type: series color:#white background:#black //y_range:{0,5000}
 		{
-			data "Direct Contact" value: sum(ViralPeople collect each.cumulated_viral_load[0]) color: # orange style: "area";
-			data "Object Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])+ sum(ViralPeople collect each.cumulated_viral_load[1]) color: # red style: "area";
-			data "Air Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])+ sum(ViralPeople collect each.cumulated_viral_load[1])+sum(ViralPeople collect each.cumulated_viral_load[2]) color: # yellow style: "area";
+			data "Direct Contact" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # orange style: "area";
+			data "Object Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # red style: "area";
+			data "Air Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # yellow style: "area";
 		}
 	  }
 	}	
