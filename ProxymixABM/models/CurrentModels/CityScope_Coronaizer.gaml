@@ -11,28 +11,30 @@ import "DailyRoutine.gaml"
 
 global{
 	bool fixed_infected_people_localization <- true;
-	bool direct_infection <- true;
-	bool objects_infection <- true;
-	bool air_infection <- true;
-	float infectionDistance <- 1#m;
+	bool large_droplet_infection <- true;
+	bool fomite_infection <- true;
+	bool aerosol_infection <- true;
+	float largeDropletRange <- 1#m;
 	float maskRatio <- 0.0;
-	float direct_infection_factor<-0.05; //increasement of the infection risk per second
+	float droplet_viral_load_per_time_unit<-0.05; //increasement of the infection risk per second
 	
-	float indirect_infection_factor<-0.003; //increasement of the viral load of cells per second 
+	float viral_load_to_fomite_infection_per_time_unit<-0.003; //increasement of the viral load of cells per second 
 	float basic_viral_decrease_cell <- 0.0003; //decreasement of the viral load of cells per second 
-	float mask_indirect_infection_factor<-0.25;// Effect of the mask on the air transmission
+	float fomite_mask_emmision_efficiency<-0.25;// Effect of the mask on the air transmission
+	float fomite_mask_reception_efficiency<-0.25;// Effect of the mask on the air transmission
 	
 	
-	float air_infection_factor <- 0.0005; //decreasement of the viral load of cells per second 
+	float aerosol_viral_load_per_time_unit <- 0.0001; //decreasement of the viral load of cells per second 
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
 	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
-	float mask_air_infection_factor<-0.25;// Effect of the mask on the air transmission
+	float aerosol_mask_emmision_efficiency<-0.25;// Effect of the mask on the air transmission
+	float aerosol_mask_reception_efficiency<-0.25;// Effect of the mask on the air transmission
 	
 	float diminution_cumulated_viral_load_sanitation <- 0.1;
 	float hand_cleaning_time_effect <- 1#h;
-	float diminution_cumulated_viral_load_mask_emission <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
-	float diminution_cumulated_viral_load_mask_reception <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
-	float diminution_cumulated_viral_load_separator <- 0.9;
+	float droplet_emission_mask_efficiency <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
+	float droplet_reception_mask_efficiency <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
+	float separator_efficiency <- 0.9;
 	
     //float step<-1#mn;
 	int totalNbInfection;
@@ -165,7 +167,7 @@ species ViralRoom mirrors: room {
 		shape <- target.shape;
 	}
 	
-	reflex update_viral_load when: air_infection{
+	reflex update_viral_load when: aerosol_infection{
 		if (target.isVentilated) {
 			viral_load <- viral_load * (1-ventilated_viral_decrease_room)^ step;
 		} else {
@@ -179,7 +181,7 @@ species ViralRoom mirrors: room {
 	
 	aspect default {
 		if(draw_viral_load_per_room){
-		  if (air_infection) {
+		  if (aerosol_infection) {
 		  	//draw shape color: room_color_map[rnd(length(color_map))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);		
 		  	//draw shape color: room_color_map[int(min (1,viral_load/0.1)*(length(color_map)-1))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
 			draw shape color: blend(color_map["red"], color_map["green"], min(1,viral_load*1000));//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);
@@ -204,37 +206,37 @@ species ViralPeople  mirrors:people{
 
 
 	reflex virus_propagation when: not target.not_yet_active and not target.end_of_day and is_infected and not target.is_outside and not target.using_sanitation {
-		if (direct_infection) {
-			ask (ViralPeople at_distance infectionDistance) where (not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
+		if (large_droplet_infection) {
+			ask (ViralPeople at_distance largeDropletRange) where (not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
 				geometry line <- line([myself,self]);
 				if empty(wall overlapping line) {
-					float effective_direct_infection_factor <- direct_infection_factor * step;
+					float transmited_droplet_viral_load <- droplet_viral_load_per_time_unit * step;
 					if empty(separator_ag overlapping line) {
-						effective_direct_infection_factor <- effective_direct_infection_factor * (1 - diminution_cumulated_viral_load_separator);
+						transmited_droplet_viral_load <- transmited_droplet_viral_load * (1 - separator_efficiency);
 					}
 					if myself.has_mask {
-						effective_direct_infection_factor <- effective_direct_infection_factor * (1 - diminution_cumulated_viral_load_mask_emission);
+						transmited_droplet_viral_load <- transmited_droplet_viral_load * (1 - droplet_emission_mask_efficiency);
 					}
 					if self.has_mask{
-						effective_direct_infection_factor <- effective_direct_infection_factor * (1 - diminution_cumulated_viral_load_mask_reception);
+						transmited_droplet_viral_load <- transmited_droplet_viral_load * (1 - droplet_reception_mask_efficiency);
 					}
-					cumulated_viral_load[0] <- cumulated_viral_load[0] + effective_direct_infection_factor;
+					cumulated_viral_load[0] <- cumulated_viral_load[0] + transmited_droplet_viral_load;
 				} 
 			}
 		}
-		if (objects_infection) and (time_since_last_hand_cleaning < hand_cleaning_time_effect){
+		if (fomite_infection) and (time_since_last_hand_cleaning < hand_cleaning_time_effect){
 			ViralCell vc <- ViralCell(self.target.location);
 			if (vc != nil) {
 				ask (vc){
-					do add_viral_load(myself.has_mask? mask_indirect_infection_factor*indirect_infection_factor * step:indirect_infection_factor * step);
+					do add_viral_load((myself.has_mask ? fomite_mask_emmision_efficiency : 1 )* viral_load_to_fomite_infection_per_time_unit * step);
 				}
 			}
 		}
-		if (air_infection) {
+		if (aerosol_infection) {
 			ViralRoom my_room <- first(ViralRoom overlapping location);
-			if (my_room != nil) {ask my_room{do add_viral_load(myself.has_mask ? mask_air_infection_factor*air_infection_factor * step : air_infection_factor * step);}}
+			if (my_room != nil) {ask my_room{do add_viral_load((myself.has_mask ? aerosol_mask_emmision_efficiency :1) * aerosol_viral_load_per_time_unit * step);}}
 			ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
-			if (my_rca != nil) {ask my_rca{do add_viral_load(myself.has_mask ? mask_air_infection_factor*air_infection_factor * step : air_infection_factor * step);}}	
+			if (my_rca != nil) {ask my_rca{do add_viral_load((myself.has_mask ? aerosol_mask_emmision_efficiency :1 ) * aerosol_viral_load_per_time_unit * step);}}	
 		}
 	}
 	
@@ -242,15 +244,15 @@ species ViralPeople  mirrors:people{
 		cumulated_viral_load[1] <- cumulated_viral_load[1] * (1- diminution_cumulated_viral_load_sanitation)  ^ step;
 		time_since_last_hand_cleaning <- 0.0;
 	}
-	reflex infection_by_objects when:not target.not_yet_active and not target.end_of_day and  objects_infection and not is_infected and not target.is_outside and not target.using_sanitation {
+	reflex infection_by_fomite when:not target.not_yet_active and not target.end_of_day and  fomite_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralCell vrc <- ViralCell(location);
-		if (vrc != nil) {cumulated_viral_load[1] <- cumulated_viral_load[1] + (self.has_mask? mask_indirect_infection_factor* step * vrc.viral_load_by_touching: step * vrc.viral_load_by_touching);}
+		if (vrc != nil) {cumulated_viral_load[1] <- cumulated_viral_load[1] + ((self.has_mask? fomite_mask_reception_efficiency : 1) * step * vrc.viral_load_by_touching);}
 	}
-	reflex infection_by_air when: not target.not_yet_active and not target.end_of_day and air_infection and not is_infected and not target.is_outside and not target.using_sanitation {
+	reflex infection_by_aerosol when: not target.not_yet_active and not target.end_of_day and aerosol_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
-		if (my_room != nil) {cumulated_viral_load[2] <- cumulated_viral_load[2] + (self.has_mask ? mask_air_infection_factor* step * my_room.viral_load: step * my_room.viral_load);}
+		if (my_room != nil) {cumulated_viral_load[2] <- cumulated_viral_load[2] + ((self.has_mask ? aerosol_mask_reception_efficiency : 1 ) * step * my_room.viral_load);}
 		ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
-		if (my_rca != nil) {cumulated_viral_load[2] <- cumulated_viral_load[2] + (self.has_mask ? mask_air_infection_factor* step * my_room.viral_load: step * my_rca.viral_load);}
+		if (my_rca != nil) {cumulated_viral_load[2] <- cumulated_viral_load[2] + ((self.has_mask ? aerosol_mask_reception_efficiency: 1 )* step * my_room.viral_load);}
 	}
 			
 	aspect base {
@@ -316,7 +318,7 @@ experiment Coronaizer type:gui autorun:false{
 	parameter "arrival_time_interval" category:'Initialization' var: arrival_time_interval <- 3 #mn;
 	
 	
-	parameter "Infection distance:" category: "Corona" var:infectionDistance min: 1.0 max: 100.0 step:1;
+	parameter "Infection distance:" category: "Corona" var:largeDropletRange min: 1.0 max: 100.0 step:1;
 	
 	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_viral_load_by_touching_grid;
 	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room<-true;
@@ -352,7 +354,7 @@ experiment Coronaizer type:gui autorun:false{
 		species bottleneck transparency: 0.5;
 		species droplet aspect:base; 
 	    species ViralPeople aspect:base position:{0,0,0.002};
-	    species ViralCell aspect:default;
+	    species ViralCell aspect:default position:{0,0,0.001};
 	
 		graphics 'title'{
 		  point titlePos;
