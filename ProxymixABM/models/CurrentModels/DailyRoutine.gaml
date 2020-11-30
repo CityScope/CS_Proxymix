@@ -605,7 +605,31 @@ species wall {
 }
 
 
-species room_entrance {
+species fomitableSurface{
+	float viral_load min: 0.0 max: 10.0;
+	float interaction_radius<-1.0#m;
+	float fomite_viral_load_decay_per_second<-0.003;
+	
+	//Action to add viral load to the cell
+	action add_viral_load(float value){
+		viral_load <- viral_load+value;
+	}
+	//Action to remove viral load to the cell
+	action remove_viral_load(float value){
+		viral_load <- viral_load-value;
+	}
+	//Action to update the viral load (i.e. trigger decreases)
+	reflex update_viral_load {
+		viral_load <- viral_load * (1- fomite_viral_load_decay_per_second) ^ step;
+	}
+	
+	aspect default{
+	  draw circle(interaction_radius) color:rgb(0,0,viral_load*255*100,0.5);
+	  draw triangle(0.1#m) color:#yellow;	
+	}
+}
+
+species room_entrance parent:fomitableSurface{
 	geometry queue;
 	room my_room;
 	list<people> people_waiting;
@@ -794,11 +818,10 @@ species room_entrance {
 		} 
 	}
 	 
-	aspect default {
+	aspect queuing {
 		if(queueing){
 		    draw queue color: #blue;	
-	  }
-		 
+	  }	 
 	}
 }
 
@@ -1045,7 +1068,7 @@ species eating_outside_act parent: activity  {
 	}
 }
 
-species place_in_room {
+species place_in_room parent:fomitableSurface{
 	float dists;
 }
 

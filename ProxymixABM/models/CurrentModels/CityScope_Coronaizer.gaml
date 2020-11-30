@@ -18,10 +18,11 @@ global{
 	float maskRatio <- 0.0;
 	float droplet_viral_load_per_time_unit<-0.05; //increasement of the infection risk per second
 	
-	float viral_load_to_fomite_infection_per_time_unit<-0.003; //increasement of the viral load of cells per second 
-	float basic_viral_decrease_cell <- 0.0003; //decreasement of the viral load of cells per second 
+	float viral_load_to_fomite_infection_per_time_unit<-0.01; //increasement of the viral load of cells per second 
 	float fomite_mask_emmision_efficiency<-0.25;// Effect of the mask on the air transmission
 	float fomite_mask_reception_efficiency<-0.25;// Effect of the mask on the air transmission
+	float hand_to_mouth<-0.75; //Ratio of fomite transmiteed from hands to mouth;
+	float proportion_of_fomite_viral_load_transmission_per_second<-0.25;// proportion of fomite viral load taken when touching a fomite. 
 	
 	
 	float aerosol_viral_load_per_time_unit <- 0.0001; //decreasement of the viral load of cells per second 
@@ -43,7 +44,7 @@ global{
    	float Low_Risk_of_Infection_threshold<-30.0;
    	float Medium_Risk_of_Infection_threshold<-60.0;
 	
-	bool draw_viral_load_by_touching_grid<-false;
+	bool draw_fomite_viral_load<-false;
 	bool draw_viral_load_per_room<-true;
 	bool showPeople<-true;
 	
@@ -55,6 +56,7 @@ global{
 	int nb_recovered <- 0 update: length(ViralPeople where (each.is_recovered));
 	
 	list<ViralPeople> infectionRiskList;
+	list<fomitableSurface> fomitableSurfaces;
 	
 	init{		
 	}
@@ -151,6 +153,7 @@ global{
 				is_recovered<-false;
 			}
 		}
+		fomitableSurfaces<-agents of_generic_species fomitableSurface;
 		
 	}
 }
@@ -190,6 +193,8 @@ species ViralRoom mirrors: room {
 	}
 }
 
+
+
 species ViralPeople  mirrors:people{
 	point location <- target.location update: {target.location.x,target.location.y,target.location.z};
 	list<float> cumulated_viral_load<-[0.0,0.0,0.0];
@@ -225,9 +230,9 @@ species ViralPeople  mirrors:people{
 			}
 		}
 		if (fomite_infection) and (time_since_last_hand_cleaning < hand_cleaning_time_effect){
-			ViralCell vc <- ViralCell(self.target.location);
-			if (vc != nil) {
-				ask (vc){
+			list<fomitableSurface> fS <- (fomitableSurfaces) overlapping self;
+			if (fS != nil) {
+				ask (fS){
 					do add_viral_load((myself.has_mask ? fomite_mask_emmision_efficiency : 1 )* viral_load_to_fomite_infection_per_time_unit * step);
 				}
 			}
@@ -245,8 +250,11 @@ species ViralPeople  mirrors:people{
 		time_since_last_hand_cleaning <- 0.0;
 	}
 	reflex infection_by_fomite when:not target.not_yet_active and not target.end_of_day and  fomite_infection and not is_infected and not target.is_outside and not target.using_sanitation {
-		ViralCell vrc <- ViralCell(location);
-		if (vrc != nil) {cumulated_viral_load[1] <- cumulated_viral_load[1] + ((self.has_mask? fomite_mask_reception_efficiency : 1) * step * vrc.viral_load_by_touching);}
+		list<fomitableSurface> fS <- (fomitableSurfaces) overlapping self;
+		ask fS{
+			myself.cumulated_viral_load[1] <- myself.cumulated_viral_load[1] + hand_to_mouth * proportion_of_fomite_viral_load_transmission_per_second *((myself.has_mask? fomite_mask_reception_efficiency : 1) * step * self.viral_load);
+			do remove_viral_load(proportion_of_fomite_viral_load_transmission_per_second * step * self.viral_load);	
+		}
 	}
 	reflex infection_by_aerosol when: not target.not_yet_active and not target.end_of_day and aerosol_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
@@ -265,28 +273,6 @@ species ViralPeople  mirrors:people{
 			}
 		}	
 	}
-}
-
-
-grid ViralCell cell_width: 1.0 cell_height:1.0 neighbors: 8 {
-	rgb color <- #white;
-	
-	float viral_load_by_touching min: 0.0 max: 10.0;
-	//Action to add viral load to the cell
-	action add_viral_load(float value){
-		viral_load_by_touching <- viral_load_by_touching+value;
-	}
-	//Action to update the viral load (i.e. trigger decreases)
-	reflex update_viral_load {
-		viral_load_by_touching <- viral_load_by_touching * (1- basic_viral_decrease_cell) ^ step;
-	}
-	aspect default{
-		if (draw_viral_load_by_touching_grid){
-			if (viral_load_by_touching > 0){
-				draw shape color:blend(#white, #red, viral_load_by_touching/1.0);		
-			}
-		}
-	}	
 }
 
 
@@ -320,7 +306,7 @@ experiment Coronaizer type:gui autorun:false{
 	
 	parameter "Infection distance:" category: "Corona" var:largeDropletRange min: 1.0 max: 100.0 step:1;
 	
-	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_viral_load_by_touching_grid;
+	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_fomite_viral_load;
 	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room<-true;
 	parameter "Show People:" category: "Visualization" var:showPeople;
     parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
@@ -344,6 +330,8 @@ experiment Coronaizer type:gui autorun:false{
 		species ViralRoom transparency:0.75 position:{0,0,0.001};
 		species ViralCommonArea transparency:0.85 position:{0,0,0.001};
 		species building_entrance refresh: true;
+		species room_entrance aspect:default position:{0,0,0.01};
+		species place_in_room aspect:default position:{0,0,0.01};
 		species common_area refresh: true;
 		species wall refresh: false;
 		//species room_entrance;
@@ -354,7 +342,7 @@ experiment Coronaizer type:gui autorun:false{
 		species bottleneck transparency: 0.5;
 		species droplet aspect:base; 
 	    species ViralPeople aspect:base position:{0,0,0.002};
-	    species ViralCell aspect:default position:{0,0,0.001};
+	    species fomitableSurface aspect:default position:{0,0,0.001};
 	
 		graphics 'title'{
 		  point titlePos;
