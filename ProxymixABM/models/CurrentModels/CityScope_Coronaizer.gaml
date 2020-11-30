@@ -330,8 +330,8 @@ experiment Coronaizer type:gui autorun:false{
 		species ViralRoom transparency:0.75 position:{0,0,0.001};
 		species ViralCommonArea transparency:0.85 position:{0,0,0.001};
 		species building_entrance refresh: true;
-		species room_entrance aspect:default position:{0,0,0.01};
-		species place_in_room aspect:default position:{0,0,0.01};
+		species room_entrance aspect:default position:{0,0,0.001};
+		species place_in_room aspect:default position:{0,0,0.001};
 		species common_area refresh: true;
 		species wall refresh: false;
 		//species room_entrance;
@@ -341,8 +341,9 @@ experiment Coronaizer type:gui autorun:false{
 		agents "proximityCell" value:draw_proximity_grid ? proximityCell : [] position:{0.0,0.0,0.01};
 		species bottleneck transparency: 0.5;
 		species droplet aspect:base; 
+		species fomitableSurface aspect:default;
 	    species ViralPeople aspect:base position:{0,0,0.002};
-	    species fomitableSurface aspect:default position:{0,0,0.001};
+	    
 	
 		graphics 'title'{
 		  point titlePos;
