@@ -47,8 +47,9 @@ global
 			list<string> useless_type_elements <- (existing_types -  standard_color_per_layer.keys);
 			if (not empty(missing_type_elements) or not empty(useless_type_elements)) {
 				if (not empty(missing_type_elements)) {
-						do error("In "+ useCase + " Some elements (layers) are missing in the dxf file:  " + missing_type_elements +  
-					(empty(useless_type_elements) ? "" :("\n\n and some elements (layers)  will not be used by the model:" + useless_type_elements)));
+						do tell("Use Case: "+ useCase + "\n\nExisting layers: " + existing_types+ 
+						"\n\nMissing layers:  " + missing_type_elements +  
+					    (empty(useless_type_elements) ? "" :("\n\nUseless layers:" + useless_type_elements)));
 				} else {
 					do tell("Some elements (layers) will not be used by the model:" + useless_type_elements);
 				}
@@ -72,7 +73,7 @@ global
 		}
 		ask dxf_element{
 			if (useless){
-				 if(validator){write "this element cannot be used and will be removed" + name + " layer: " + layer;}
+				 if(validator){write "this element cannot be used and will be removed " + name + " layer: " + layer;}
 				do die;
 			}
 		}

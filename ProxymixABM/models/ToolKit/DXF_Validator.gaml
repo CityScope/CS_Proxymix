@@ -17,7 +17,7 @@ global
 experiment ValidatedDXF type: gui
 {   
 
-	parameter 'fileName:' var: useCase category: 'file' <- "Andorra/High_Covid19";
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab";
 	output
 	{	
 		display map type: opengl background:#black toolbar:false draw_env:true
