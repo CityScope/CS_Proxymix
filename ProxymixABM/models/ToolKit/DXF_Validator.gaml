@@ -14,13 +14,12 @@ global
 	}
 }
 
-
 experiment ValidatedDXF type: gui
 {   
 
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA" among: ["UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'file' <- "Andorra/High_Covid19";
 	output
-	{	layout #split;
+	{	
 		display map type: opengl background:#black toolbar:false draw_env:true
 		{
 			species dxf_element;
@@ -29,53 +28,4 @@ experiment ValidatedDXF type: gui
 			}
 		}
 	}
-
 }
-
-
-experiment ValidatedAllUDGDXF type: gui
-{   
-	init
-	{   create simulation with: [useCase::"UDG/CUT/lab"];
-		create simulation with: [useCase::"UDG/CUAAD"];
-		create simulation with: [useCase::"UDG/CUCEA"];
-		create simulation with: [useCase::"UDG/CUSUR"];
-	}
-	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCS/Level 2";// among: ["Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
-	output
-	{	layout #split;
-		display map type: opengl background:#black toolbar:true draw_env:false
-		{
-			species dxf_element;
-			graphics 'legend'{
-			  draw useCase color: #white at: {-world.shape.width*0.1,-world.shape.height*0.1} perspective: true font:font("Helvetica", 20 , #bold);
-			}
-		}
-	}
-}
-
-
-experiment ValidatedAllDXF type: gui
-{   
-	init
-	{   create simulation with: [useCase::"CityScience"];
-		create simulation with: [useCase::"ENSAL"];
-		create simulation with: [useCase::"Hotel-Dieu"];
-		create simulation with: [useCase::"Factory"];
-		create simulation with: [useCase::"Learning_Center"];
-		create simulation with: [useCase::"SanSebastian"];
-		create simulation with: [useCase::"CUT"];
-	}
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab" among: ["Factory", "MediaLab","CityScience","Hotel-Dieu","ENSAL","Learning_Center","SanSebastian"];
-	output
-	{	layout #split;
-		display map type: opengl background:#black toolbar:false draw_env:false
-		{
-			species dxf_element;
-			graphics 'legend'{
-			  draw useCase color: #white at: {-world.shape.width*0.1,-world.shape.height*0.1} perspective: true font:font("Helvetica", 20 , #bold);
-			}
-		}
-	}
-}
-
