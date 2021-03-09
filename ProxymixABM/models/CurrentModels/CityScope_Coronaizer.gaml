@@ -233,7 +233,7 @@ species ViralPeople  mirrors:people{
 			list<fomitableSurface> fS <- (fomitableSurfaces) overlapping self;
 			if (fS != nil) {
 				ask (fS){
-					do add_viral_load((myself.has_mask ? fomite_mask_emmision_efficiency : 1 )* viral_load_to_fomite_infection_per_time_unit * step);
+					do add_viral_load((myself.has_mask ? (1-fomite_mask_emmision_efficiency) : 1 )* viral_load_to_fomite_infection_per_time_unit * step);
 				}
 			}
 		}
@@ -253,8 +253,10 @@ species ViralPeople  mirrors:people{
 		list<fomitableSurface> fS <- (fomitableSurfaces) overlapping self;
 		ask fS{
 			myself.cumulated_viral_load[1] <- myself.cumulated_viral_load[1] + hand_to_mouth * proportion_of_fomite_viral_load_transmission_per_second *((myself.has_mask? fomite_mask_reception_efficiency : 1) * step * self.viral_load);
-			do remove_viral_load(proportion_of_fomite_viral_load_transmission_per_second * step * self.viral_load);	
+			do remove_viral_load(self.viral_load* (1-(1-proportion_of_fomite_viral_load_transmission_per_second)^step));	
 		}
+		
+		
 	}
 	reflex infection_by_aerosol when: not target.not_yet_active and not target.end_of_day and aerosol_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);

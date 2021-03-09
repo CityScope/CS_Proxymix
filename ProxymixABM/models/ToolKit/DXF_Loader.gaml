@@ -35,8 +35,16 @@ global
 	coffee::rgb(25,25,25), furnitures::#maroon, 
 	toilets::rgb(25,25,25),  sanitation::#purple,
 	walls::#white, windows::#white,doors::#lightgray,
-	stairs::rgb(125,125,125),
+	stairs::rgb(225,200,200),
 	chairs::rgb(125,125,125)];
+	
+	map<string,rgb> standard_color_per_layer_test <- 
+	[offices::rgb(29,72,81),meeting_rooms::rgb(23,58,65),library::rgb(20,20,20),lab::rgb(10,10,10),
+	entrance::#white,elevators::rgb(249,54,32),stairs::rgb(251,116,101),
+	coffee::rgb(25,25,25), 
+	toilets::#yellow,  sanitation::#purple,
+	walls::rgb(29,54,74), windows::#white,doors::#lightgray,
+	chairs::rgb(29,72,81), furnitures::rgb(37,109,123)];
 	bool showLegend<-false;
 	
 	action initiliaze_dxf

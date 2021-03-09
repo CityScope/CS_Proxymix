@@ -17,10 +17,10 @@ global
 experiment ValidatedDXF type: gui
 {   
 
-	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab";
+	parameter 'fileName:' var: useCase category: 'file' <- "UDG/CUCEA";
 	output
 	{	
-		display map type: opengl background:#black toolbar:false draw_env:true
+		display map type: opengl background:#black toolbar:false draw_env:false
 		{
 			species dxf_element;
 			graphics 'legend'{
