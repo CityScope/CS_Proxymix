@@ -10,8 +10,9 @@ model CityScopeCoronaizer
 import "DailyRoutine.gaml"
 
 global{
-	bool fixed_infected_people_localization <- true;
-	bool large_droplet_infection <- true;
+//	bool dummy_very_weird_variable;
+//	bool fixed_infected_people_localization <- true;
+//	bool large_droplet_infection <- true;
 	bool fomite_infection <- true;
 	bool aerosol_infection <- true;
 	float largeDropletRange <- 1#m;
@@ -32,7 +33,7 @@ global{
 	float aerosol_mask_reception_efficiency<-0.75;// Effect of the mask on the air transmission
 	float breathing_volume <- 8*10^-3#m^3/#mn;// volume of air inspired/expired per minute
 	float virus_concentration_in_breath <- 5.0; //virus concentration in expired air
-	float DEFAULT_HEIGHT <- 2#m; //default height for rooms
+	float DEFAULT_HEIGHT <- 2.0#m; //default height for rooms
 
 	
 	float diminution_cumulated_viral_load_sanitation <- 0.1;
@@ -66,7 +67,8 @@ global{
 	}
 		
 	reflex initCovid when:cycle = 1{
-		if fixed_infected_people_localization {
+	//	if fixed_infected_people_localization {
+		if true {
 			int nb_i;
 			list<ViralPeople> concerned_people <- ViralPeople where (each.target.working_desk != nil);
 			map<room,list<ViralPeople>> pp_per_room <- concerned_people group_by each.target.working_place;
@@ -192,8 +194,8 @@ species ViralRoom mirrors: room {
 		  	//draw shape color: room_color_map[rnd(length(color_map))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);		
 		  	//draw shape color: room_color_map[int(min (1,viral_load/0.1)*(length(color_map)-1))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
 			draw shape color: blend(color_map["red"], color_map["green"], min(1,viral_load*2000/(shape.area*DEFAULT_HEIGHT)));//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);
-		}		
-	 }
+			}		
+	 	}
 	}
 }
 
@@ -216,7 +218,8 @@ species ViralPeople  mirrors:people{
 
 
 	reflex virus_propagation when: not target.not_yet_active and not target.end_of_day and is_infected and not target.is_outside and not target.using_sanitation {
-		if (large_droplet_infection) {
+	//	if (large_droplet_infection) {
+		if (true) {
 			ask (ViralPeople at_distance largeDropletRange) where (not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
 				geometry line <- line([myself,self]);
 				if empty(wall overlapping line) {
@@ -531,25 +534,25 @@ experiment Coronaizer type:gui autorun:false{
 		}
 	  }
 	  
-//  	  display "Infection Risk" type: java2D
-//	  {
-//		chart "Cumulative Infection Risk" type: series size:{0.5,0.5}//y_range:{0,5000}
-//		{
-//			data "Direct Contact" value: sum(ViralPeople collect each.cumulated_viral_load[0]) color: # orange style: "area";
-//			data "Object Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])+ sum(ViralPeople collect each.cumulated_viral_load[1]) color: # red style: "area";
-//			data "Air Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])+ sum(ViralPeople collect each.cumulated_viral_load[1])+sum(ViralPeople collect each.cumulated_viral_load[2]) color: # yellow style: "area";
-//		}
-//		chart "Direct Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.0}{
-//			data ("") value: (ViralPeople sort_by each.cumulated_viral_load[0] collect each.cumulated_viral_load[0]) color:#orange;
-//		}
-//		chart "Object Infection distribution" type: histogram size:{0.5,0.5} position:{0.0,0.5}{
-//			data ("") value: (ViralPeople sort_by each.cumulated_viral_load[1] collect each.cumulated_viral_load[1]) color:#red;
-//		}
-//		chart "Air Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.5}{
-//			data ("") value: (ViralPeople sort_by each.cumulated_viral_load[2] collect each.cumulated_viral_load[2]) color:#yellow;
-//		}
-//
-//	  }
+  	  display "Infection Risk" type: java2D
+	  {
+		chart "Cumulative Infection Risk" type: series size:{0.5,0.5}//y_range:{0,5000}
+		{
+			data "Direct Contact" value: sum(ViralPeople collect each.cumulated_viral_load[0]) color: # orange style: "area";
+			data "Object Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])+ sum(ViralPeople collect each.cumulated_viral_load[1]) color: # red style: "area";
+			data "Air Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])+ sum(ViralPeople collect each.cumulated_viral_load[1])+sum(ViralPeople collect each.cumulated_viral_load[2]) color: # yellow style: "area";
+		}
+		chart "Direct Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.0}{
+			data ("") value: (ViralPeople sort_by each.cumulated_viral_load[0] collect each.cumulated_viral_load[0]) color:#orange;
+		}
+		chart "Object Infection distribution" type: histogram size:{0.5,0.5} position:{0.0,0.5}{
+			data ("") value: (ViralPeople sort_by each.cumulated_viral_load[1] collect each.cumulated_viral_load[1]) color:#red;
+		}
+		chart "Air Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.5}{
+			data ("") value: (ViralPeople sort_by each.cumulated_viral_load[2] collect each.cumulated_viral_load[2]) color:#yellow;
+		}
+
+	  }
 	  display "Infection Risk" type: java2D background:#black
 	  {
 		chart "Cumulative Infection Risk" type: series color:#white background:#black //y_range:{0,5000}
