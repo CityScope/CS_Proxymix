@@ -198,6 +198,7 @@ species ViralRoom mirrors: room {
 species ViralPeople  mirrors:people{
 	point location <- target.location update: {target.location.x,target.location.y,target.location.z};
 	list<float> cumulated_viral_load<-[0.0,0.0,0.0];
+	int infectionRiskStatus;
 	bool is_susceptible <- true;
 	bool is_infected <- false;
     bool is_immune <- false;
@@ -264,11 +265,27 @@ species ViralPeople  mirrors:people{
 		ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
 		if (my_rca != nil) {cumulated_viral_load[2] <- cumulated_viral_load[2] + ((self.has_mask ? aerosol_mask_reception_efficiency: 1 )* step * my_room.viral_load);}
 	}
+	
+	
+	reflex infectionRiskStatus{		
+		if(sum(cumulated_viral_load) < Low_Risk_of_Infection_threshold){
+			infectionRiskStatus<-0;
+		}
+		if(sum(cumulated_viral_load) >= Low_Risk_of_Infection_threshold and sum(cumulated_viral_load) < Medium_Risk_of_Infection_threshold){
+			infectionRiskStatus<-1;
+		}
+		if(sum(cumulated_viral_load) >= Medium_Risk_of_Infection_threshold){
+			infectionRiskStatus<-2;
+		}
+	}
 			
 	aspect base {
 		if not target.end_of_day and not target.not_yet_active{
 			if(showPeople) and not target.is_outside{
-			  draw circle(peopleSize) color:(is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], sum(cumulated_viral_load)/100.0);					
+			  //GRADIENT	
+			  draw circle(peopleSize) color:(is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], sum(cumulated_viral_load)/100.0);	
+			  //DISCRET	
+			  draw circle(peopleSize) color:(is_infected) ? #blue : ((infectionRiskStatus = 0) ? #green : ((infectionRiskStatus = 1) ? #orange : #red));			
 				if (has_mask){
 					draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
 				}
@@ -437,9 +454,9 @@ experiment Coronaizer type:gui autorun:false{
 	  		float x_offset <- 300#px;
 	  		float y_offset <- 50#px;
 	  		map<string,int> infection_data <- ["Initial infected"::initial_nb_infected, 
-	  										   "Low risk"::(ViralPeople count (sum(each.cumulated_viral_load) < Low_Risk_of_Infection_threshold)- initial_nb_infected),
-	  										   "Medium risk"::(ViralPeople count (sum(each.cumulated_viral_load) >= Low_Risk_of_Infection_threshold and sum(each.cumulated_viral_load) < Medium_Risk_of_Infection_threshold)),
-	  										   "High risk"::(ViralPeople count (sum(each.cumulated_viral_load) >= Medium_Risk_of_Infection_threshold))
+	  										   "Low risk"::(length (ViralPeople where (each.infectionRiskStatus = 0))- initial_nb_infected),
+	  										   "Medium risk"::(length (ViralPeople where (each.infectionRiskStatus = 1))),
+	  										   "High risk"::(length (ViralPeople where (each.infectionRiskStatus = 2)))
 	  					];
 	  		list<string> risk_colors <- ["blue", "green","orange","red"];
 	  		//draw "SIMULATION PROJECTION" color:#white at:{infectiousLegendPos.x,infectiousLegendPos.y-20#px,0.01} perspective: true font:font("Helvetica", 50 , #bold);
@@ -520,9 +537,9 @@ experiment Coronaizer type:gui autorun:false{
 	  {
 		chart "Cumulative Infection Risk" type: series color:#white background:#black //y_range:{0,5000}
 		{
-			data "Direct Contact" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # orange style: "area";
-			data "Object Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # red style: "area";
-			data "Air Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # yellow style: "area";
+			data "Droplets" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # orange style: "area";
+			data "Fomites" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # red style: "area";
+			data "Aerosols" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # yellow style: "area";
 		}
 	  }
 	}	
