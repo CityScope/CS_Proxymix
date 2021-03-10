@@ -33,6 +33,7 @@ global{
 	float breathing_volume <- 8*10^-3#m^3/#mn;// volume of air inspired/expired per minute
 	float virus_concentration_in_breath <- 5.0; //virus concentration in expired air
 	float DEFAULT_HEIGHT <- 2#m; //default height for rooms
+
 	
 	float diminution_cumulated_viral_load_sanitation <- 0.1;
 	float hand_cleaning_time_effect <- 1#h;
@@ -558,6 +559,18 @@ experiment Coronaizer type:gui autorun:false{
 			data "Aerosols" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # yellow style: "area";
 		}
 	  }
+	  
+	  
+	  display "Infection Risk Histogram" type: java2D background:#black
+	  {
+		chart "Cumulative Infection Risk" type: histogram color:#white background:#black //y_range:{0,5000}
+		{
+			data "Droplets" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # orange style: stack ;
+			data "Fomites" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # red style: stack ;
+			data "Aerosols" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # yellow style: stack ;
+		}
+	  }
+	  
 	}	
 }
 
