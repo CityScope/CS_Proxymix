@@ -28,8 +28,11 @@ global{
 	float aerosol_viral_load_per_time_unit <- 0.0001; //decreasement of the viral load of cells per second 
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
 	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
-	float aerosol_mask_emmision_efficiency<-0.25;// Effect of the mask on the air transmission
-	float aerosol_mask_reception_efficiency<-0.25;// Effect of the mask on the air transmission
+	float aerosol_mask_emmision_efficiency<-0.75;// Effect of the mask on the air transmission
+	float aerosol_mask_reception_efficiency<-0.75;// Effect of the mask on the air transmission
+	float breathing_volume <- 8*10^-3#m^3/#mn;// volume of air inspired/expired per minute
+	float virus_concentration_in_breath <- 5.0; //virus concentration in expired air
+	float DEFAULT_HEIGHT <- 2#m; //default height for rooms
 	
 	float diminution_cumulated_viral_load_sanitation <- 0.1;
 	float hand_cleaning_time_effect <- 1#h;
@@ -179,7 +182,7 @@ species ViralRoom mirrors: room {
 	}
 	//Action to add viral load to the room
 	action add_viral_load(float value){
-		viral_load <- viral_load + (value/ shape.area);
+		viral_load <- viral_load + value;
 	}
 	
 	aspect default {
@@ -187,7 +190,7 @@ species ViralRoom mirrors: room {
 		  if (aerosol_infection) {
 		  	//draw shape color: room_color_map[rnd(length(color_map))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);		
 		  	//draw shape color: room_color_map[int(min (1,viral_load/0.1)*(length(color_map)-1))];//blend(color_map["red"], color_map["green"], viral_load*1000);//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);	
-			draw shape color: blend(color_map["red"], color_map["green"], min(1,viral_load*1000));//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);
+			draw shape color: blend(color_map["red"], color_map["green"], min(1,viral_load*2000/(shape.area*DEFAULT_HEIGHT)));//;blend(rgb(169,0,0), rgb(125,239,66), viral_load*1000); //blend(#red, #green, viral_load*1000);
 		}		
 	 }
 	}
@@ -240,9 +243,9 @@ species ViralPeople  mirrors:people{
 		}
 		if (aerosol_infection) {
 			ViralRoom my_room <- first(ViralRoom overlapping location);
-			if (my_room != nil) {ask my_room{do add_viral_load((myself.has_mask ? aerosol_mask_emmision_efficiency :1) * aerosol_viral_load_per_time_unit * step);}}
+			if (my_room != nil) {ask my_room{do add_viral_load((myself.has_mask ? (1-aerosol_mask_emmision_efficiency) :1) * virus_concentration_in_breath*breathing_volume * step);}}
 			ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
-			if (my_rca != nil) {ask my_rca{do add_viral_load((myself.has_mask ? aerosol_mask_emmision_efficiency :1 ) * aerosol_viral_load_per_time_unit * step);}}	
+			if (my_rca != nil) {ask my_rca{do add_viral_load((myself.has_mask ? (1-aerosol_mask_emmision_efficiency) :1 ) * virus_concentration_in_breath*breathing_volume * step);}}	
 		}
 	}
 	
@@ -253,17 +256,30 @@ species ViralPeople  mirrors:people{
 	reflex infection_by_fomite when:not target.not_yet_active and not target.end_of_day and  fomite_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		list<fomitableSurface> fS <- (fomitableSurfaces) overlapping self;
 		ask fS{
-			myself.cumulated_viral_load[1] <- myself.cumulated_viral_load[1] + hand_to_mouth * proportion_of_fomite_viral_load_transmission_per_second *((myself.has_mask? fomite_mask_reception_efficiency : 1) * step * self.viral_load);
-			do remove_viral_load(self.viral_load* (1-(1-proportion_of_fomite_viral_load_transmission_per_second)^step));	
+			float transmitted_viral_load <- self.viral_load* (1-(1-proportion_of_fomite_viral_load_transmission_per_second)^step);
+			myself.cumulated_viral_load[1] <- myself.cumulated_viral_load[1] + hand_to_mouth *(myself.has_mask? (1-fomite_mask_reception_efficiency) : 1) * transmitted_viral_load;
+			do remove_viral_load(transmitted_viral_load);	
 		}
 		
 		
 	}
 	reflex infection_by_aerosol when: not target.not_yet_active and not target.end_of_day and aerosol_infection and not is_infected and not target.is_outside and not target.using_sanitation {
 		ViralRoom my_room <- first(ViralRoom overlapping location);
-		if (my_room != nil) {cumulated_viral_load[2] <- cumulated_viral_load[2] + ((self.has_mask ? aerosol_mask_reception_efficiency : 1 ) * step * my_room.viral_load);}
+		if (my_room != nil) {
+			float transmitted_viral_load <-  (self.has_mask ? (1-aerosol_mask_reception_efficiency) : 1 ) * (1-(1-breathing_volume/(my_room.shape.area*DEFAULT_HEIGHT))^step) * my_room.viral_load;
+			cumulated_viral_load[2] <- cumulated_viral_load[2] + transmitted_viral_load;
+			ask my_room{
+				do add_viral_load(-transmitted_viral_load);
+			}
+		}
 		ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
-		if (my_rca != nil) {cumulated_viral_load[2] <- cumulated_viral_load[2] + ((self.has_mask ? aerosol_mask_reception_efficiency: 1 )* step * my_room.viral_load);}
+		if (my_rca != nil) {
+			float transmitted_viral_load <-  (self.has_mask ? (1-aerosol_mask_reception_efficiency) : 1 ) * (1-(1-breathing_volume/(my_rca.shape.area*DEFAULT_HEIGHT))^step) * my_rca.viral_load;
+			cumulated_viral_load[2] <- cumulated_viral_load[2] + transmitted_viral_load;
+			ask my_rca{
+				do add_viral_load(-transmitted_viral_load);
+			}
+		}
 	}
 	
 	
