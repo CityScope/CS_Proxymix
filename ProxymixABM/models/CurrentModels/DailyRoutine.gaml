@@ -131,7 +131,7 @@ global {
 			
 			} else if type in (workplace_layer + [coffee, sanitation]) {
 				create room with: [shape::clean(polygon(se.points)), type::type]{
-					if flip (ventilation_ratio){
+					if (ventilationType="AC"){
 						isVentilated<-true;
 					}
 				}	
@@ -140,7 +140,7 @@ global {
 		
 		ask room sort_by (-1 * each.shape.area){
 			ask(room overlapping self) {
-				if (type = myself.type) {
+				if (type = myself.type and shape.area>0) {
 					if ((self inter myself).area / shape.area) > 0.8 {
 						do die;	
 					} else {
@@ -624,8 +624,9 @@ species fomitableSurface{
 	}
 	
 	aspect default{
-	  draw circle(interaction_radius) color:rgb(0,0,viral_load*255*100,0.5);
-	  draw triangle(0.1#m) color:#yellow;	
+		if(viral_load>0){
+		  draw circle(interaction_radius) color:rgb(0,0,viral_load*255*100,0.5);	
+		}
 	}
 }
 

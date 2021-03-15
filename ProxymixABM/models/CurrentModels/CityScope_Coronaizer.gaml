@@ -549,7 +549,7 @@ experiment Coronaizer type:gui autorun:false{
 	  
 	  display "Infection Risk" type: java2D background:#black
 	  {
-		chart "Cumulative Infection Risk" type: series color:#white background:#black y_range:{0,200}
+		chart "Cumulative Infection Risk" type: series color:#white background:#black y_range:{0,100}
 		{
 			data "DROPLET" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # yellow style: "area";
 			data "FOMITE" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # orange style: "area";
