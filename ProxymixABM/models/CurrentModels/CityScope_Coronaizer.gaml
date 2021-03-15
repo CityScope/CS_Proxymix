@@ -17,29 +17,42 @@ global{
 	bool aerosol_infection <- true;
 	float largeDropletRange <- 1#m;
 	float maskRatio <- 0.0;
-	float droplet_viral_load_per_time_unit<-0.05; //increasement of the infection risk per second
 	
-	float viral_load_to_fomite_infection_per_time_unit<-0.01; //increasement of the viral load of cells per second 
-	float fomite_mask_emmision_efficiency<-0.25;// Effect of the mask on the air transmission
-	float fomite_mask_reception_efficiency<-0.25;// Effect of the mask on the air transmission
+
+	//MASK
+	float droplet_emission_mask_efficiency <- 0.75; //1.0 masks are totaly efficient to avoid direct transmission
+	float droplet_reception_mask_efficiency <- 0.75; //1.0 masks are totaly efficient to avoid direct transmission
+	float fomite_mask_emmision_efficiency<-0.75;// Effect of the mask on the air transmission
+	float fomite_mask_reception_efficiency<-0.75;// Effect of the mask on the air transmission
+	float aerosol_mask_emmision_efficiency<-0.75;// Effect of the mask on the air transmission
+	float aerosol_mask_reception_efficiency<-0.75;// Effect of the mask on the air transmission
+	
+	
+
 	float hand_to_mouth<-0.75; //Ratio of fomite transmiteed from hands to mouth;
 	float proportion_of_fomite_viral_load_transmission_per_second<-0.25;// proportion of fomite viral load taken when touching a fomite. 
 	
 	
-	float aerosol_viral_load_per_time_unit <- 0.0001; //decreasement of the viral load of cells per second 
 	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
 	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
-	float aerosol_mask_emmision_efficiency<-0.75;// Effect of the mask on the air transmission
-	float aerosol_mask_reception_efficiency<-0.75;// Effect of the mask on the air transmission
-	float breathing_volume <- 8*10^-3#m^3/#mn;// volume of air inspired/expired per minute
-	float virus_concentration_in_breath <- 5.0; //virus concentration in expired air
-	float DEFAULT_HEIGHT <- 2.0#m; //default height for rooms
+
+	
+	//DROPLET
+	float droplet_viral_load_per_time_unit<-1.0; //increasement of the infection risk per second
+	float viral_load_to_fomite_infection_per_time_unit<-0.2; //increasement of the viral load of cells per second 
+	
+	
+	
+	float breathing_volume <- 8*10^-3*#m^3/#mn;// volume of air inspired/expired per minute
+	float virus_concentration_in_breath <- 100000.0; //virus concentration in expired air
+	float DEFAULT_HEIGHT <- 2.0*#m^3; //default height for rooms
 
 	
 	float diminution_cumulated_viral_load_sanitation <- 0.1;
 	float hand_cleaning_time_effect <- 1#h;
-	float droplet_emission_mask_efficiency <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
-	float droplet_reception_mask_efficiency <- 0.7; //1.0 masks are totaly efficient to avoid direct transmission
+	
+	
+	
 	float separator_efficiency <- 0.9;
 	
     //float step<-1#mn;
@@ -63,7 +76,7 @@ global{
 	list<ViralPeople> infectionRiskList;
 	list<fomitableSurface> fomitableSurfaces;
 	
-	init{		
+	init{	
 	}
 		
 	reflex initCovid when:cycle = 1{
@@ -171,7 +184,7 @@ species ViralCommonArea mirrors: common_area parent: ViralRoom ;
 
 species ViralRoom mirrors: room {
 	list<rgb> room_color_map<-[rgb(109, 112, 0),rgb(175, 190, 49),rgb(211, 186, 25),rgb(247, 181, 0),rgb(246, 143, 18),rgb(245, 105, 36),rgb(244, 67, 54)];	
-	float viral_load min: 0.0 max: 10.0;
+	float viral_load;
 	init {
 		shape <- target.shape;
 	}
@@ -247,7 +260,7 @@ species ViralPeople  mirrors:people{
 		}
 		if (aerosol_infection) {
 			ViralRoom my_room <- first(ViralRoom overlapping location);
-			if (my_room != nil) {ask my_room{do add_viral_load((myself.has_mask ? (1-aerosol_mask_emmision_efficiency) :1) * virus_concentration_in_breath*breathing_volume * step);}}
+			if (my_room != nil) {ask my_room{do add_viral_load((myself.has_mask ? (1-aerosol_mask_emmision_efficiency) :1) * virus_concentration_in_breath*breathing_volume * step);}}		
 			ViralCommonArea my_rca <- first(ViralCommonArea overlapping location);
 			if (my_rca != nil) {ask my_rca{do add_viral_load((myself.has_mask ? (1-aerosol_mask_emmision_efficiency) :1 ) * virus_concentration_in_breath*breathing_volume * step);}}	
 		}
@@ -303,7 +316,7 @@ species ViralPeople  mirrors:people{
 		if not target.end_of_day and not target.not_yet_active{
 			if(showPeople) and not target.is_outside{
 			  //GRADIENT	
-			  draw circle(peopleSize) color:(is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], sum(cumulated_viral_load)/100.0);	
+			//  draw circle(peopleSize) color:(is_infected) ? color_map["blue"] : blend(color_map["red"], color_map["green"], sum(cumulated_viral_load)/100.0);	
 			  //DISCRET	
 			  draw circle(peopleSize) color:(is_infected) ? #blue : ((infectionRiskStatus = 0) ? #green : ((infectionRiskStatus = 1) ? #orange : #red));			
 				if (has_mask){
@@ -534,45 +547,26 @@ experiment Coronaizer type:gui autorun:false{
 		}
 	  }
 	  
-  	  display "Infection Risk" type: java2D
-	  {
-		chart "Cumulative Infection Risk" type: series size:{0.5,0.5}//y_range:{0,5000}
-		{
-			data "Direct Contact" value: sum(ViralPeople collect each.cumulated_viral_load[0]) color: # orange style: "area";
-			data "Object Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])+ sum(ViralPeople collect each.cumulated_viral_load[1]) color: # red style: "area";
-			data "Air Infection" value: sum(ViralPeople collect each.cumulated_viral_load[0])+ sum(ViralPeople collect each.cumulated_viral_load[1])+sum(ViralPeople collect each.cumulated_viral_load[2]) color: # yellow style: "area";
-		}
-		chart "Direct Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.0}{
-			data ("") value: (ViralPeople sort_by each.cumulated_viral_load[0] collect each.cumulated_viral_load[0]) color:#orange;
-		}
-		chart "Object Infection distribution" type: histogram size:{0.5,0.5} position:{0.0,0.5}{
-			data ("") value: (ViralPeople sort_by each.cumulated_viral_load[1] collect each.cumulated_viral_load[1]) color:#red;
-		}
-		chart "Air Infection distribution" type: histogram size:{0.5,0.5} position:{0.5,0.5}{
-			data ("") value: (ViralPeople sort_by each.cumulated_viral_load[2] collect each.cumulated_viral_load[2]) color:#yellow;
-		}
-
-	  }
 	  display "Infection Risk" type: java2D background:#black
 	  {
-		chart "Cumulative Infection Risk" type: series color:#white background:#black //y_range:{0,5000}
+		chart "Cumulative Infection Risk" type: series color:#white background:#black y_range:{0,200}
 		{
-			data "Droplets" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # orange style: "area";
-			data "Fomites" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # red style: "area";
-			data "Aerosols" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # yellow style: "area";
+			data "DROPLET" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # yellow style: "area";
+			data "FOMITE" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # orange style: "area";
+			data "AEROSOL" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # red style: "area";
 		}
 	  }
 	  
 	  
-	  display "Infection Risk Histogram" type: java2D background:#black
+	  /*display "Infection Risk Histogram" type: java2D background:#black
 	  {
-		chart "Cumulative Infection Risk" type: histogram color:#white background:#black //y_range:{0,5000}
+		chart "Cumulative Infection Risk" type: histogram color:#white background:#black y_range:{0,200}
 		{
 			data "Droplets" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # orange style: stack ;
-			data "Fomites" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # red style: stack ;
-			data "Aerosols" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # yellow style: stack ;
+			data "Fomites" value: sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # red style: stack ;
+			data "Aerosols" value: sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # yellow style: stack ;
 		}
-	  }
+	  }*/
 	  
 	}	
 }
