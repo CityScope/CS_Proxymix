@@ -15,50 +15,44 @@ global{
 //	bool large_droplet_infection <- true;
 	bool fomite_infection <- true;
 	bool aerosol_infection <- true;
-	float largeDropletRange <- 1#m;
 	float maskRatio <- 0.0;
 	
 
 	//MASK
-	float droplet_emission_mask_efficiency <- 0.75; //1.0 masks are totaly efficient to avoid direct transmission
-	float droplet_reception_mask_efficiency <- 0.75; //1.0 masks are totaly efficient to avoid direct transmission
-	float fomite_mask_emmision_efficiency<-0.75;// Effect of the mask on the air transmission
-	float fomite_mask_reception_efficiency<-0.75;// Effect of the mask on the air transmission
-	float aerosol_mask_emmision_efficiency<-0.75;// Effect of the mask on the air transmission
-	float aerosol_mask_reception_efficiency<-0.75;// Effect of the mask on the air transmission
+	float droplet_mask_emission_efficiency <- 0.70; 
+	float droplet_reception_mask_efficiency <- 0.70; 
+	float fomite_mask_emmision_efficiency<-0.70;
+	float fomite_mask_reception_efficiency<-0.70;
+	float aerosol_mask_emmision_efficiency<-0.70;
+	float aerosol_mask_reception_efficiency<-0.70;
 	
-	
-
+    //FOMITE
 	float hand_to_mouth<-0.75; //Ratio of fomite transmiteed from hands to mouth;
 	float proportion_of_fomite_viral_load_transmission_per_second<-0.25;// proportion of fomite viral load taken when touching a fomite. 
-	
-	
-	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
-	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
-
-	
+		
 	//DROPLET
 	float droplet_viral_load_per_time_unit<-1.0; //increasement of the infection risk per second
 	float viral_load_to_fomite_infection_per_time_unit<-0.2; //increasement of the viral load of cells per second 
-	
-	
-	
 	float breathing_volume <- 8*10^-3*#m^3/#mn;// volume of air inspired/expired per minute
-	float virus_concentration_in_breath <- 100000.0; //virus concentration in expired air
+	float virus_concentration_in_breath <- 10000.0; //virus concentration in expired air
 	float DEFAULT_HEIGHT <- 2.0*#m^3; //default height for rooms
+	float largeDropletRange <- 1#m;
 
-	
+	//SANITATION
 	float diminution_cumulated_viral_load_sanitation <- 0.1;
 	float hand_cleaning_time_effect <- 1#h;
 	
+	//VENTILATION
+	float basic_viral_decrease_room <- 0.0001; //decreasement of the viral load of cells per second 
+	float ventilated_viral_decrease_room <- 0.001; //decreasement of the viral load of cells per second 
 	
-	
+	//SEPARATOR
 	float separator_efficiency <- 0.9;
-	
-    //float step<-1#mn;
-	int totalNbInfection;
+
    	int initial_nb_infected<-10;
    	map<room, int> infected_per_room;
+   	
+   	//OUTPUT
    	float Low_Risk_of_Infection_threshold<-30.0;
    	float Medium_Risk_of_Infection_threshold<-60.0;
 	
@@ -241,7 +235,7 @@ species ViralPeople  mirrors:people{
 						transmited_droplet_viral_load <- transmited_droplet_viral_load * (1 - separator_efficiency);
 					}
 					if myself.has_mask {
-						transmited_droplet_viral_load <- transmited_droplet_viral_load * (1 - droplet_emission_mask_efficiency);
+						transmited_droplet_viral_load <- transmited_droplet_viral_load * (1 - droplet_mask_emission_efficiency);
 					}
 					if self.has_mask{
 						transmited_droplet_viral_load <- transmited_droplet_viral_load * (1 - droplet_reception_mask_efficiency);
@@ -549,11 +543,11 @@ experiment Coronaizer type:gui autorun:false{
 	  
 	  display "Infection Risk" type: java2D background:#black
 	  {
-		chart "Cumulative Infection Risk" type: series color:#white background:#black y_range:{0,100}
+		chart "Cumulative Infection Risk" type: series color:#white background:#black y_range:{0,300}
 		{
-			data "DROPLET" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # yellow style: "area";
-			data "FOMITE" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # orange style: "area";
-			data "AEROSOL" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # red style: "area";
+			data "DROPLET" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color:#mistyrose style: "area";
+			data "FOMITE" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: #pink style: "area";
+			data "AEROSOL" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: #hotpink style: "area";
 		}
 	  }
 	  

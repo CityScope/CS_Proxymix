@@ -14,7 +14,7 @@ import "./../ToolKit/DXF_Loader.gaml"
 global {
 	
 	list<string> workplace_layer <- [offices, meeting_rooms];
-	float normal_step <- 1#s;
+	float normal_step <- 10#s;
 	float fast_step <- 10#s;
 	bool use_change_step <- true;
 	bool synchronized_step <- true;
@@ -608,7 +608,8 @@ species wall {
 species fomitableSurface{
 	float viral_load min: 0.0 max: 10.0;
 	float interaction_radius<-1.0#m;
-	float fomite_viral_load_decay_per_second<-0.003;
+	float fomite_viral_load_decay_per_second<-0.00003;
+
 	
 	//Action to add viral load to the cell
 	action add_viral_load(float value){
