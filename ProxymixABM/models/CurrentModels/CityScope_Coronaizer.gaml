@@ -229,7 +229,8 @@ species ViralPeople  mirrors:people{
 	reflex virus_propagation when: not target.not_yet_active and not target.end_of_day and is_infected and not target.is_outside and not target.using_sanitation {
 	//	if (large_droplet_infection) {
 		if (true) {
-			ask (ViralPeople at_distance largeDropletRange) where (not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
+		//	ask (ViralPeople at_distance largeDropletRange) where (not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
+			ask ViralPeople where ((each.location.x-self.location.x)^2+(each.location.y-self.location.y)^2<largeDropletRange^2 and not each.target.end_of_day and not target.not_yet_active and not each.is_infected and not each.target.using_sanitation and not each.target.is_outside) {
 				geometry line <- line([myself,self]);
 				if empty(wall overlapping line) {
 					float transmited_droplet_viral_load <- droplet_viral_load_per_time_unit * step;
