@@ -136,7 +136,7 @@ experiment Episode1_Ventilation type: gui parent: Coronaizer{
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
-	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
@@ -149,7 +149,7 @@ experiment Episode1_Ventilation type: gui parent: Coronaizer{
 	{   
 		create simulation with: [episode::1,title::"Ventilation",useCase::"MediaLab",useCaseType::"Classrooms",
 		ventilationType::"AC",ventilation_ratio::0.0,
-		timeSpent::1.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
+		timeSpent::1.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 		
 		

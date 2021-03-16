@@ -33,9 +33,19 @@ experiment Episode1 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::1,title::"Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
+		create simulation with: [episode::1,title::"Mask",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
 		ventilationType::"Natural",ventilation_ratio::0.0,
 		timeSpent::1.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
+		arrival_time_interval:: 3#mn, step_arrival::1#s];
+		
+		create simulation with: [episode::1,title::"Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
+		ventilationType::"Natural",ventilation_ratio::0.0,
+		timeSpent::1.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
+		arrival_time_interval:: 3#mn, step_arrival::1#s];
+		
+		create simulation with: [episode::1,title::"Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
+		ventilationType::"Natural",ventilation_ratio::0.0,
+		timeSpent::1.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 	}
 }
