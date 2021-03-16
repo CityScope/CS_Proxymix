@@ -27,8 +27,8 @@ global{
 	float aerosol_mask_reception_efficiency<-0.70;
 	
     //FOMITE
-	float hand_to_mouth<-0.75; //Ratio of fomite transmiteed from hands to mouth;
-	float proportion_of_fomite_viral_load_transmission_per_second<-0.25;// proportion of fomite viral load taken when touching a fomite. 
+	float hand_to_mouth<-0.3; //Ratio of fomite transmiteed from hands to mouth;
+	float proportion_of_fomite_viral_load_transmission_per_second<-0.01;// proportion of fomite viral load taken when touching a fomite. 
 		
 	//DROPLET
 	float droplet_viral_load_per_time_unit<-1.0; //increasement of the infection risk per second
@@ -554,7 +554,7 @@ experiment Coronaizer type:gui autorun:false{
 	  {
 		
 		
-		chart "Cumulative Infection Risk: "+ title  type: series color:#white background:#black y_range:{0,300}
+		chart "Cumulative Infection Risk: "+ title  type: series color:#white background:#black y_range:{0,30}
 		{
 			data "DROPLET" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color:#mistyrose style: "area";
 			data "FOMITE" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: #pink style: "area";
