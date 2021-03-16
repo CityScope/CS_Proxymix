@@ -100,7 +100,7 @@ experiment Episode1_TimeShift type: gui parent: Coronaizer{
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
-	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;

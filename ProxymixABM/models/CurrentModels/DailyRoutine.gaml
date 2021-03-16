@@ -626,7 +626,7 @@ species fomitableSurface{
 	
 	aspect default{
 		if(viral_load>0){
-		  draw circle(interaction_radius) color:rgb(0,0,viral_load*255*100,0.5);	
+		  //draw circle(interaction_radius) color:rgb(0,0,viral_load*255*100,0.5);	
 		}
 	}
 }

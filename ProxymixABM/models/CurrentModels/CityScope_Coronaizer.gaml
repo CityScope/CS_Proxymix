@@ -37,6 +37,7 @@ global{
 	float virus_concentration_in_breath <- 10000.0; //virus concentration in expired air
 	float DEFAULT_HEIGHT <- 2.0*#m^3; //default height for rooms
 	float largeDropletRange <- 1#m;
+	
 
 	//SANITATION
 	float diminution_cumulated_viral_load_sanitation <- 0.1;
@@ -58,6 +59,7 @@ global{
 	
 	bool draw_fomite_viral_load<-false;
 	bool draw_viral_load_per_room<-true;
+	bool dropletRange<-true;
 	bool showPeople<-true;
 	
 	int nb_cols <- int(75*1.5);
@@ -316,6 +318,9 @@ species ViralPeople  mirrors:people{
 				if (has_mask){
 					draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
 				}
+			if(dropletRange){
+			 draw circle(largeDropletRange) color:#white empty:true;	
+			} 
 			}
 		}	
 	}
@@ -557,6 +562,8 @@ experiment Coronaizer type:gui autorun:false{
 		graphics "Viral Load" {
 			draw "VIRAL LOAD: " + float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) with_precision 2 
 			color: #white at: {10#px,30#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
+			draw "DROPLET LOAD: " + float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)) with_precision 2 
+			color: #white at: {10#px,50#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
 		}
 	  }
 	  
