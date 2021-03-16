@@ -20,38 +20,39 @@ experiment Episode1 type: gui parent: Coronaizer{
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCS/Level 2";
 	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Classrooms";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 2.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
 	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
 	parameter "step_arrival" var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 3 #mn;
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::1,title::"Mask",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
-		ventilationType::"Natural",
-		timeSpent::1.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
-		arrival_time_interval:: 3#mn, step_arrival::1#s];
+		create simulation with: [useCase::"UDG/CUCS/Level 2",title::"Mask",maskRatio::1.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"Natural",timeSpent::2.0#h,
+		arrival_time_interval:: 3#mn, step_arrival::1#s,episode::1,useCaseType::"Classrooms",queueing::false, peopleSize::0.3#m , agenda_scenario::"simple"];
 		
-		create simulation with: [episode::1,title::"Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
-		ventilationType::"Natural",
-		timeSpent::1.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
-		arrival_time_interval:: 3#mn, step_arrival::1#s];
+		create simulation with: [useCase::"UDG/CUCS/Level 2",title::"Social Distance",maskRatio::0.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"Natural",timeSpent::2.0#h,
+		arrival_time_interval:: 3#mn, step_arrival::1#s,episode::1,useCaseType::"Classrooms",queueing::false, peopleSize::0.3#m , agenda_scenario::"simple"];
 		
-		create simulation with: [episode::1,title::"Ventilation",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
-		ventilationType::"Ventilation",
-		timeSpent::1.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
-		arrival_time_interval:: 3#mn, step_arrival::1#s];
+		create simulation with: [useCase::"UDG/CUCS/Level 2",title::"Ventilation",maskRatio::0.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"AC",timeSpent::2.0#h,
+		arrival_time_interval:: 3#mn, step_arrival::1#s,episode::1,useCaseType::"Classrooms",queueing::false, peopleSize::0.3#m , agenda_scenario::"simple"];
 		
-		create simulation with: [episode::1,title::"Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
-		ventilationType::"Natural",
-		timeSpent::1.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
-		arrival_time_interval:: 3#mn, step_arrival::1#s];
+		create simulation with: [useCase::"UDG/CUCS/Level 2",title::"Mask/Social Distance",maskRatio::1.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"Natural",timeSpent::2.0#h,
+		arrival_time_interval:: 3#mn, step_arrival::1#s,episode::1,useCaseType::"Classrooms",queueing::false, peopleSize::0.3#m , agenda_scenario::"simple"];
+		
+		create simulation with: [useCase::"UDG/CUCS/Level 2",title::"Mask/Ventilation",maskRatio::1.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"AC",timeSpent::2.0#h,
+		arrival_time_interval:: 3#mn, step_arrival::1#s,episode::1,useCaseType::"Classrooms",queueing::false, peopleSize::0.3#m , agenda_scenario::"simple"];
+		
+		create simulation with: [useCase::"UDG/CUCS/Level 2",title::"Ventilation/Social Distance",maskRatio::0.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"AC",timeSpent::2.0#h,
+		arrival_time_interval:: 3#mn, step_arrival::1#s,episode::1,useCaseType::"Classrooms",queueing::false, peopleSize::0.3#m , agenda_scenario::"simple"];
+		
+		create simulation with: [useCase::"UDG/CUCS/Level 2",title::"All",maskRatio::1.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"AC",timeSpent::2.0#h,
+		arrival_time_interval:: 3#mn, step_arrival::1#s,episode::1,useCaseType::"Classrooms",queueing::false, peopleSize::0.3#m , agenda_scenario::"simple"];
+
 	}
 }
 

@@ -369,7 +369,7 @@ experiment Coronaizer type:gui autorun:false{
 		
 	output{
 	  layout #split;
-	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false	{
+	  display Simulation type:opengl  background:#black draw_env:false synchronized:false autosave:false toolbar:false	{
 	   	species room  refresh: false;
 		species room aspect: available_places_info refresh: true position:{0,0,0.001};
 		species ViralRoom transparency:0.75 position:{0,0,0.001};
@@ -464,7 +464,11 @@ experiment Coronaizer type:gui autorun:false{
 	  		}
 	  		
 	  		draw "POPULATION"color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01}  perspective: true font:font("Helvetica", 30 , #plain);
-	  		draw "" + length(people) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y+30#px,0.01}  perspective: true font:font("Helvetica", 30 , #bold);  
+	  		draw "" + length(people) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y+30#px,0.01}  perspective: true font:font("Helvetica", 30 , #bold); 
+	  		draw "VIRAL LOAD"color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y+60#px,0.01}  perspective: true font:font("Helvetica", 30 , #plain);
+	  		draw "" + int(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y+90#px,0.01}  perspective: true font:font("Helvetica", 30 , #bold); 
+	  		
+	  		 
 	  	}
 	  	
 	  	
@@ -540,13 +544,19 @@ experiment Coronaizer type:gui autorun:false{
 		}
 	  }
 	  
-	  display "Infection Risk" type: java2D background:#black
+	  display "Infection Risk" type: java2D background:#black toolbar:false
 	  {
-		chart "Cumulative Infection Risk" type: series color:#white background:#black y_range:{0,200}
+		
+		
+		chart "Cumulative Infection Risk: "+ title  type: series color:#white background:#black y_range:{0,300}
 		{
 			data "DROPLET" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color:#mistyrose style: "area";
 			data "FOMITE" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: #pink style: "area";
 			data "AEROSOL" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: #hotpink style: "area";
+		}
+		graphics "Viral Load" {
+			draw "VIRAL LOAD: " + float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) with_precision 2 
+			color: #white at: {10#px,30#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
 		}
 	  }
 	  
