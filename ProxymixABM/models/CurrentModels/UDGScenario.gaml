@@ -34,17 +34,22 @@ experiment Episode1 type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [episode::1,title::"Mask",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
-		ventilationType::"Natural",ventilation_ratio::0.0,
+		ventilationType::"Natural",
 		timeSpent::1.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 		
 		create simulation with: [episode::1,title::"Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
-		ventilationType::"Natural",ventilation_ratio::0.0,
+		ventilationType::"Natural",
 		timeSpent::1.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 		
+		create simulation with: [episode::1,title::"Ventilation",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
+		ventilationType::"Ventilation",
+		timeSpent::1.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
+		arrival_time_interval:: 3#mn, step_arrival::1#s];
+		
 		create simulation with: [episode::1,title::"Mask/Social Distancing",useCase::"UDG/CUCS/Level 2",useCaseType::"Classrooms",
-		ventilationType::"Natural",ventilation_ratio::0.0,
+		ventilationType::"Natural",
 		timeSpent::1.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 	}
@@ -65,7 +70,6 @@ experiment Episode2 type: gui parent: Coronaizer{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.15#m;
 	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
 	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-5;
@@ -78,7 +82,7 @@ experiment Episode2 type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::2,title::"Natural Ventilation",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"Natural",ventilation_ratio::1.0,
+		create simulation with: [episode::2,title::"Natural Ventilation",useCase::"UDG/CUT/lab",useCaseType::"Labs",ventilationType::"Natural",
 		initial_nb_infected::5,timeSpent::45#mn,workplace_layer::["Labs"],density_scenario::"distance",distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.15#m,agenda_scenario::"simple",
 		show_droplet::false,droplet_livespan::20,droplet_distance::1.0, fast_step::5.0,normal_step::0.2,arrival_time_interval:: 20#s, step_arrival::0.2#s,limit_cpt_for_entrance_room_creation::2];
 	}
@@ -97,7 +101,6 @@ experiment Episode3 type: gui parent: Coronaizer{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.2#m;
 	parameter "step_arrival" var: step_arrival <- 3#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 5#mn;
@@ -107,7 +110,7 @@ experiment Episode3 type: gui parent: Coronaizer{
 	{   
 		create simulation with: [episode::3,title::"Sanitation ",useCase::"UDG/CUAAD",useCaseType::"Labs",ventilationType::"Natural", use_sanitation::true,nb_people_per_sanitation::2, sanitation_usage_duration::20#s,
 		proba_using_before_work::1.0, proba_using_after_work::0.5,step_arrival::3, arrival_time_interval::5#mn,tolerance_target_param::2.0,
-		timeSpent::45#mn,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.2#m,agenda_scenario::"simple",ventilation_ratio::0.0];
+		timeSpent::45#mn,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.2#m,agenda_scenario::"simple"];
 
 	}
 }
@@ -124,7 +127,6 @@ experiment Episode4 type: gui parent: Coronaizer{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.4#m;
 	parameter "step_arrival" var: step_arrival <- 3#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 10#mn;
@@ -134,7 +136,7 @@ experiment Episode4 type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [title::"Mask",useCase::"UDG/CUCEA",useCaseType::"Labs",ventilationType::"Natural",use_change_step::false,step_arrival::3, arrival_time_interval::10#mn,
-		timeSpent::1.0#h,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.4#m,agenda_scenario::"simple",ventilation_ratio::0.0];
+		timeSpent::1.0#h,density_scenario::"distance",distance_people::1.5#m,maskRatio::1.0,queueing::true, peopleSize::0.4#m,agenda_scenario::"simple"];
 		
 	}
 }
@@ -153,7 +155,6 @@ experiment Episode5 type: gui parent: Coronaizer{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <-2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-2.0#m;
 	
 	//Scenario 2
@@ -161,6 +162,6 @@ experiment Episode5 type: gui parent: Coronaizer{
 	{   
 		create simulation with: [episode::5,title::"Dedicated path",useCase::"UDG/CUSUR",useCaseType::"Labs",ventilationType::"Natural",
 		timeSpent::45#mn,density_scenario::"distance",distance_people::3.0#m,maskRatio::1.0,queueing::false, peopleSize::2.0#m,agenda_scenario::"simple",
-		ventilation_ratio::0.0,initial_nb_infected::100];
+		initial_nb_infected::100];
 	}
 }

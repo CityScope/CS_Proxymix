@@ -27,7 +27,6 @@ experiment Episode1_Reference type: gui parent: Coronaizer{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
 	parameter "step_arrival" var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 3 #mn;
@@ -47,7 +46,6 @@ experiment Episode1_Mask_Initial_Layout type: gui parent: Coronaizer{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
 	parameter "step_arrival" var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 3 #mn;
@@ -55,7 +53,7 @@ experiment Episode1_Mask_Initial_Layout type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [episode::1,title::"Masks",useCase::"MediaLab",useCaseType::"Classrooms",
-		ventilationType::"Natural",ventilation_ratio::0.0,
+		ventilationType::"Natural",
 		timeSpent::3.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 	}
@@ -74,7 +72,6 @@ experiment Episode1_Social_Distancing type: gui parent: Coronaizer{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.1#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
 	parameter "step_arrival" var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 3 #mn;
@@ -82,7 +79,7 @@ experiment Episode1_Social_Distancing type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [episode::1,title::"Social Distance",useCase::"MediaLab",useCaseType::"Classrooms",
-		ventilationType::"Natural",ventilation_ratio::0.0,
+		ventilationType::"Natural",
 		timeSpent::1.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 		
@@ -107,7 +104,6 @@ experiment Episode1_TimeShift type: gui parent: Coronaizer{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
 	parameter "step_arrival" var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 3 #mn;
@@ -115,7 +111,7 @@ experiment Episode1_TimeShift type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [episode::1,title::"Time Shift",useCase::"MediaLab",useCaseType::"Classrooms",
-		ventilationType::"Natural",ventilation_ratio::0.0,
+		ventilationType::"Natural",
 		timeSpent::3.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 		
@@ -140,7 +136,6 @@ experiment Episode1_Ventilation type: gui parent: Coronaizer{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
 	parameter "step_arrival" var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" var: arrival_time_interval <- 3 #mn;
@@ -148,7 +143,7 @@ experiment Episode1_Ventilation type: gui parent: Coronaizer{
 	init
 	{   
 		create simulation with: [episode::1,title::"Ventilation",useCase::"MediaLab",useCaseType::"Classrooms",
-		ventilationType::"AC",ventilation_ratio::0.0,
+		ventilationType::"AC",
 		timeSpent::1.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 		

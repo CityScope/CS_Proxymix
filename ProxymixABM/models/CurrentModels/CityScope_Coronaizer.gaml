@@ -344,7 +344,6 @@ experiment Coronaizer type:gui autorun:false{
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "Ventilated room ratio:" category: "Policy" var:ventilation_ratio min:0.0 max:1.0 <-0.0;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
 	parameter "step_arrival" category:'Initialization' var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" category:'Initialization' var: arrival_time_interval <- 3 #mn;

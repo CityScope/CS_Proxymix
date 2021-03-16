@@ -106,7 +106,7 @@ global {
 	float droplet_distance <- 0.8#m;
 	file fanPic <- file('./../../images/fan.png');
 	//file logoPic <- file('./../../images/logo.png');
-	float ventilation_ratio;
+
 	
 	map<string,rgb> color_map <- [ "blue"::rgb(50, 197, 255), "red"::rgb(244, 67, 54),"green"::rgb(109, 212, 0), "orange"::rgb(247, 181, 0)];
 	
