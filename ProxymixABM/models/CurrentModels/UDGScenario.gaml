@@ -13,11 +13,10 @@ import 'CityScope_Coronaizer.gaml'
 
 /* Insert your model definition here */
 
-experiment Episode1 type: gui parent: Coronaizer{
+experiment FullBenchMark type: gui parent: Coronaizer{
 	string usecase<-"UDG/CUCS/Level 2";// 1."UDG/CUCS/Level 2" 2.!!!!DOESN'TWORK"UDG/CUT/lab" 3."UDG/CUAAD" 4. "UDG/CUCEA" 5."UDG/CUSUR"
 	string scenario<-"simple";
 	float timespent<-2.0#h;
-	
 	parameter 'fileName:' var: useCase category: 'Initialization' <- usecase;
 	init
 	{   
