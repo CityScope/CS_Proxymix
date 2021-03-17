@@ -27,7 +27,7 @@ global{
 	float aerosol_mask_reception_efficiency<-0.70;
 	
     //FOMITE
-	float hand_to_mouth<-0.3; //Ratio of fomite transmiteed from hands to mouth;
+	float hand_to_mouth<-0.2; //Ratio of fomite transmiteed from hands to mouth;
 	float proportion_of_fomite_viral_load_transmission_per_second<-0.01;// proportion of fomite viral load taken when touching a fomite.
 	list<fomitableSurface> fomitableSurfaces; 
 		

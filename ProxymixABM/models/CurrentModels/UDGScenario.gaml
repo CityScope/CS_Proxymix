@@ -14,7 +14,7 @@ import 'CityScope_Coronaizer.gaml'
 /* Insert your model definition here */
 
 experiment Episode1 type: gui parent: Coronaizer{
-	string usecase<-"UDG/CUAAD";// 1."UDG/CUCS/Level 2" 2."UDG/CUT/lab" 3."UDG/CUAAD" 4. "UDG/CUCEA" 5."UDG/CUSUR"
+	string usecase<-"UDG/CUCS/Level 2";// 1."UDG/CUCS/Level 2" 2.!!!!DOESN'TWORK"UDG/CUT/lab" 3."UDG/CUAAD" 4. "UDG/CUCEA" 5."UDG/CUSUR"
 	string scenario<-"simple";
 	float timespent<-2.0#h;
 	
