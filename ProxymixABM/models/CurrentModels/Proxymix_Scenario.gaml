@@ -16,10 +16,8 @@ import 'CityScope_Coronaizer.gaml'
 
 experiment Episode1_Reference type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'Episode:' var: episode category: 'Initialization' <- 1;
 	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab";
-	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Classrooms";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
@@ -35,10 +33,8 @@ experiment Episode1_Reference type: gui parent: Coronaizer{
 
 experiment Episode1_Mask_Initial_Layout type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'Episode:' var: episode category: 'Initialization' <- 1;
 	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab";
-	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Classrooms";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 3.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
@@ -52,8 +48,7 @@ experiment Episode1_Mask_Initial_Layout type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::1,title::"Masks",useCase::"MediaLab",useCaseType::"Classrooms",
-		ventilationType::"Natural",
+		create simulation with: [title::"Masks",useCase::"MediaLab",ventilationType::"Natural",
 		timeSpent::3.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::1.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 	}
@@ -61,10 +56,8 @@ experiment Episode1_Mask_Initial_Layout type: gui parent: Coronaizer{
 
 experiment Episode1_Social_Distancing type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'Episode:' var: episode category: 'Initialization' <- 1;
 	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab";
-	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Classrooms";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
@@ -78,7 +71,7 @@ experiment Episode1_Social_Distancing type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::1,title::"Social Distance",useCase::"MediaLab",useCaseType::"Classrooms",
+		create simulation with: [title::"Social Distance",useCase::"MediaLab",
 		ventilationType::"Natural",
 		timeSpent::1.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
@@ -93,10 +86,8 @@ experiment Episode1_Social_Distancing type: gui parent: Coronaizer{
 
 experiment Episode1_TimeShift type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'Episode:' var: episode category: 'Initialization' <- 1;
 	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab";
-	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Classrooms";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
@@ -110,8 +101,7 @@ experiment Episode1_TimeShift type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::1,title::"Time Shift",useCase::"MediaLab",useCaseType::"Classrooms",
-		ventilationType::"Natural",
+		create simulation with: [title::"Time Shift",useCase::"MediaLab",ventilationType::"Natural",
 		timeSpent::3.0#h,density_scenario::'distance',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 		
@@ -125,10 +115,8 @@ experiment Episode1_TimeShift type: gui parent: Coronaizer{
 
 experiment Episode1_Ventilation type: gui parent: Coronaizer{
 	//Scenario 1
-	parameter 'Episode:' var: episode category: 'Initialization' <- 1;
 	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab";
-	parameter 'useCaseType:' var: useCaseType category: 'Initialization' <- "Classrooms";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
@@ -142,8 +130,7 @@ experiment Episode1_Ventilation type: gui parent: Coronaizer{
 	//Scenario 2
 	init
 	{   
-		create simulation with: [episode::1,title::"Ventilation",useCase::"MediaLab",useCaseType::"Classrooms",
-		ventilationType::"AC",
+		create simulation with: [title::"Ventilation",useCase::"MediaLab",ventilationType::"AC",
 		timeSpent::1.0#h,density_scenario::'data',distance_people::2.0#m,maskRatio::0.0,queueing::false, peopleSize::0.3#m , agenda_scenario::"simple",
 		arrival_time_interval:: 3#mn, step_arrival::1#s];
 		

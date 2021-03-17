@@ -339,9 +339,8 @@ grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 ne
 
 experiment Coronaizer type:gui autorun:false{
 
-	parameter 'title:' var: title category: 'Initialization' <- "Generic";
+	parameter 'title:' var: title category: 'Initialization' <- "Reference";
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter 'Episode:' var: episode category: 'Initialization' <- 0;
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
@@ -398,22 +397,14 @@ experiment Coronaizer type:gui autorun:false{
 	
 		graphics 'title'{
 		  point titlePos;
-		  if(episode=1){
-		  	titlePos<-{world.shape.width*0.25,-400#px};
-		  }else{
-		  	titlePos<-{-world.shape.width*0.5,0};
-		  }		
+		  titlePos<-{-world.shape.width*0.5,0};
 	 
 		  draw "SCENARIO" color: #white at: {titlePos.x,titlePos.y,0.01} perspective: true font:font("Helvetica", 20 , #bold);
 		  draw string(title) color: #white at: {titlePos.x,titlePos.y+50#px,0.01} perspective: true font:font("Helvetica", 40 , #plain);
 		}
 		graphics 'site'{
 			  point sitlegendPos;
-			  if(episode=1){
-			  	sitlegendPos<-{world.shape.width*0,-300#px};
-			  }else{
-			  	sitlegendPos<-{-world.shape.width*0.5,world.shape.height*0.2};
-			  }
+			  sitlegendPos<-{-world.shape.width*0.5,world.shape.height*0.2};
 			  int fontSize<-20;
 			  draw string("SITE") color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
 		      draw string(useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 
@@ -425,11 +416,7 @@ experiment Coronaizer type:gui autorun:false{
 		}	
 		 graphics "intervention"{
 		 	point simLegendPos;
-		 	if(episode=1){
-		 		simLegendPos<-{world.shape.width*0.22,-300#px};
-		 	}else{
-		 	    simLegendPos<-{-world.shape.width*0.5,world.shape.height*0.6};	
-		 	}	
+		 	simLegendPos<-{-world.shape.width*0.5,world.shape.height*0.6};	
 	  		int fontSize<-20;
 	  		draw "INTERVENTION" color:#white at:{simLegendPos.x,simLegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
 	  		
@@ -449,12 +436,7 @@ experiment Coronaizer type:gui autorun:false{
 	  	
 		graphics "time" {
 		  point timeLegendPos;
-		  if (episode = 1){
-		  	timeLegendPos<-{world.shape.width*0,-50#px};
-		  }else{
-		  	timeLegendPos<-{world.shape.width*1.1,world.shape.height*0.1};
-		  }
-		  
+		  timeLegendPos<-{world.shape.width*1.1,world.shape.height*0.1};
 	      draw "TIME" color: #white font: font("Helvetica", 20, #plain) at:{timeLegendPos.x,timeLegendPos.y,0.01};
 	      draw string(current_date, "HH:mm:ss") color: #white font: font("Helvetica", 30, #bold) at:{timeLegendPos.x,timeLegendPos.y+30#px,0.01};
 	      //draw string("step: "+ step) color: #white font: font("Helvetica", 20, #bold) at:{timeLegendPos.x,timeLegendPos.y+40#px,0.01};
@@ -462,12 +444,7 @@ experiment Coronaizer type:gui autorun:false{
 	  	}
 	  	graphics "Population"{
 	  		point infectiousLegendPos;
-	  		if(episode=1){
-	  		  infectiousLegendPos<-{world.shape.width*0.5,-300#px};	
-	  		}else{
-	  		  infectiousLegendPos<-{world.shape.width*1.1,world.shape.height*0.25};	
-	  		}
-	  		
+	  		infectiousLegendPos<-{world.shape.width*1.1,world.shape.height*0.25};	
 	  		draw "POPULATION"color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y,0.01}  perspective: true font:font("Helvetica", 30 , #plain);
 	  		draw "" + length(people) color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y+30#px,0.01}  perspective: true font:font("Helvetica", 30 , #bold); 
 	  		draw "VIRAL LOAD"color: #white at: {infectiousLegendPos.x,infectiousLegendPos.y+60#px,0.01}  perspective: true font:font("Helvetica", 30 , #plain);
@@ -480,11 +457,7 @@ experiment Coronaizer type:gui autorun:false{
 	  	graphics "Projection"{
 	  		float bar_fill;
 	  		point infectiousLegendPos;
-	  		if(episode=1){
-	  		  infectiousLegendPos<-{world.shape.width*0.5,-200#px};	
-	  		}else{
-	  		  infectiousLegendPos<-{world.shape.width*1.1,world.shape.height*0.5};	
-	  		}
+	  		infectiousLegendPos<-{world.shape.width*1.1,world.shape.height*0.5};	
 	  		point bar_size <- {300#px,10#px};
 	  		float x_offset <- 300#px;
 	  		float y_offset <- 50#px;
@@ -506,7 +479,7 @@ experiment Coronaizer type:gui autorun:false{
 			}
 	  	}
 	  	
-	  	graphics "scale"{
+	  	/*graphics "scale"{
 	  		float base_scale<-5#m;
 	  		if(episode=1){
 	  		  base_scale<-3#m;	
@@ -521,11 +494,7 @@ experiment Coronaizer type:gui autorun:false{
 	  			base_scale<-25#m;
 	  		}
 	  		point scalePos;
-	  		if(episode=1){
-	  			scalePos<-{world.shape.width*0,-100#px};
-	  		}else{
-	  			scalePos<-{world.shape.width*1.1,world.shape.height};
-	  		}
+	  		scalePos<-{world.shape.width*1.1,world.shape.height};
 	  		 
 	  		draw "SCALE"color: #white at: {scalePos.x,scalePos.y-30#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
 	  		
@@ -538,7 +507,8 @@ experiment Coronaizer type:gui autorun:false{
 				side <- - side;
 	  		}	  		
 	  		draw string(int(last(scale_markers)))+ "m" anchor: #bottom_right color: #white font: font("Helvetica", 15, #bold) at:{scalePos.x+last(scale_markers),scalePos.y+rectangle_width+16#px,0.01};
-	  	} 
+	  	} */
+	  	
 		graphics "social_graph" {
 			if (social_distance_graph != nil and drawSocialDistanceGraph = true) {
 				loop eg over: social_distance_graph.edges {
