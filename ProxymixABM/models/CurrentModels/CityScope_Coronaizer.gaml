@@ -339,38 +339,51 @@ grid cell cell_width: world.shape.width/100 cell_height:world.shape.width/100 ne
 
 experiment Coronaizer type:gui autorun:false{
 
+	//See issue #180
+	/*action _init_ {
+		title <- "Reference";
+		useCase <- "MediaLab"; 
+		maskRatio <-0.0;
+		density_scenario <- "data";
+		distance_people <- 2.0#m;
+		ventilationType <- "Natural";
+		timeSpent <- 2.0 #h;
+		agenda_scenario  <-"simple";
+		
+	    initial_nb_infected <-10;
+		queueing  <-false;
+		peopleSize  <-0.3#m;
+		step_arrival <- 1#s;
+		arrival_time_interval <- 3 #mn;
+	}*/
 	parameter 'title:' var: title category: 'Initialization' <- "Reference";
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
-	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
-	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 1.0 #h;
-	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
-	parameter "Initial Infected"   category: 'Initialization' var: initial_nb_infected min:0 max:100 <-10;
-	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
-	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
+	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 2.0 #h;
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
+	
+	parameter "Initial Infected"   category: 'Initialization' var: initial_nb_infected min:0 max:100 <-10;
 	parameter "Queueing:" category: "Policy" var: queueing  <-false;
 	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
 	parameter "step_arrival" category:'Initialization' var: step_arrival <- 1#s;
 	parameter "arrival_time_interval" category:'Initialization' var: arrival_time_interval <- 3 #mn;
 	
-	
-	parameter "Infection distance:" category: "Corona" var:largeDropletRange min: 1.0 max: 100.0 step:1;
-	
-	parameter "Draw Infection by Touching Grid:" category: "Risk Visualization" var:draw_fomite_viral_load;
-	parameter "Draw Viral Load:" category: "Risk Visualization" var:draw_viral_load_per_room<-true;
+	parameter "Draw Infection by Touching Grid:" category: "Visualization" var:draw_fomite_viral_load;
+	parameter "Draw Viral Load:" category: "Visualization" var:draw_viral_load_per_room<-true;
 	parameter "Show People:" category: "Visualization" var:showPeople;
-    parameter 'People per Building (only working if density_scenario is num_people_building):' var: num_people_per_building category:'Initialization' min:0 max:1000 <- 10;
-	parameter 'People per Room (only working if density_scenario is num_people_building):' var: num_people_per_room category:'Initialization' min:0 max:100 <- 10;
-	parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
+    parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
 	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
 	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
 	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
 	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
 	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-false;
 	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
-	parameter "Show droplets:" category: "Droplet" var:show_droplet <-false;
-	parameter "Droplets lifespan:" category: "Droplet" var:droplet_livespan min:0 max:100 <-10;
-	parameter "Droplets distance:" category: "Droplet" var:droplet_distance min:0.0 max:10.0 <-2.0;
+	parameter "Show droplets:" category: "Visualization" var:show_droplet <-false;
+	parameter "Droplets lifespan:" category: "Visualization" var:droplet_livespan min:0 max:100 <-10;
+	parameter "Droplets distance:" category: "Visualization" var:droplet_distance min:0.0 max:10.0 <-2.0;
 		
 	output{
 	  layout #split;
