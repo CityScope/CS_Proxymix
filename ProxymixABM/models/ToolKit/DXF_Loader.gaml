@@ -18,7 +18,6 @@ global
 	//Parameters used onyl for video editing
 	int episode <-0;
 	string title<-"default";
-	string useCaseType<-"default";
 	string ventilationType<-"default";
 	float timeSpent<-1.0 #hour;
 	file the_dxf_metadata <- file_exists(dataset_path + useCase +"/building.csv") ?csv_file(dataset_path + useCase +"/building.csv",",",true) : nil;
