@@ -542,3 +542,49 @@ experiment Coronaizer type:gui autorun:false{
 	}	
 }
 
+experiment CoronaizerHeadless type:gui autorun:false{
+
+	parameter 'title:' var: title category: 'Initialization' <- "Reference";
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
+	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
+	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 2.0 #h;
+	
+
+	parameter "Draw Infection by Touching Grid:" category: "Visualization" var:draw_fomite_viral_load;
+	parameter "Draw Viral Load:" category: "Visualization" var:draw_viral_load_per_room<-true;
+	parameter "Show People:" category: "Visualization" var:showPeople;
+    parameter "Social Distance Graph:" category: "Visualization" var:drawSocialDistanceGraph ;
+	parameter "Draw Flow Grid:" category: "Visualization" var:draw_flow_grid;
+	parameter "Draw Proximity Grid:" category: "Visualization" var:draw_proximity_grid;
+	parameter "Draw Pedestrian Path:" category: "Visualization" var:display_pedestrian_path;
+	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false;
+	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-false;
+	parameter "Bottlenecks lifespan:" category: "Visualization" var:bottleneck_livespan min:0 max:100 <-10;
+	parameter "Show droplets:" category: "Visualization" var:show_droplet <-false;
+	parameter "Droplets lifespan:" category: "Visualization" var:droplet_livespan min:0 max:100 <-10;
+	parameter "Droplets distance:" category: "Visualization" var:droplet_distance min:0.0 max:10.0 <-2.0;
+		
+	output{
+		layout #split;	
+	  display "Infection Risk" type: java2D background:#black toolbar:false
+	  {
+		
+		
+		chart "Cumulative Infection Risk: "+ title  type: series color:#white background:#black y_range:{0,200}
+		{
+			data "DROPLET" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color:#mistyrose style: "area";
+			data "FOMITE" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: #pink style: "area";
+			data "AEROSOL" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: #hotpink style: "area";
+		}
+		graphics "Viral Load" {
+			draw "VIRAL LOAD: " + float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) with_precision 2 
+			color: #white at: {world.shape.width/4,30#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
+		}
+	  }	  
+	}	
+}
+

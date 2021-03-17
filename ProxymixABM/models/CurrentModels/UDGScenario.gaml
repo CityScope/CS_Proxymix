@@ -22,24 +22,6 @@ experiment Episode1 type: gui parent: Coronaizer{
 	{   
 		create simulation with: [title::"Mask", maskRatio::1.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"Natural",
 		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
-		
-		create simulation with: [title::"Social Distance", maskRatio::0.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"Natural",
-		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
-		
-		create simulation with: [title::"Ventilation",maskRatio::0.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"AC",
-		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
-
-		create simulation with: [title::"Mask/Social Distance",maskRatio::1.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"Natural",
-		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
-		
-		create simulation with: [title::"Mask/Ventilation",maskRatio::1.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"AC",
-		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
-		
-		create simulation with: [title::"Social Distance/Ventilation",maskRatio::0.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"AC",
-		useCase::usecase,agenda_scenario::scenario,timeSpent::2.0#h];
-		
-		create simulation with: [title::"All",maskRatio::1.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"AC",
-		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
 	}
 }
 
