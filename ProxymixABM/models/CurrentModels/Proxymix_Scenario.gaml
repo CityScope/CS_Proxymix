@@ -11,9 +11,6 @@ model StoryTelling
  
 import 'CityScope_Coronaizer.gaml'
 
-/* Insert your model definition here */
-
-
 experiment Episode1_Reference type: gui parent: Coronaizer{
 	parameter 'title:' var: title category: 'Initialization' <- "No intervention";
 }
@@ -33,6 +30,3 @@ experiment Episode1_Ventilation type: gui parent: Coronaizer{
 	parameter 'title:' var: title category: 'Initialization' <- "Ventilation";
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "AC";
 }
-
-
-

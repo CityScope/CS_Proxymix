@@ -28,7 +28,8 @@ global{
 	
     //FOMITE
 	float hand_to_mouth<-0.3; //Ratio of fomite transmiteed from hands to mouth;
-	float proportion_of_fomite_viral_load_transmission_per_second<-0.01;// proportion of fomite viral load taken when touching a fomite. 
+	float proportion_of_fomite_viral_load_transmission_per_second<-0.01;// proportion of fomite viral load taken when touching a fomite.
+	list<fomitableSurface> fomitableSurfaces; 
 		
 	//DROPLET
 	float droplet_viral_load_per_time_unit<-1.0; //increasement of the infection risk per second
@@ -50,29 +51,26 @@ global{
 	//SEPARATOR
 	float separator_efficiency <- 0.9;
 
+   	//INIT
    	int initial_nb_infected<-10;
-   	map<room, int> infected_per_room;
+    
    	
    	//OUTPUT
    	float Low_Risk_of_Infection_threshold<-30.0;
    	float Medium_Risk_of_Infection_threshold<-60.0;
 	
+	//VISUALIZATION
 	bool draw_fomite_viral_load<-false;
 	bool draw_viral_load_per_room<-true;
-	bool dropletRange<-true;
+	bool showDropletRange<-false;
 	bool showPeople<-true;
-	
-	int nb_cols <- int(75*1.5);
-	int nb_rows <- int(50*1.5);
-	
-	int nb_susceptible  <- 0 update: length(ViralPeople where (each.is_susceptible));
-	int nb_infected <- 0 update: length(ViralPeople where (each.is_infected));
-	int nb_recovered <- 0 update: length(ViralPeople where (each.is_recovered));
-	
-	list<ViralPeople> infectionRiskList;
-	list<fomitableSurface> fomitableSurfaces;
-	
+
+
 	init{	
+     queueing <-false;
+     peopleSize  <-0.3#m;
+	 step_arrival <- 1#s;
+	 arrival_time_interval <- 3 #mn;
 	}
 		
 	reflex initCovid when:cycle = 1{
@@ -320,7 +318,7 @@ species ViralPeople  mirrors:people{
 				if (has_mask){
 					draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
 				}
-			if(dropletRange){
+			if(showDropletRange){
 			 draw circle(largeDropletRange) color:#white empty:true;	
 			} 
 			}
@@ -358,18 +356,14 @@ experiment Coronaizer type:gui autorun:false{
 	}*/
 	parameter 'title:' var: title category: 'Initialization' <- "Reference";
 	parameter 'fileName:' var: useCase category: 'Initialization' <- "MediaLab" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 2.0 #h;
-	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
 	
-	parameter "Initial Infected"   category: 'Initialization' var: initial_nb_infected min:0 max:100 <-10;
-	parameter "Queueing:" category: "Policy" var: queueing  <-false;
-	parameter "People Size:" category: "Visualization" var: peopleSize  <-0.3#m;
-	parameter "step_arrival" category:'Initialization' var: step_arrival <- 1#s;
-	parameter "arrival_time_interval" category:'Initialization' var: arrival_time_interval <- 3 #mn;
+
 	
 	parameter "Draw Infection by Touching Grid:" category: "Visualization" var:draw_fomite_viral_load;
 	parameter "Draw Viral Load:" category: "Visualization" var:draw_viral_load_per_room<-true;
@@ -422,10 +416,8 @@ experiment Coronaizer type:gui autorun:false{
 			  draw string("SITE") color: #white at: {sitlegendPos.x,sitlegendPos.y,0.01} perspective: true font:font("Helvetica", fontSize*1.5 , #plain);
 		      draw string(useCase) color: #white at: {sitlegendPos.x,sitlegendPos.y+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 
 		      
-		      draw string("Building type" ) color: #white at: {sitlegendPos.x,sitlegendPos.y+2*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain);
-		      
-		      draw string("Floor area ") color: #white at: {sitlegendPos.x,sitlegendPos.y+4*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain); 
-		      draw string("" + with_precision(totalArea,2) + "m2") color: #white at: {sitlegendPos.x,sitlegendPos.y+4*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 		      
+		      draw string("Floor area ") color: #white at: {sitlegendPos.x,sitlegendPos.y+2*fontSize*1.5#px,0.01} perspective: true font:font("Helvetica", fontSize , #plain); 
+		      draw string("" + with_precision(totalArea,2) + "m2") color: #white at: {sitlegendPos.x,sitlegendPos.y+2*fontSize*1.5#px+fontSize#px,0.01} perspective: true font:font("Helvetica", fontSize , #bold); 		      
 		}	
 		 graphics "intervention"{
 		 	point simLegendPos;
@@ -485,10 +477,10 @@ experiment Coronaizer type:gui autorun:false{
 			loop i from:0 to: length(infection_data)-1{
 				draw infection_data.keys[i] anchor: #left_center color: color_map[risk_colors[i]] at: {infectiousLegendPos.x,infectiousLegendPos.y+i*y_offset,0.01} perspective: true font:font("Helvetica", 20 , #plain); 
 	  			draw string(infection_data.values[i])  anchor: #left_center color: color_map[risk_colors[i]] at: {infectiousLegendPos.x,infectiousLegendPos.y+i*y_offset+y_offset/2,0.01} perspective: true font:font("Helvetica", 20 , #bold); 
-	  			draw g color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset,infectiousLegendPos.y+i*y_offset,0.01};
+	  			//draw g color: color_map[risk_colors[i]]-140 at: {infectiousLegendPos.x+x_offset,infectiousLegendPos.y+i*y_offset,0.01};
 	  			bar_fill <- length(ViralPeople) = 0 ?0:(infection_data.values[i] / length(ViralPeople)*bar_size.x);
 	  			geometry g2 <- (g at_location {0,0,0}) inter (g at_location {-bar_size.x+bar_fill,0,0}) ;
-	  			draw g2 color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.011};
+	  			draw g2 color: color_map[risk_colors[i]] at: {infectiousLegendPos.x+x_offset-bar_size.x/2+bar_fill/2,infectiousLegendPos.y+i*y_offset,0.015};
 			}
 	  	}
 	  	
@@ -536,7 +528,7 @@ experiment Coronaizer type:gui autorun:false{
 	  {
 		
 		
-		chart "Cumulative Infection Risk: "+ title  type: series color:#white background:#black y_range:{0,30}
+		chart "Cumulative Infection Risk: "+ title  type: series color:#white background:#black y_range:{0,200}
 		{
 			data "DROPLET" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color:#mistyrose style: "area";
 			data "FOMITE" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: #pink style: "area";
@@ -544,23 +536,9 @@ experiment Coronaizer type:gui autorun:false{
 		}
 		graphics "Viral Load" {
 			draw "VIRAL LOAD: " + float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) with_precision 2 
-			color: #white at: {10#px,30#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
-			draw "DROPLET LOAD: " + float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)) with_precision 2 
-			color: #white at: {10#px,50#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
+			color: #white at: {world.shape.width/4,30#px,0.01}  perspective: true font:font("Helvetica", 20 , #plain);
 		}
-	  }
-	  
-	  
-	  /*display "Infection Risk Histogram" type: java2D background:#black
-	  {
-		chart "Cumulative Infection Risk" type: histogram color:#white background:#black y_range:{0,200}
-		{
-			data "Droplets" value: sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople) color: # orange style: stack ;
-			data "Fomites" value: sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople) color: # red style: stack ;
-			data "Aerosols" value: sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople) color: # yellow style: stack ;
-		}
-	  }*/
-	  
+	  }	  
 	}	
 }
 

@@ -104,16 +104,9 @@ global {
 	bool show_droplet <- false;  //show or not the bottleneck
 	int droplet_livespan <- 5; //to livespan of a bottleneck agent (to avoid glitching aspect) 
 	float droplet_distance <- 0.8#m;
-	file fanPic <- file('./../../images/fan.png');
-	//file logoPic <- file('./../../images/logo.png');
 
-	
 	map<string,rgb> color_map <- [ "blue"::rgb(50, 197, 255), "red"::rgb(244, 67, 54),"green"::rgb(109, 212, 0), "orange"::rgb(247, 181, 0)];
-	
-	
-	
-	
-	
+
 	init {
 		validator <- false;
 		outputFilePathName <-"../results/output_" + (#now).year+"_"+(#now).month+"_"+ (#now).day + "_"+ (#now).hour+"_"+ (#now).minute  + "_" + (#now).second+"_distance_"+distance_people+".csv";
