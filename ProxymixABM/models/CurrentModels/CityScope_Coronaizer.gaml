@@ -65,6 +65,9 @@ global{
 	bool showDropletRange<-false;
 	bool showPeople<-true;
 
+	string type_explo <- "normal" among: ["normal", "stochasticity"];
+	string path_ <-  "results/" +type_explo+"/results_" + type_explo+ "_" + int(self)+".csv";
+	
 
 	init{	
      queueing <-false;
@@ -168,6 +171,20 @@ global{
 		}
 		fomitableSurfaces<-agents of_generic_species fomitableSurface;
 		
+	}
+	
+	reflex save_result when: batch_mode and every(10 #cycle){
+		
+		float direct <- sum(ViralPeople collect each.cumulated_viral_load[0]);
+		float object <-  sum(ViralPeople collect each.cumulated_viral_load[1]) ;
+		float air <- sum(ViralPeople collect each.cumulated_viral_load[2]);
+		
+		string 	results <- ""+ 
+		int(self)+"," + world.seed+","+time+","+ direct + "," + object + "," + air;
+		
+		
+		save results to:path_ type:text rewrite: false;
+	
 	}
 }
 
@@ -586,5 +603,26 @@ experiment CoronaizerHeadless type:gui autorun:false{
 		}
 	  }	  
 	}	
+}
+
+experiment stochasticity_analysis type: batch repeat: 100 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {
+	parameter batch_mode var:batch_mode <- true among: [true];
+	parameter type_explo  var:type_explo <- "stochasticity" among: ["stochasticity"];
+
+	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple" among: ["simple"];
+	parameter "Mask Ratio:" category: "Policy" var: maskRatio <-0.0  among: [0.0];
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data"  among: ["data"];
+	parameter 'distance people:' var: distance_people category:'Policy' <- 2.0#m  among: [2.0#m ];
+	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural"  among: ["Natural"];
+	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 2.0 #h  among: [2.0 #h];
+	
+
+	
+	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false  among: [false];
+	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-false  among: [false];
+	parameter "Show droplets:" category: "Visualization" var:show_droplet <-false  among: [false];
+		
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCS/Level 2"  among: ["UDG/CUCS/Level 2"];
+
 }
 

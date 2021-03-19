@@ -106,7 +106,9 @@ global {
 	float droplet_distance <- 0.8#m;
 
 	map<string,rgb> color_map <- [ "blue"::rgb(50, 197, 255), "red"::rgb(244, 67, 54),"green"::rgb(109, 212, 0), "orange"::rgb(247, 181, 0)];
-
+	
+	bool batch_mode <- false;
+	
 	init {
 		validator <- false;
 		outputFilePathName <-"../results/output_" + (#now).year+"_"+(#now).month+"_"+ (#now).day + "_"+ (#now).hour+"_"+ (#now).minute  + "_" + (#now).second+"_distance_"+distance_people+".csv";
@@ -534,7 +536,7 @@ global {
 	}
 	
 	
-	reflex end_simulation when: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {
+	reflex end_simulation when: not batch_mode and ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {
 		if (first_end_sim) {
 			first_end_sim <- false;
 		}
