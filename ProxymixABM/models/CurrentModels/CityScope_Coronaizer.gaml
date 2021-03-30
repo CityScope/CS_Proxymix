@@ -74,7 +74,11 @@ global{
      peopleSize  <-0.3#m;
 	 step_arrival <- 1#s;
 	 arrival_time_interval <- 3 #mn;
+	 filePathName <-"../results/output"+date("now")+"_sim"+int(self)+".csv";
 	}
+	
+	bool savetoCSV<-true;
+	string filePathName;
 		
 	reflex initCovid when:cycle = 1{
 	//	if fixed_infected_people_localization {
@@ -170,8 +174,10 @@ global{
 			}
 		}
 		fomitableSurfaces<-agents of_generic_species fomitableSurface;
+
 		
 	}
+
 	
 	reflex save_result when: batch_mode and every(10 #cycle){
 		
@@ -184,7 +190,15 @@ global{
 		
 		
 		save results to:path_ type:text rewrite: false;
-	
+		
+	}
+
+			
+	reflex save_model_output when: every(#hours) and savetoCSV {
+		write "save to csv at time:" + time;
+		save [time,sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)
+		] to: filePathName type:"csv" rewrite: false;
+
 	}
 }
 
@@ -587,7 +601,7 @@ experiment CoronaizerHeadless type:gui autorun:false{
 		
 	output{
 		layout #split;	
-	  display "Infection Risk" type: java2D background:#black toolbar:false
+	  display "Infection Risk" type: java2D background:#white toolbar:false
 	  {
 		
 		
