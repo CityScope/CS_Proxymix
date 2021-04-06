@@ -9,6 +9,7 @@ model CityScopeCoronaizer
 
 import "DailyRoutine.gaml"
 
+
 global{
 //	bool dummy_very_weird_variable;
 //	bool fixed_infected_people_localization <- true;
@@ -74,7 +75,7 @@ global{
      peopleSize  <-0.3#m;
 	 step_arrival <- 1#s;
 	 arrival_time_interval <- 3 #mn;
-	 filePathName <-"../results/output"+date("now")+"_sim"+int(self)+".csv";
+	 filePathName <-"../results/output/"+useCase+".csv";
 	}
 	
 	bool savetoCSV<-true;
@@ -194,9 +195,9 @@ global{
 	}
 
 			
-	reflex save_model_output when: every(#hours) and savetoCSV {
+	reflex save_model_output when: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) and savetoCSV {
 		write "save to csv at time:" + time;
-		save [time,sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)
+		save [time,sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople),float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) with_precision 2
 		] to: filePathName type:"csv" rewrite: false;
 
 	}
@@ -619,24 +620,5 @@ experiment CoronaizerHeadless type:gui autorun:false{
 	}	
 }
 
-experiment stochasticity_analysis type: batch repeat: 100 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {
-	parameter batch_mode var:batch_mode <- true among: [true];
-	parameter type_explo  var:type_explo <- "stochasticity" among: ["stochasticity"];
 
-	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple" among: ["simple"];
-	parameter "Mask Ratio:" category: "Policy" var: maskRatio <-0.0  among: [0.0];
-	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data"  among: ["data"];
-	parameter 'distance people:' var: distance_people category:'Policy' <- 2.0#m  among: [2.0#m ];
-	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural"  among: ["Natural"];
-	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 2.0 #h  among: [2.0 #h];
-	
-
-	
-	parameter "Show available desk:" category: "Visualization" var:showAvailableDesk <-false  among: [false];
-	parameter "Show bottlenecks:" category: "Visualization" var:show_dynamic_bottleneck <-false  among: [false];
-	parameter "Show droplets:" category: "Visualization" var:show_droplet <-false  among: [false];
-		
-	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCS/Level 2"  among: ["UDG/CUCS/Level 2"];
-
-}
 
