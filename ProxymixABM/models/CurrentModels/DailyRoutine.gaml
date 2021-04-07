@@ -122,7 +122,11 @@ global {
 			} else if type = entrance {
 				create building_entrance  with: [shape::polygon(se.points), type::type];
 			} else if type = library {
-				create common_area  with: [shape::polygon(se.points), type::type];
+				create common_area  with: [shape::polygon(se.points), type::type]{
+					if (ventilationType="AC"){
+						isVentilated<-true;
+					}
+				}
 			
 			} else if type in (workplace_layer + [coffee, sanitation]) {
 				create room with: [shape::clean(polygon(se.points)), type::type]{
