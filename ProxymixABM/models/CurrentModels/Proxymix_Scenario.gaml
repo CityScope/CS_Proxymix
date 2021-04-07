@@ -86,7 +86,7 @@ experiment GUI type:gui parent: CoronaizerHeadless{
 	}
 }
 
-experiment FullBenchMark type: gui parent: Coronaizer{
+experiment FullBenchMark type: gui parent: Coronaizer parallel: false{
 	string usecase<-"UDG/CUCS/Level 2";// 1."UDG/CUCS/Level 2" 2.!!!!DOESN'TWORK"UDG/CUT/lab" 3."UDG/CUAAD" 4. "UDG/CUCEA" 5."UDG/CUSUR" 0."MediaLab"
 	string scenario<-"simple";
 	float timespent<-2.0#h;
