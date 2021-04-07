@@ -32,7 +32,7 @@ experiment Episode1_Ventilation type: gui parent: Coronaizer{
 }
 
 
-experiment FullBenchMarkOnlyPLot type:gui parent: CoronaizerHeadless{
+experiment FullBenchMarkOnlyPLot type:gui parent: CoronaizerHeadless parallel: false{
 	string usecase<-"UDG/CUCS/Level 2";// 1."UDG/CUCS/Level 2" 2.!!!!DOESN'TWORK"UDG/CUT/lab" 3."UDG/CUAAD" 4. "UDG/CUCEA" 5."UDG/CUSUR" 0."MediaLab"
 	string scenario<-"simple";
 	float timespent<-2.0#h;
