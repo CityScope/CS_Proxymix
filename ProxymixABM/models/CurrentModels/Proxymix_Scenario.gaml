@@ -63,8 +63,8 @@ experiment FullBenchMarkPLOT type:gui parent: CoronaizerHeadless parallel: false
 }
 
 
-experiment Headless type:batch repeat: 1 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {//parent: CoronaizerHeadless{
-	parameter useCase var: useCase<-"UDG/CUCS/Level 2" ;
+experiment Headless type:batch repeat: 2 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) parent:Coronaizer{//parent: CoronaizerHeadless{
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCS/Level 2" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter agenda_scenario var: agenda_scenario<-"simple";
 	parameter timeSpent var: timeSpent <-2.0#h ;
 	parameter title var: title <- "Reference";
