@@ -62,16 +62,19 @@ experiment FullBenchMarkOnlyPLot type:gui parent: CoronaizerHeadless parallel: f
 	}
 }
 
-experiment Headless type:batch repeat: 2 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) parent: CoronaizerHeadless{
-	string usecase<-"UDG/CUCS/Level 2";
-	string scenario<-"simple";
-	float timespent<-2.0#h;
-	parameter 'fileName:' var: useCase category: 'Initialization' <- usecase;
-	init
-	{   
-		create simulation with: [title::"Mask", maskRatio::1.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"Natural",
-		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
-	}
+experiment Headless type:batch repeat: 2 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {//parent: CoronaizerHeadless{
+	parameter useCase var: useCase<-"UDG/CUCS/Level 2" ;
+	parameter agenda_scenario var: agenda_scenario<-"simple";
+	parameter timeSpent var: timeSpent <-2.0#h ;
+	parameter title var: title <- "Mask";
+	parameter maskRatio var: maskRatio <-1.0 ;
+	
+	parameter density_scenario var:density_scenario <-"data" ;
+	parameter distance_people var: distance_people <-2.0#m;
+	parameter ventilationType var: ventilationType<-"Natural" ;
+	
+	parameter 'fileName:' var: useCase category: 'Initialization' <- useCase;
+	
 }
 
 experiment GUI type:gui parent: CoronaizerHeadless{
