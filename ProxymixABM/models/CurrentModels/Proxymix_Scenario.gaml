@@ -63,17 +63,15 @@ experiment FullBenchMarkPLOT type:gui parent: CoronaizerHeadless parallel: false
 }
 
 
-experiment Headless type:batch repeat: 2 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {//parent: CoronaizerHeadless{
+experiment Headless type:batch repeat: 1 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {//parent: CoronaizerHeadless{
 	parameter useCase var: useCase<-"UDG/CUCS/Level 2" ;
 	parameter agenda_scenario var: agenda_scenario<-"simple";
 	parameter timeSpent var: timeSpent <-2.0#h ;
-	parameter title var: title <- "Mask";
-	parameter maskRatio var: maskRatio <-1.0 ;
-
+	parameter title var: title <- "Reference";
+	parameter maskRatio var: maskRatio <-0.0 ;
 	parameter density_scenario var:density_scenario <-"data" ;
 	parameter distance_people var: distance_people <-2.0#m;
 	parameter ventilationType var: ventilationType<-"Natural" ;
-
 	parameter 'fileName:' var: useCase category: 'Initialization' <- useCase;
 
 }

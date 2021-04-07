@@ -197,7 +197,7 @@ global{
 			
 	reflex save_model_output when: time=timeSpent and savetoCSV {
 		write "save to csv at time:" + time + "Sim:" + int(self);
-		save [time,title,/*sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople),*/float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) with_precision 2
+		save [time,title,sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople),float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) with_precision 2
 		] to: filePathName type:"csv" rewrite: false;
 
 	}
@@ -387,7 +387,7 @@ experiment Coronaizer type:gui autorun:false{
 		arrival_time_interval <- 3 #mn;
 	}*/
 	parameter 'title:' var: title category: 'Initialization' <- "Reference";
-	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCEA" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCS/Level 2" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
 	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
