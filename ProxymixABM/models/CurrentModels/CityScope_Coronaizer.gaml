@@ -195,9 +195,9 @@ global{
 	}
 
 			
-	reflex save_model_output when: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) and savetoCSV {
-		write "save to csv at time:" + time;
-		save [time,sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople),float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) with_precision 2
+	reflex save_model_output when: time=timeSpent and savetoCSV {
+		write "save to csv at time:" + time + "Sim:" + int(self);
+		save [time,title,/*sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople),sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople),*/float(sum(ViralPeople collect each.cumulated_viral_load[0])/length(ViralPeople)+ sum(ViralPeople collect each.cumulated_viral_load[1])/length(ViralPeople)+sum(ViralPeople collect each.cumulated_viral_load[2])/length(ViralPeople)) with_precision 2
 		] to: filePathName type:"csv" rewrite: false;
 
 	}

@@ -62,10 +62,13 @@ experiment FullBenchMarkOnlyPLot type:gui parent: CoronaizerHeadless parallel: f
 	}
 }
 
-experiment Headless type:batch repeat: 2 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) {//parent: CoronaizerHeadless{
-	parameter useCase var: useCase<-"UDG/CUCS/Level 2" ;
-	parameter agenda_scenario var: agenda_scenario<-"simple";
-	parameter timeSpent var: timeSpent <-2.0#h ;
+experiment FullBenchMarkHeadless type:batch repeat: 1 until: ((people count not each.end_of_day) = 0) and time > (arrival_time_interval + 10) parallel:false{//parent: CoronaizerHeadless{
+	string usecase<-"UDG/CUCS/Level 2";// 1."UDG/CUCS/Level 2" 2.!!!!DOESN'TWORK"UDG/CUT/lab" 3."UDG/CUAAD" 4. "UDG/CUCEA" 5."UDG/CUSUR" 0."MediaLab"
+	string scenario<-"simple";
+	float timespent<-2.0#h;
+	parameter useCase var: useCase<-usecase ;
+	parameter agenda_scenario var: agenda_scenario<-scenario;
+	parameter timeSpent var: timeSpent <-timespent;
 	parameter title var: title <- "Mask";
 	parameter maskRatio var: maskRatio <-1.0 ;
 	
@@ -74,6 +77,30 @@ experiment Headless type:batch repeat: 2 until: ((people count not each.end_of_d
 	parameter ventilationType var: ventilationType<-"Natural" ;
 	
 	parameter 'fileName:' var: useCase category: 'Initialization' <- useCase;
+	
+		init
+	{   
+		create simulation with: [title::"Mask", maskRatio::1.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"Natural",
+		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
+		
+		create simulation with: [title::"Social Distance", maskRatio::0.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"Natural",
+		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
+		
+		create simulation with: [title::"Ventilation",maskRatio::0.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"AC",
+		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
+
+		create simulation with: [title::"Mask/Social Distance",maskRatio::1.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"Natural",
+		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
+		
+		create simulation with: [title::"Mask/Ventilation",maskRatio::1.0,density_scenario::'data',distance_people::2.0#m, ventilationType::"AC",
+		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
+		
+		create simulation with: [title::"Social Distance/Ventilation",maskRatio::0.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"AC",
+		useCase::usecase,agenda_scenario::scenario,timeSpent::2.0#h];
+		
+		create simulation with: [title::"All",maskRatio::1.0,density_scenario::'distance',distance_people::2.0#m, ventilationType::"AC",
+		useCase::usecase,agenda_scenario::scenario,timeSpent::timespent];
+	}
 	
 }
 
