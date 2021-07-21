@@ -356,7 +356,6 @@ global {
 	action create_people(int nb) {
 		create people number: nb {
 			age <- rnd(18, 70); 
-			pedestrian_model <- SFM;
 			obstacle_species <- [people, wall];
 			tolerance_target <-tolerance_target_param;
 			bool goto_common_area <- (not empty(common_area)) and flip(proba_goto_common_area);
@@ -1091,7 +1090,7 @@ species droplet {
 }
 
 
-species people skills: [escape_pedestrian] schedules: people where (not each.end_of_day and not each.not_yet_active){
+species people skills: [pedestrian] schedules: people where (not each.end_of_day and not each.not_yet_active){
 	int age <- rnd(18,70); // HAS TO BE DEFINED !!!
 	bool not_yet_active <- true;
 	room working_place;
