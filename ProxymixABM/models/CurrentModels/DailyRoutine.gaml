@@ -121,6 +121,9 @@ global {
 			if (movement_model = pedestrian_skill) {
 				list<geometry> fs <- free_space_path_shape_file overlapping self;
 				free_space <- fs first_with (each covers shape);
+				if free_space = nil {
+					free_space <- shape + 0.1;
+				}
 			}
 			 
 		}
