@@ -49,7 +49,10 @@ global {
 	
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
-	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian_path.shp", gama.pref_gis_default_crs);
+	
+	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian path.shp", gama.pref_gis_default_crs);
+	//shape_file walking_area_shape_file <- shape_file(dataset_path+ useCase+"/walking_area.shp", gama.pref_gis_default_crs);
+	shape_file free_space_path_shape_file <- shape_file(dataset_path+ useCase+"/free space.shp", gama.pref_gis_default_crs);
 	date starting_date <- date([2020,4,6,7]);
 	geometry shape <- envelope(the_dxf_file);
 	graph pedestrian_network;
@@ -113,8 +116,22 @@ global {
 		validator <- false;
 		outputFilePathName <-"../results/output_" + (#now).year+"_"+(#now).month+"_"+ (#now).day + "_"+ (#now).hour+"_"+ (#now).minute  + "_" + (#now).second+"_distance_"+distance_people+".csv";
 		do initiliaze_dxf;
-		create pedestrian_path from: pedestrian_path_shape_file;
+		
+		create pedestrian_path from: pedestrian_path_shape_file  {
+			if (movement_model = pedestrian_skill) {
+				list<geometry> fs <- free_space_path_shape_file overlapping self;
+				free_space <- fs first_with (each covers shape);
+			}
+			 
+		}
 		pedestrian_network <- as_edge_graph(pedestrian_path);
+		
+		if false and (movement_model = pedestrian_skill) {
+			ask pedestrian_path {
+				do build_intersection_areas pedestrian_graph: pedestrian_network;
+			}
+		}
+		
 		loop se over: the_dxf_file  {
 			string type <- se get layer;
 			if (type = walls) {
@@ -257,9 +274,9 @@ global {
 		
 		available_offices <- (workplace_layer accumulate rooms_type[each]) where each.is_available();	
 		
-		if (movement_model = pedestrian_skill) {
+		/*if (movement_model = pedestrian_skill) {
 			do initialize_pedestrian_model;
-		}
+		}*/
 		
 		ask building_entrance {
 			if (not empty(pedestrian_path)) {
@@ -337,14 +354,14 @@ global {
 	 }
 	}	
 	
-	action initialize_pedestrian_model {
+	/*action initialize_pedestrian_model {
 		
 		ask pedestrian_path {
 			float dist <- max(1.0, self distance_to (wall closest_to self));
 			do initialize obstacles:[wall] distance: dist;
 			free_space <- free_space.geometries first_with (each overlaps shape);
 		}
-	}
+	}*/
 	
 	
 	action active_people(int nb) {
@@ -356,8 +373,19 @@ global {
 	action create_people(int nb) {
 		create people number: nb {
 			age <- rnd(18, 70); 
-			obstacle_species <- [people, wall];
-			tolerance_target <-tolerance_target_param;
+			pedestrian_model <- "simple";
+			n_SFM <- 2.0;
+			n_prime_SFM <- 3.0;
+			lambda_SFM <- 2.0;
+			gama_SFM <-0.35;
+			relaxion_SFM <- 0.54;
+			A_obstacles_SFM <- 4.5;
+			tolerance_target <- tolerance_target_param;
+			
+			pedestrian_species <- [people];
+			//obstacle_species<-[wall];
+			
+			
 			bool goto_common_area <- (not empty(common_area)) and flip(proba_goto_common_area);
 			
 			location <- any_location_in (one_of(building_entrance).init_place);

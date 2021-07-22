@@ -6,13 +6,13 @@
 model generatepedestriannetwork
 import "DXF_Loader.gaml"
 global {
-	
-	string useCase <- "Andorra/Low_Covid19_Ordino";
+	string dataset_path <- "../../includes/";
+	string useCase <- "Hotel-Dieu";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
+	string pedestrian_paths_path <-dataset_path + useCase+ "/pedestrian path.shp";
+	string free_space_path <-dataset_path + useCase+ "/free space.shp";
 	list<string> layer_to_consider <- [walls,windows,offices, supermarket, meeting_rooms,coffee, furnitures, entrance , lab];
-	
-	bool recreate_walking_area <- true;
 	
 	float simplification_dist <- 0.1;
 	float buffer_simplication <-  0.001;
@@ -74,6 +74,7 @@ global {
 			}
 		
 		}
+		
 		list<dxf_element> rooms <- dxf_element where (each.layer in [offices, supermarket, meeting_rooms,coffee,lab]);
 		list<dxf_element> rooms_entrances <- dxf_element where (each.layer in [entrance, offices, supermarket, meeting_rooms,coffee,lab]);
 		write "Number of dxf elements:" + length(dxf_element);
@@ -102,10 +103,11 @@ global {
 				entrances <- points_on (contour, 2.0);
 			}	
 		}
+		
 		write "entrances created";
-		if (not recreate_walking_area) and file_exists(walking_area_path) {
-			create walking_area from: file(walking_area_path);
-		} else {
+		
+		
+		if (build_pedestrian_network or not file_exists(pedestrian_paths_path)) {
 			geometry walking_area_g <- copy(shape);
 			if empty(wall ) {
 				ask dxf_element {
@@ -116,112 +118,62 @@ global {
 				if build_pedestrian_network {
 					ask dxf_element {
 						loop pt over: entrances {
-							walking_area_g <- walking_area_g - (square(0.1) at_location pt); 
+							walking_area_g <- walking_area_g - (square(0.05) at_location pt); 
 						}
 					}
 				}
+				
 				ask wall {
 					walking_area_g <- walking_area_g - (shape );
-					walking_area_g <- walking_area_g.geometries with_max_of each.area;
+					walking_area_g <- world.select_geometry(walking_area_g.geometries, rooms) ;
 				}
 				if (get_only_inside_room) {
 					walking_area_g <- walking_area_g inter union(rooms_entrances);
 				}
 			}
 			
-			
 			create walking_area from: walking_area_g.geometries;
-			save walking_area type: shp to: walking_area_path;
-		}
-		write "Walking area created";
-		
-		
-		
-		if (build_pedestrian_network) {
+				write "Walking area created";
+	
 			display_pedestrian_path <- true;
 			list<geometry> geoms_decomp <- decomp_shape_triangulation();
-			list<geometry> pp <- generate_pedestrian_network([],geoms_decomp,add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering);
+			list<geometry> pp <- generate_pedestrian_network([],geoms_decomp,add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering,simplification_dist);
+		
 			
-			
-			list<geometry> ggs;
-			if (clean_network) {
-				geometry wa <- union(walking_area);
-				geometry wa_b <- wa buffer (-dist_min_obst);
-				loop p over:pp {
-					if not(wa covers p) {
-						geometry g <- p inter wa_b;
-						if (g != nil and g.perimeter > dist_reconnection) {
-							if (length(g.geometries) > 1 ) {
-								loop g1 over: g.geometries where (each != nil and each.perimeter > dist_reconnection) {
-									ggs << g;
-								}
-							} else {
-								ggs << g;
-							}
-							
-						}
-					} else if (p != nil and p.perimeter > dist_reconnection){
-						ggs <<p;
-					}
+			create pedestrian_path from: pp  {
+				do initialize bounds:walking_area as list distance: min(10.0,(wall closest_to self) distance_to self) /*masked_by: [wall]*/ distance_extremity: 1.0;
+				if (free_space.area = 0) {
+				 	do die;
+				
 				}
-			} else {
-				ggs <- pp;
+				
 			}
+			save pedestrian_path type: shp to:pedestrian_paths_path;
+			save walking_area type: shp to: walking_area_path;
+			save pedestrian_path collect each.free_space type: shp to:free_space_path;
 			
-			//list<geometry> cn <- clean_network(ggs, dist_reconnection,true,true);
-			
-			list<geometry> fcn;
-			loop c over: ggs {
-				fcn <- fcn + c.geometries;
-			}
-			fcn <- clean_network(fcn, dist_reconnection,true,true);
-			
-			create pedestrian_path from: fcn;
-			
-			save pedestrian_path type: shp to:dataset_path  + useCase+ "/pedestrian_path.shp";  
 		} else {
 			
-			create pedestrian_path from: shape_file(dataset_path + useCase+ "/pedestrian_path.shp") ;
-			geometry walking_area_g;
-			if (not recreate_walking_area) and file_exists(walking_area_path) {
-				create walking_area from: file(walking_area_path);
-				walking_area_g <- union(walking_area);
-			} else {	
-		 		geometry walking_area_g <- copy(shape);
-				
-				ask wall {
-					walking_area_g <- walking_area_g - (shape );
-					walking_area_g <- walking_area_g.geometries with_max_of each.area;
-				}
-				create walking_area from: walking_area_g.geometries;
-				save walking_area type: shp to: walking_area_path;
-			
-			}
 			create Wall from: wall collect each.shape;
 				
-			ask pedestrian_path {
-				do initialize obstacles:[Wall] distance: 1.0;
-				free_space <- (free_space);// inter walking_area_g);// union (shape + 0.001);
-				//write free_space.area;
-				
-				if (free_space = nil) {
-					free_space <- copy(shape);
-				} else {
-					geometry free_s2 <- free_space - 0.2;
-					if (free_space != nil) {
-						free_space <- free_s2;
-					} 				}
-				
-				free_space <- (free_space.geometries where (each != nil)) with_max_of each.area;
+		
+			create walking_area from: shape_file(walking_area_path) ;
+			file free_spaces_shape_file <- shape_file(free_space_path) ;
+			create pedestrian_path from: shape_file(pedestrian_paths_path)  {
+				list<geometry> fs <- free_spaces_shape_file overlapping self;
+				free_space <- fs first_with (each covers shape); 
 			}
 			network <- as_edge_graph(pedestrian_path);
+			ask pedestrian_path {
+				do build_intersection_areas pedestrian_graph: network;
+			}
 		
-		
-			create people number: 500 {
+			create people number: 100 {
 				location <- any_location_in(one_of(pedestrian_path).free_space);
-				pedestrian_model <- P_pedestrian_model;
+			
+				pedestrian_species <- [people];
+				obstacle_species<-[dxf_element];
 				avoid_other <- P_avoid_other;
-				obstacle_species <- [people, dxf_element];
 			}
 			
 			
@@ -253,6 +205,35 @@ global {
 		}
 		return (geom_f where (each != nil and each.area > 0.1));
 	}
+	
+	geometry select_geometry(list<geometry> geoms, list<dxf_element> rooms) {
+		if empty(geoms) {return nil;}
+		if length(geoms) = 1 {
+			return first(geoms);
+		}
+		float max_v_o <- 0.0;
+		float max_v <- 0.0;
+		geometry g_o;
+		geometry g_no;
+		loop g over: geoms {
+			if not empty(rooms overlapping g) {
+				if (g.area > max_v_o) {
+					g_o <- g;
+					max_v_o <- g.area;
+				}
+			}  else {
+				if (g.area > max_v) {
+					g_no <- g;
+					max_v <- g.area;
+				}
+			}
+		}
+		
+		if max_v_o > (max_v/10.0) {
+			return g_o;
+		}
+		return g_no;
+	}
 }
 
 species Wall;
@@ -276,7 +257,7 @@ species triangles {
 	}
 }
 
-species people skills: [escape_pedestrian] {
+species people skills: [pedestrian] {
 	rgb color <- rnd_color(255);
 	float speed <- gauss(3,1.5) #km/#h min: 1 #km/#h;
 	
