@@ -261,15 +261,15 @@ species people skills: [pedestrian] {
 	rgb color <- rnd_color(255);
 	float speed <- gauss(3,1.5) #km/#h min: 1 #km/#h;
 	
-	reflex choose_target when: final_target = nil  {
-		final_target <- any_location_in(one_of(pedestrian_path).free_space);
-		do compute_virtual_path pedestrian_graph:network final_target: final_target ;
-		if empty(targets ) {
+	reflex choose_target when: final_waypoint = nil  {
+		final_waypoint <- any_location_in(one_of(pedestrian_path).free_space);
+		do compute_virtual_path pedestrian_graph:network target: final_waypoint ;
+		if empty(waypoints ) {
 			write name + " -> " + current_path;
 		}
 		
 	}
-	reflex move when: final_target != nil {
+	reflex move when: final_waypoint != nil {
 		do walk ;
 	}	
 	
