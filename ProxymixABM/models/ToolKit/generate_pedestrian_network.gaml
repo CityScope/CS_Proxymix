@@ -7,7 +7,7 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 global {
 	string dataset_path <- "../../includes/";
-	string useCase <- "Hotel-Dieu";
+	string useCase <- "IDB/Level 0";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
 	string pedestrian_paths_path <-dataset_path + useCase+ "/pedestrian path.shp";
@@ -267,7 +267,6 @@ species people skills: [pedestrian] {
 		if empty(waypoints ) {
 			write name + " -> " + current_path;
 		}
-		
 	}
 	reflex move when: final_waypoint != nil {
 		do walk ;
