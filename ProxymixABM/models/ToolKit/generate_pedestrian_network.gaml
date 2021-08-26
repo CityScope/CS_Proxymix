@@ -135,13 +135,17 @@ global {
 			create walking_area from: walking_area_g.geometries;
 				write "Walking area created";
 	
-			display_pedestrian_path <- true;
+		 display_pedestrian_path <- true;
 			list<geometry> geoms_decomp <- decomp_shape_triangulation();
 			list<geometry> pp <- generate_pedestrian_network([],geoms_decomp,add_points_open_area,random_densification,min_dist_open_area,density_open_area,clean_network,tol_cliping,tol_triangulation,min_dist_obstacles_filtering,simplification_dist);
-		
-			
+			graph g <-as_edge_graph(pp);
+			g <- main_connected_component(g);
+			pp <- g.edges;
 			create pedestrian_path from: pp  {
-				do initialize bounds:walking_area as list distance: min(10.0,(wall closest_to self) distance_to self) /*masked_by: [wall]*/ distance_extremity: 1.0;
+				do initialize bounds:walking_area as list distance: min(10.0,(wall closest_to self) distance_to self)  distance_extremity: 1.0; //*masked_by: [wall]
+				if free_space = nil {
+					free_space <- shape + dist_min_obst;
+				}
 				if (free_space.area = 0) {
 				 	do die;
 				
@@ -162,11 +166,14 @@ global {
 			create pedestrian_path from: shape_file(pedestrian_paths_path)  {
 				list<geometry> fs <- free_spaces_shape_file overlapping self;
 				free_space <- fs first_with (each covers shape); 
+				if free_space = nil {
+					free_space <- shape + dist_min_obst;
+				}
 			}
 			network <- as_edge_graph(pedestrian_path);
-			ask pedestrian_path {
+			/*ask pedestrian_path {
 				do build_intersection_areas pedestrian_graph: network;
-			}
+			}*/
 		
 			create people number: 100 {
 				location <- any_location_in(one_of(pedestrian_path).free_space);

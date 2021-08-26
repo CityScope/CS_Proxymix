@@ -20,7 +20,7 @@ global
 	string ventilationType<-"default";
 	float timeSpent<-1.0 #hour;
 	file the_dxf_metadata <- file_exists(dataset_path + useCase +"/building.csv") ?csv_file(dataset_path + useCase +"/building.csv",",",true) : nil;
-	float unit <- #cm;//(the_dxf_metadata != nil )? float(matrix(the_dxf_metadata)[1,0]) : #cm;
+	float unit <- (the_dxf_metadata != nil )? float(matrix(the_dxf_metadata)[1,0]) : #cm;
 	//define the bounds of the studied area
 	file the_dxf_file <- dxf_file(dataset_path + useCase +"/building.dxf",unit);
 	bool validator<-true;
@@ -89,12 +89,13 @@ global
 species dxf_element
 {
 	string layer;
-	rgb color;
+	rgb color <- #black;
 	bool useless;
 	list<point> entrances;
+	
 	aspect default
 	{
-		draw shape color: color;
+		draw shape color: #black;
 	}
 	init {
 		shape <- polygon(shape.points);
