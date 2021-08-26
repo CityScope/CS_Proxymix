@@ -383,7 +383,7 @@ global {
 			gama_SFM <-0.35;
 			relaxion_SFM <- 0.54;
 			A_obstacles_SFM <- 4.5;
-			tolerance_target <- tolerance_target_param;
+			tolerance_waypoint <- tolerance_target_param;
 			
 			pedestrian_species <- [people];
 			//obstacle_species<-[wall];
@@ -1164,10 +1164,10 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 		if wandering {
 			if (wandering_time_ag > wandering_time) {
 				if (target_place != nil) {
-					if final_target = nil and ((location distance_to target_place) > 2.0){
-						do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_place ;
+					if final_waypoint = nil and ((location distance_to target_place) > 2.0){
+						do compute_virtual_path pedestrian_graph:pedestrian_network target: target_place ;
 					}
-					if (final_target = nil) {
+					if (final_waypoint = nil) {
 						do goto target: target_place;
 					} else {
 						do walk;
@@ -1176,7 +1176,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 					if not(location overlaps target_room.inside_geom) {
 						location <- (target_room.inside_geom closest_points_with location) [0];
 					}
-					if final_target =nil {
+					if final_waypoint =nil {
 						wandering <- false;
 					}
 				} else {
@@ -1190,7 +1190,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 				wandering_time_ag <- wandering_time_ag + step;	
 			}
 		} else if goto_a_desk {
-			if (final_target = nil) {
+			if (final_waypoint = nil) {
 				do goto target: target;
 			} else {
 				do walk;
@@ -1199,7 +1199,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 			if not(location overlaps target_room.inside_geom) {
 				location <- (target_room.inside_geom closest_points_with location) [0];
 			}
-			if final_target =nil {
+			if final_waypoint =nil {
 				goto_a_desk <- false;
 			}
 		} else {
@@ -1216,7 +1216,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 					target_desk <- (target_room.inside_geom closest_points_with target_desk) [0];
 				}
 				if ((location distance_to target_desk) > 2.0) {
-					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target_desk ;
+					do compute_virtual_path pedestrian_graph:pedestrian_network target: target_desk ;
 				}
 			}
 		}
@@ -1265,7 +1265,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 			if (queueing) and (species(target_room) != building_entrance) and ((self distance_to target) < (2 * distance_queue))  and ((self distance_to target) > (1 * distance_queue))  {
 				point pt <- the_entrance.get_position();
 				if (pt != target) {
-					final_target <- nil;
+					final_waypoint <- nil;
 					target <- pt;
 				}
 			}
@@ -1273,10 +1273,10 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 				do goto target: target on: pedestrian_network;
 				arrived <- location = target;
 			} else {
-				if (final_target = nil) and ((location distance_to target) > 2.0)  {
-					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target ;
+				if (final_waypoint = nil) and ((location distance_to target) > 2.0)  {
+					do compute_virtual_path pedestrian_graph:pedestrian_network target: target ;
 				}
-				if (final_target != nil) {
+				if (final_waypoint != nil) {
 					do walk;
 					float r_s <- prev_loc distance_to location;
 					is_slow <- r_s < (speed/coeff_speed_slow);
@@ -1291,7 +1291,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 					}
 				}
 				
-				arrived <- final_target = nil;
+				arrived <- final_waypoint = nil;
 				if (arrived) {
 					is_slow_real <- false;
 					counter <- 0;
@@ -1302,11 +1302,11 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 			if (finished_goto) {
 				do goto target: target;
 			} else {
-				if (final_target = nil) {
-					do compute_virtual_path pedestrian_graph:pedestrian_network final_target: target ;
+				if (final_waypoint = nil) {
+					do compute_virtual_path pedestrian_graph:pedestrian_network target: target ;
 				}
 				do walk;
-				finished_goto <- (final_target = nil) and (location != target);
+				finished_goto <- (final_waypoint = nil) and (location != target);
 			}
 			//do goto target: target;
 			arrived <- location = target;
@@ -1327,7 +1327,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 						target <- the_entrance.get_position();
 					}
 				}
-				if (current_activity.name = going_home) and (location distance_to target < tolerance_target){
+				if (current_activity.name = going_home) and (location distance_to target < tolerance_waypoint){
 					end_of_day <- true;
 				}
 				
