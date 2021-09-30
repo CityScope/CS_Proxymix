@@ -422,28 +422,11 @@ experiment debug type:gui autorun:false{
 
 experiment Coronaizer type:gui autorun:false{
 
-	//See issue #180
-	/*action _init_ {
-		title <- "Reference";
-		useCase <- "MediaLab"; 
-		maskRatio <-0.0;
-		density_scenario <- "data";
-		distance_people <- 2.0#m;
-		ventilationType <- "Natural";
-		timeSpent <- 2.0 #h;
-		agenda_scenario  <-"simple";
-		
-	    initial_nb_infected <-10;
-		queueing  <-false;
-		peopleSize  <-0.3#m;
-		step_arrival <- 1#s;
-		arrival_time_interval <- 3 #mn;
-	}*/
 	parameter 'title:' var: title category: 'Initialization' <- "Reference";
-	parameter 'fileName:' var: useCase category: 'Initialization' <- "UDG/CUCS/Level 2" among: ["UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
+	parameter 'fileName:' var: useCase category: 'Initialization' <- "IDB/Level 0" among: ["IDB/Level 0","UDG/CUCS/Campus","UDG/CUSUR","UDG/CUCEA","UDG/CUAAD","UDG/CUT/campus","UDG/CUT/lab","UDG/CUT/room104","UDG/CUCS/Level 2","UDG/CUCS/Ground","UDG/CUCS_Campus","UDG/CUCS/Level 1","Factory", "MediaLab","CityScience","Learning_Center","ENSAL","SanSebastian"];
 	parameter "Agenda Scenario:" category: 'Initialization' var: agenda_scenario  <-"simple";
 	parameter "Mask Ratio:" category: "Policy" var: maskRatio min: 0.0 max: 1.0 step:0.1 <-0.0;
-	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "data" among: ["data", "distance", "num_people_building", "num_people_room"];
+	parameter "Density Scenario" var: density_scenario category:'Policy'  <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
 	parameter 'distance people:' var: distance_people category:'Policy' min:0.0 max:5.0#m <- 2.0#m;
 	parameter 'ventilationType:' var: ventilationType category: 'Initialization' <- "Natural";
 	parameter 'timeSpent:' var: timeSpent category: 'Initialization' <- 2.0 #h;
