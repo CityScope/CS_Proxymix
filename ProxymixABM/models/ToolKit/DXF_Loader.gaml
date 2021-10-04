@@ -28,11 +28,11 @@ global
 	
 	// Defining the mandatory layer
 	map<string,rgb> standard_color_per_layer <- 
-	[offices::rgb(50,50,50),meeting_rooms::rgb(75,75,75),library::rgb(20,20,20),lab::rgb(10,10,10),
-	entrance::#darkgray,elevators::#orange,
+	[offices::#lightblue,meeting_rooms::#blue,library::rgb(20,20,20),lab::rgb(10,10,10),
+	entrance::#red,elevators::#orange,
 	coffee::rgb(25,25,25), furnitures::#maroon, 
 	toilets::rgb(25,25,25),  sanitation::#purple,
-	walls::#white, windows::#white,doors::#lightgray,
+	walls::#white, windows::#white,doors::#yellow,
 	stairs::rgb(225,200,200),
 	chairs::rgb(125,125,125)];
 	
@@ -43,7 +43,7 @@ global
 	toilets::#yellow,  sanitation::#purple,
 	walls::rgb(29,54,74), windows::#white,doors::#lightgray,
 	chairs::rgb(29,72,81), furnitures::rgb(37,109,123)];
-	bool showLegend<-false;
+	bool showLegend<-true;
 	
 	action initiliaze_dxf
 	{  
@@ -95,7 +95,7 @@ species dxf_element
 	
 	aspect default
 	{
-		draw shape color: #black;
+		draw shape color: standard_color_per_layer[layer];
 	}
 	init {
 		shape <- polygon(shape.points);
@@ -125,7 +125,9 @@ experiment DXFDisplay type: gui virtual:true
 			}
 			}
 			
+			
 		}
+
 		
 	}
 }
