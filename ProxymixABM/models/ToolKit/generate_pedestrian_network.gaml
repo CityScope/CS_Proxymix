@@ -143,14 +143,14 @@ global {
 			pp <- g.edges;
 			create pedestrian_path from: pp  {
 				do initialize bounds:walking_area as list distance: min(10.0,(wall closest_to self) distance_to self)  distance_extremity: 1.0; //*masked_by: [wall]
-				if free_space = nil {
+				if free_space = nil or not (free_space covers shape){
 					free_space <- shape + dist_min_obst;
 				}
-				if (free_space.area = 0) {
+				if (free_space = nil or free_space.area = 0) {
 				 	do die;
 				
 				}
-				
+			
 			}
 			save pedestrian_path type: shp to:pedestrian_paths_path;
 			save walking_area type: shp to: walking_area_path;
@@ -309,7 +309,7 @@ experiment test_pedestrian_network type: gui {
 		create simulation with: [build_pedestrian_network::false, dataset_path::"../../includes/", validator::false];
 	}
 	output {
-		display map {
+		display map  {
 			species dxf_element;
 			species pedestrian_path;
 			species people;
