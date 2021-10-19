@@ -28,7 +28,7 @@ global
 	
 	// Defining the mandatory layer
 	map<string,rgb> standard_color_per_layer <- 
-	[offices::#lightblue,meeting_rooms::#blue,library::rgb(20,20,20),lab::rgb(10,10,10),
+	[offices::#deepskyblue,meeting_rooms::#blue,library::#pink,lab::#orange,
 	entrance::#red,elevators::#orange,
 	coffee::rgb(25,25,25), furnitures::#maroon, 
 	toilets::rgb(25,25,25),  sanitation::#purple,

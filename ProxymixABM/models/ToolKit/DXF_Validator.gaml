@@ -17,7 +17,7 @@ global
 experiment ValidatedDXF type: gui
 {   
 
-	parameter 'fileName:' var: useCase category: 'file' <- "IDB/Level 0";
+	parameter 'fileName:' var: useCase category: 'file' <- "MediaLab";
 	output
 	{	
 		display map type: opengl background:#black toolbar:false draw_env:false
@@ -27,7 +27,7 @@ experiment ValidatedDXF type: gui
 			  draw useCase color: #white at: {-world.shape.width*0.1,-world.shape.height*0.1} perspective: true font:font("Helvetica", 20 , #bold);
 			  rgb text_color<-#white;
                 float y <- 30#px;
-                float x<- -40#px;
+                float x<- -100#px;
   				draw "Building Usage" at: { x, y } color: text_color font: font("Helvetica", 20, #bold);
                 y <- y + 30 #px;
                 loop type over: standard_color_per_layer.keys
