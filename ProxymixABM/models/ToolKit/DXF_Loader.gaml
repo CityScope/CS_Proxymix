@@ -28,21 +28,13 @@ global
 	
 	// Defining the mandatory layer
 	map<string,rgb> standard_color_per_layer <- 
-	[offices::#deepskyblue,meeting_rooms::#blue,library::#pink,lab::#orange,
-	entrance::#red,elevators::#orange,
-	coffee::rgb(25,25,25), furnitures::#maroon, 
-	toilets::rgb(25,25,25),  sanitation::#purple,
-	walls::#white, windows::#white,doors::#yellow,
-	stairs::rgb(225,200,200),
-	chairs::rgb(125,125,125)];
+	[offices::#gamablue,meeting_rooms::#blue,library::#dodgerblue,lab::#midnightblue,
+	entrance::#fuchsia,elevators::#pink,stairs::#lightpink,
+	furnitures::#maroon,chairs::#orangered,
+	toilets::#darkslategray,  sanitation::#seagreen, 
+	coffee::#mintcream,
+	walls::#white, windows::#white,doors::#white];
 	
-	map<string,rgb> standard_color_per_layer_test <- 
-	[offices::rgb(29,72,81),meeting_rooms::rgb(23,58,65),library::rgb(20,20,20),lab::rgb(10,10,10),
-	entrance::#white,elevators::rgb(249,54,32),stairs::rgb(251,116,101),
-	coffee::rgb(25,25,25), 
-	toilets::#yellow,  sanitation::#purple,
-	walls::rgb(29,54,74), windows::#white,doors::#lightgray,
-	chairs::rgb(29,72,81), furnitures::rgb(37,109,123)];
 	bool showLegend<-true;
 	
 	list<string> existing_types;

@@ -37,9 +37,9 @@ global {
 	string SFM <- "SFM";
 	string simple <- "simple";
 	
-	 map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), "Chair"::rgb(50,50,50), "Coffee"::#orange, "Doors"::rgb(225,0,0),"Entrance"::rgb(175,0,0), "Elevators"::rgb(200,200,200), "Facade_Glass"::#darkgray, 
+	/*  map<string,rgb> color_per_layer <- ["0"::rgb(161,196,90), "Chair"::rgb(50,50,50), "Coffee"::#orange, "Doors"::rgb(225,0,0),"Entrance"::rgb(175,0,0), "Elevators"::rgb(200,200,200), "Facade_Glass"::#darkgray, 
 	"Facade_Wall"::rgb(175,175,175), "Furniture"::rgb(50,50,50),"Glass"::rgb(150,150,150), "Labs"::rgb(75,75,75),"Library"::rgb(75,75,75), "Offices"::rgb(75,75,75),"Meeting rooms"::rgb(125,125,125), "Misc"::rgb(161,196,90), 
-	"Railing"::rgb(125,124,120), "Supermarket"::#purple,"Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Sanitation"::rgb(225,225,225), "Void"::rgb(0,0,0), "Walls"::rgb(175,175,175),"Windows"::rgb(175,175,175)];
+	"Railing"::rgb(125,124,120), "Supermarket"::#purple,"Stairs"::rgb(225,225,225), "Storage"::rgb(25,25,25), "Toilets"::rgb(225,225,225), "Sanitation"::rgb(225,225,225), "Void"::rgb(0,0,0), "Walls"::rgb(175,175,175),"Windows"::rgb(175,175,175)];*/
 	
 	
 }
