@@ -7,7 +7,7 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 global {
 	string dataset_path <- "../../includes/";
-	string useCase <- "IDB/Level 2";
+	string useCase <- "IDB/Level 0";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
 	string pedestrian_paths_path <-dataset_path + useCase+ "/pedestrian path.shp";
@@ -150,7 +150,7 @@ global {
 				 	do die;
 				
 				}
-			
+				
 			}
 			save pedestrian_path type: shp to:pedestrian_paths_path;
 			save walking_area type: shp to: walking_area_path;
@@ -309,7 +309,7 @@ experiment test_pedestrian_network type: gui {
 		create simulation with: [build_pedestrian_network::false, dataset_path::"../../includes/", validator::false];
 	}
 	output {
-		display map  {
+		display map {
 			species dxf_element;
 			species pedestrian_path;
 			species people;
