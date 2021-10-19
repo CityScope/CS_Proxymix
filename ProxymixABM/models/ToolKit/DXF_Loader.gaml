@@ -45,12 +45,16 @@ global
 	chairs::rgb(29,72,81), furnitures::rgb(37,109,123)];
 	bool showLegend<-true;
 	
+	list<string> existing_types;
+	list<string> missing_type_elements;
+	list<string> useless_type_elements;
+	
 	action initiliaze_dxf
 	{  
 		 if(validator){
-			list<string> existing_types <- remove_duplicates(the_dxf_file.contents collect (each get layer));
-			list<string> missing_type_elements <- standard_color_per_layer.keys - existing_types;
-			list<string> useless_type_elements <- (existing_types -  standard_color_per_layer.keys);
+			existing_types <- remove_duplicates(the_dxf_file.contents collect (each get layer));
+			missing_type_elements <- standard_color_per_layer.keys - existing_types;
+			useless_type_elements <- (existing_types -  standard_color_per_layer.keys);
 			if (not empty(missing_type_elements) or not empty(useless_type_elements)) {
 				if (not empty(missing_type_elements)) {
 						do tell("Use Case: "+ useCase + "\n\nExisting layers: " + existing_types+ 
