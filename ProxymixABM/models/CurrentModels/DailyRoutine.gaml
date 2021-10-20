@@ -50,6 +50,9 @@ global {
 	string movement_model <- "pedestrian skill" among: ["moving skill","pedestrian skill"];
 	float unit <- #cm;
 	
+	float distance_init_entrances <- 0.3;
+	float distance_between_entrances <- 2.0;
+	
 	shape_file pedestrian_path_shape_file <- shape_file(dataset_path+ useCase+"/pedestrian path.shp", gama.pref_gis_default_crs);
 	//shape_file walking_area_shape_file <- shape_file(dataset_path+ useCase+"/walking_area.shp", gama.pref_gis_default_crs);
 	shape_file free_space_path_shape_file <- shape_file(dataset_path+ useCase+"/free space.shp", gama.pref_gis_default_crs);
@@ -225,7 +228,7 @@ global {
 		}
 		ask room + building_entrance + common_area{
 			geometry contour <- nil;
-			float dist <-0.3;
+			float dist <-distance_init_entrances;
 			int cpt <- 0;
 			loop while: contour = nil {
 				cpt <- cpt + 1;
@@ -234,7 +237,7 @@ global {
 					contour <- contour - (shape +dist);
 				}
 				if cpt < limit_cpt_for_entrance_room_creation {
-					ask (room  + common_area) at_distance 1.0 {
+					ask (room  + common_area) at_distance distance_init_entrances {
 						contour <- contour - (shape + dist);
 					}
 				}
@@ -244,19 +247,21 @@ global {
 				dist <- dist * 0.5;	
 			} 
 			if contour != nil {
-				list<point> ents <- points_on (contour, 2.0);
+				list<point> ents <- points_on (contour, distance_between_entrances);
 				loop pt over:ents {
 					create room_entrance with: [location::pt,my_room::self] {
 						myself.entrances << self;
 					}
 				
 				}
-			}
-			ask places {
-				point pte <- (myself.entrances closest_to self).location;
-				dists <- self distance_to pte;
-			}
-					
+			
+				ask places {
+					point pte <- (myself.entrances closest_to self).location;
+					dists <- self distance_to pte;
+				}
+			} else {
+				do die;
+			}	
 		}
 		map<string, list<room>> rooms_type <- room group_by each.type;
 		sanitation_rooms <- rooms_type[sanitation];
@@ -1007,7 +1012,7 @@ species room {
 			}
 			
 		}
-		available_places <- copy(places);
+		available_places <- copy(places) where not dead(each);
 		
 	}
 	bool is_available {

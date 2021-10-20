@@ -17,6 +17,10 @@ global {
 	float simplification_dist <- 0.1;
 	float buffer_simplication <-  0.001;
 	
+	float dist_entrances <-0.3;
+	float distance_entrances <- 2.0;
+			
+	
 	bool add_points_open_area <- false;//add points to open areas
  	bool random_densification <- false;//random densification (if true, use random points to fill open areas; if false, use uniform points), 
  	float min_dist_open_area <- 0.1;//min distance to considered an area as open area, 
@@ -81,7 +85,8 @@ global {
 		
 		ask rooms_entrances{
 			geometry contour <- nil;
-			float dist <-0.3;
+	
+			float dist <-dist_entrances;
 			int cpt <- 0;
 			loop while: contour = nil {
 				cpt <- cpt + 1;
@@ -100,7 +105,7 @@ global {
 				dist <- dist * 0.5;	
 			} 
 			if contour != nil {
-				entrances <- points_on (contour, 2.0);
+				entrances <- points_on (contour, distance_entrances);
 			}	
 		}
 		
@@ -119,14 +124,12 @@ global {
 			} else {
 				if build_pedestrian_network {
 					ask dxf_element {
-						write "entrance: " + sample(length(entrances));
 						loop pt over: entrances {
 							
 							walking_area_g <- walking_area_g - (square(0.05) at_location pt); 
 						}
 					}
 				}
-					write "entrance: " + sample(walking_area_g.area);
 		
 				ask wall {
 					
