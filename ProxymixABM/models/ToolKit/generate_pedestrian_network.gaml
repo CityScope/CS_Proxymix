@@ -7,7 +7,7 @@ model generatepedestriannetwork
 import "DXF_Loader.gaml"
 global {
 	string dataset_path <- "../../includes/";
-	string useCase <- "IDB/Level 0";
+	string useCase <- "IDB/Level 1";
 	string parameter_path <-dataset_path + useCase+ "/Pedestrian network generator parameters.csv";
 	string walking_area_path <-dataset_path + useCase+ "/walking_area.shp";
 	string pedestrian_paths_path <-dataset_path + useCase+ "/pedestrian path.shp";
@@ -109,21 +109,27 @@ global {
 		
 		if (build_pedestrian_network or not file_exists(pedestrian_paths_path)) {
 			geometry walking_area_g <- copy(shape);
+			write sample(length(wall));
 			if empty(wall ) {
 				ask dxf_element {
+					
 					walking_area_g <- walking_area_g - (shape );
 					walking_area_g <- walking_area_g.geometries with_max_of each.area;
 				}
 			} else {
 				if build_pedestrian_network {
 					ask dxf_element {
+						write "entrance: " + sample(length(entrances));
 						loop pt over: entrances {
+							
 							walking_area_g <- walking_area_g - (square(0.05) at_location pt); 
 						}
 					}
 				}
-				
+					write "entrance: " + sample(walking_area_g.area);
+		
 				ask wall {
+					
 					walking_area_g <- walking_area_g - (shape );
 					walking_area_g <- world.select_geometry(walking_area_g.geometries, rooms) ;
 				}
@@ -171,9 +177,9 @@ global {
 				}
 			}
 			network <- as_edge_graph(pedestrian_path);
-			/*ask pedestrian_path {
-				do build_intersection_areas pedestrian_graph: network;
-			}*/
+			//ask pedestrian_path {
+			//	do build_intersection_areas pedestrian_graph: network;
+			//}
 		
 			create people number: 100 {
 				location <- any_location_in(one_of(pedestrian_path).free_space);
@@ -291,7 +297,7 @@ experiment generate_pedestrian_network type: gui {
 		create simulation with: [build_pedestrian_network::true, dataset_path::"../../includes/",validator::false];
 	}
 	output {
-		display map {
+		display map type: opengl {
 			species dxf_element;
 			species walking_area;
 			species triangles;
@@ -309,7 +315,7 @@ experiment test_pedestrian_network type: gui {
 		create simulation with: [build_pedestrian_network::false, dataset_path::"../../includes/", validator::false];
 	}
 	output {
-		display map {
+		display map type: opengl{
 			species dxf_element;
 			species pedestrian_path;
 			species people;

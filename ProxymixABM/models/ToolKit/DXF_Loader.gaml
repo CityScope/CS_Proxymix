@@ -92,6 +92,9 @@ species dxf_element
 	aspect default
 	{
 		draw shape color: standard_color_per_layer[layer];
+		loop e over: entrances {
+			draw square(0.5) at: e color: #magenta;
+		}
 	}
 	init {
 		shape <- polygon(shape.points);
