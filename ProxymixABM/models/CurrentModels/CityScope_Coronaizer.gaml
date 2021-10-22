@@ -82,90 +82,7 @@ global{
 	string filePathName;
 		
 	reflex initCovid when:cycle = 1{
-	//	if fixed_infected_people_localization {
-		if true {
-			int nb_i;
-			list<ViralPeople> concerned_people <- ViralPeople where (each.target.working_desk != nil);
-			map<room,list<ViralPeople>> pp_per_room <- concerned_people group_by each.target.working_place;
-			list<room> r_ord <- pp_per_room.keys  sort_by each.name;
-			int direction_i <- 0;
-			float sum_area <- r_ord sum_of each.shape.area;
-			loop r over: r_ord {
-				list<ViralPeople> pps <- pp_per_room[r];
-				int nb_infected_room <- round(initial_nb_infected * r.shape.area/ sum_area);
-				nb_infected_room <- min([nb_infected_room, initial_nb_infected - nb_i, length(pps)]);
-				if nb_infected_room > 0 and not empty(pps){
-					int direction <- direction_i;
-					loop times: nb_infected_room {
-						ViralPeople vp;
-						if direction = 0 {
-							vp <- pps with_min_of (each.target.working_desk.location distance_to each.target.working_place.location);
-						}else if direction = 1 {
-							vp <- (pps sort_by (each.target.working_desk.location.y - each.target.working_desk.location.x)) [min(4, length(pps) - 1)];
-						} else if direction = 2 {
-							vp <- (pps sort_by (each.target.working_desk.location.x - each.target.working_desk.location.y)) [min(2, length(pps) - 1)];
-						} else {
-							vp <- pps with_max_of (each.target.working_desk.location distance_to each.target.working_place.location);
-						}
-						ask vp{
-							has_been_infected<-true;
-							is_susceptible <-  false;
-					        is_infected <-  true;
-					        is_immune <-  false;
-					        is_recovered<-false;
-					        pps >> self;
-						}
-						direction <- (direction + 1 ) mod 4;
-					}
-					pp_per_room[r] <- pps;
-					nb_i <- nb_i + nb_infected_room;
-				}
-				direction_i <- (direction_i + 1) mod 4;
-				
-				
-			}
-			if nb_i < initial_nb_infected {
-				list<room> ror <- pp_per_room.keys sort_by each.name;
-				
-				int direction <- 0;
-				
-				loop while: nb_i < initial_nb_infected {
-					loop r over: ror {
-						if (nb_i = initial_nb_infected) {
-							break;
-						} else {
-							list<ViralPeople> pps <- pp_per_room[r];
-							if (not empty(pps))  {
-								ViralPeople vp;
-								
-								if direction = 0 {
-									vp <- pps with_min_of (each.target.working_desk.location distance_to each.target.working_place.location);
-								}else if direction = 1 {
-									vp <- (pps sort_by (each.target.working_desk.location.y - each.target.working_desk.location.x)) [min(4, length(pps) - 1)];
-								} else if direction = 2 {
-									vp <- (pps sort_by (each.target.working_desk.location.x - each.target.working_desk.location.y)) [min(2, length(pps) - 1)];
-								} else {
-									vp <- pps with_max_of (each.target.working_desk.location distance_to each.target.working_place.location);
-								}
-								ask vp{
-									has_been_infected<-true;
-									is_susceptible <-  false;
-							        is_infected <-  true;
-							        is_immune <-  false;
-							        is_recovered<-false;
-							        pps >> self;
-								}
-								direction <- (direction + 1 ) mod 4;
-							
-								pp_per_room[r] <- pps;
-								nb_i <- nb_i + 1;
-							}
-						}
-					}
-				}
-			}
-			
-		} else {
+		if agenda_scenario = "shopping" {
 			ask initial_nb_infected among ViralPeople{
 				has_been_infected<-true;
 				is_susceptible <-  false;
@@ -173,6 +90,106 @@ global{
 				is_immune <-  false;
 				is_recovered<-false;
 			}
+		}  else {
+				
+			
+		//	if fixed_infected_people_localization {
+			if true {
+				int nb_i;
+				list<ViralPeople> concerned_people <- ViralPeople where (each.target.working_desk != nil);
+				map<room,list<ViralPeople>> pp_per_room <- concerned_people group_by each.target.working_place;
+				list<room> r_ord <- pp_per_room.keys  sort_by each.name;
+				int direction_i <- 0;
+				float sum_area <- r_ord sum_of each.shape.area;
+				
+				loop r over: r_ord {
+					list<ViralPeople> pps <- pp_per_room[r];
+					
+					int nb_infected_room <- round(initial_nb_infected * r.shape.area/ sum_area);
+					nb_infected_room <- min([nb_infected_room, initial_nb_infected - nb_i, length(pps)]);
+					if nb_infected_room > 0 and not empty(pps){
+						int direction <- direction_i;
+						
+						loop times: nb_infected_room {
+							ViralPeople vp;
+							if direction = 0 {
+								vp <- pps with_min_of (each.target.working_desk.location distance_to each.target.working_place.location);
+							}else if direction = 1 {
+								vp <- (pps sort_by (each.target.working_desk.location.y - each.target.working_desk.location.x)) [min(4, length(pps) - 1)];
+							} else if direction = 2 {
+								vp <- (pps sort_by (each.target.working_desk.location.x - each.target.working_desk.location.y)) [min(2, length(pps) - 1)];
+							} else {
+								vp <- pps with_max_of (each.target.working_desk.location distance_to each.target.working_place.location);
+							}
+							ask vp{
+								has_been_infected<-true;
+								is_susceptible <-  false;
+						        is_infected <-  true;
+						        is_immune <-  false;
+						        is_recovered<-false;
+						        pps >> self;
+							}
+							direction <- (direction + 1 ) mod 4;
+						}
+						pp_per_room[r] <- pps;
+						nb_i <- nb_i + nb_infected_room;
+					}
+					direction_i <- (direction_i + 1) mod 4;
+					
+					
+				}
+				
+				if nb_i < initial_nb_infected {
+					list<room> ror <- pp_per_room.keys sort_by each.name;
+					
+					int direction <- 0;
+					
+					loop while: nb_i < initial_nb_infected {
+						loop r over: ror {
+							if (nb_i = initial_nb_infected) {
+								break;
+							} else {
+								list<ViralPeople> pps <- pp_per_room[r];
+								if (not empty(pps))  {
+									ViralPeople vp;
+									
+									if direction = 0 {
+										vp <- pps with_min_of (each.target.working_desk.location distance_to each.target.working_place.location);
+									}else if direction = 1 {
+										vp <- (pps sort_by (each.target.working_desk.location.y - each.target.working_desk.location.x)) [min(4, length(pps) - 1)];
+									} else if direction = 2 {
+										vp <- (pps sort_by (each.target.working_desk.location.x - each.target.working_desk.location.y)) [min(2, length(pps) - 1)];
+									} else {
+										vp <- pps with_max_of (each.target.working_desk.location distance_to each.target.working_place.location);
+									}
+									ask vp{
+										has_been_infected<-true;
+										is_susceptible <-  false;
+								        is_infected <-  true;
+								        is_immune <-  false;
+								        is_recovered<-false;
+								        pps >> self;
+									}
+									direction <- (direction + 1 ) mod 4;
+								
+									pp_per_room[r] <- pps;
+									nb_i <- nb_i + 1;
+								}
+							}
+						}
+					}
+				}
+				
+			} else {
+				ask initial_nb_infected among ViralPeople{
+					has_been_infected<-true;
+					is_susceptible <-  false;
+					is_infected <-  true;
+					is_immune <-  false;
+					is_recovered<-false;
+				}
+			}
+			
 		}
 		fomitableSurfaces<-agents of_generic_species fomitableSurface;
 
@@ -351,7 +368,7 @@ species ViralPeople  mirrors:people{
 					draw square(peopleSize*0.5) color:#white border:rgb(70,130,180)-100;	
 				}
 			if(showDropletRange){
-			 draw circle(largeDropletRange) color:#white empty:true;	
+			 draw circle(largeDropletRange) color:#white wireframe:true;	
 			} 
 			}
 		}	

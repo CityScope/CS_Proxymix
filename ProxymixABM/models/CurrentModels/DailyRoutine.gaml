@@ -20,9 +20,12 @@ global {
 	bool synchronized_step <- true;
 	
 	float tolerance_target_param <- 1.0;
-	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day"];
+	string agenda_scenario <- "simple" among: ["simple", "custom", "classic day", "shopping"];
 	float step_arrival <- 5#s;
 	float arrival_time_interval <- 0#mn;//15 #mn;
+	int max_num_waypoints <- 4; 
+	float max_activity_time <- 5 #mn;
+	float distance_waypoints <- 5.0; // distance of the waypoints to the shortest path
 	
 	float proba_goto_common_area <- 0.4;
 	float proba_wander <- 0.003;
@@ -393,113 +396,118 @@ global {
 			pedestrian_species <- [people];
 			//obstacle_species<-[wall];
 			
-			
-			bool goto_common_area <- (not empty(common_area)) and flip(proba_goto_common_area);
-			
-			location <- any_location_in (one_of(building_entrance).init_place);
-			if (goto_common_area) {
-				working_place <- common_area[rnd_choice(common_area collect each.shape.area)];
+			if agenda_scenario = "shopping" {
+				do init_waypoints;
 			} else {
-				working_place <- one_of (available_offices);
-				if (working_place = nil) {do die;}
-				working_place.nb_affected <- working_place.nb_affected + 1;
-				if not(working_place.is_available()) {
-					available_offices >> working_place;
-				}
-			}
-			working_desk <- working_place.get_target(self,false);
-			if (working_place = nil) {
-				do die;
-			}
-			if (use_sanitation and not empty(sanitation_rooms) and flip(proba_using_before_work)) {
-				current_activity <- first(sanitation_activity);
-				target_room <- sanitation_rooms[rnd_choice(sanitation_rooms collect (1 / (0.1 + each distance_to self)) )];
-				waiting_sanitation <- true;
 				
-				list<room_entrance> re <- copy(target_room.entrances);
-				if (length(re) = 1) {
-					the_entrance <- first(re);
+				location <- any_location_in (one_of(building_entrance).init_place);
+				bool goto_common_area <- (not empty(common_area)) and flip(proba_goto_common_area);
+				
+				if (goto_common_area) {
+					working_place <- common_area[rnd_choice(common_area collect each.shape.area)];
 				} else {
-					re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room.inside_geom);
-					if (empty(re)) {
-						re <- target_room.entrances;
+					working_place <- one_of (available_offices);
+					if (working_place = nil) {do die;}
+					working_place.nb_affected <- working_place.nb_affected + 1;
+					if not(working_place.is_available()) {
+						available_offices >> working_place;
 					}
-					the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / (0.1 + each distance_to self)) )];
 				}
-				
-			//	the_entrance <- (target_room.entrances closest_to self);
-				target <- the_entrance.location;
-				agenda_day[current_date add_seconds 10] <- first(working);
-			} else {
-				current_activity <- first(working);
-				target_room <- current_activity.get_place(self);
-				list<room_entrance> re <- copy(target_room.entrances);
-				if (length(re) = 1) {
-					the_entrance <- first(re);
-				} else {
-					room_entrance rec <- room_entrance closest_to self;
-					if rec distance_to self < 5.0 { 
-						the_entrance <- rec;
-					} else {
-						
-						re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room.inside_geom);
+				working_desk <- working_place.get_target(self,false);
+				if (working_place = nil) {
+					do die;
+				}
+				if (use_sanitation and not empty(sanitation_rooms) and flip(proba_using_before_work)) {
+					current_activity <- first(sanitation_activity);
+					target_room <- sanitation_rooms[rnd_choice(sanitation_rooms collect (1 / (0.1 + each distance_to self)) )];
+					waiting_sanitation <- true;
 					
+					list<room_entrance> re <- copy(target_room.entrances);
+					if (length(re) = 1) {
+						the_entrance <- first(re);
+					} else {
+						re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room.inside_geom);
 						if (empty(re)) {
 							re <- target_room.entrances;
 						}
-						
 						the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / (0.1 + each distance_to self)) )];
-					}	
-				}
-				
-			//	the_entrance <- (target_room.entrances closest_to self);
-				target <- the_entrance.location;
-		
-			}
+					}
 					
-			goto_entrance <- true;
-			//location <- any_location_in (one_of(building_entrance).init_place);
-			
-			switch agenda_scenario {
-				match "classic day" {
-					date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 40 #mn);
-					time_first_lunch <-((time_first_lunch = nil) or (time_first_lunch > lunch_time)) ? lunch_time : time_first_lunch;
-					activity act_coffee <- activity first_with (each.name = coffee);
-					activity shopping_supermarket <- activity first_with (each.name = supermarket);
-					bool return_after_lunch <- false;
-					if (flip(0.8)) {
-						agenda_day[lunch_time] <-first(eating_outside_act) ;
-						return_after_lunch <- true;
-						lunch_time <- lunch_time add_seconds rnd(30 #mn, 90 #mn);
-						if flip(0.3) and act_coffee != nil{
-							agenda_day[lunch_time] <- activity first_with (each.name = coffee);
-							lunch_time <- lunch_time add_seconds rnd(5#mn, 15 #mn);
-						}
+				//	the_entrance <- (target_room.entrances closest_to self);
+					target <- the_entrance.location;
+					agenda_day[current_date add_seconds 10] <- first(working);
+				} else {
+					current_activity <- first(working);
+					target_room <- current_activity.get_place(self);
+					list<room_entrance> re <- copy(target_room.entrances);
+					if (length(re) = 1) {
+						the_entrance <- first(re);
 					} else {
-						if flip(0.3) and  shopping_supermarket != nil{
-							agenda_day[lunch_time] <-shopping_supermarket ;
-							return_after_lunch <- true;
-							lunch_time <- lunch_time add_seconds rnd(5#mn, 10 #mn);
-						}
-						if flip(0.5) and act_coffee != nil{
-							agenda_day[lunch_time] <- act_coffee;
-							return_after_lunch <- true;
-							lunch_time <- lunch_time add_seconds rnd(10#mn, 30 #mn);
+						room_entrance rec <- room_entrance closest_to self;
+						if rec distance_to self < 5.0 { 
+							the_entrance <- rec;
+						} else {
+							
+							re <- re where not((pedestrian_network path_between (self, each)).shape overlaps target_room.inside_geom);
+						
+							if (empty(re)) {
+								re <- target_room.entrances;
+							}
+							
+							the_entrance <- re[rnd_choice(re collect (max(1,length(each.positions)) / (0.1 + each distance_to self)) )];
 						}	
 					}
 					
-					if (return_after_lunch) {
-						agenda_day[lunch_time] <- first(working);
+				//	the_entrance <- (target_room.entrances closest_to self);
+					target <- the_entrance.location;
+			
+				}
+						
+				goto_entrance <- true;
+				//location <- any_location_in (one_of(building_entrance).init_place);
+				
+				switch agenda_scenario {
+					match "classic day" {
+						date lunch_time <- date(current_date.year,current_date.month,current_date.day,11, 30) add_seconds rnd(0, 40 #mn);
+						time_first_lunch <-((time_first_lunch = nil) or (time_first_lunch > lunch_time)) ? lunch_time : time_first_lunch;
+						activity act_coffee <- activity first_with (each.name = coffee);
+						activity shopping_supermarket <- activity first_with (each.name = supermarket);
+						bool return_after_lunch <- false;
+						if (flip(0.8)) {
+							agenda_day[lunch_time] <-first(eating_outside_act) ;
+							return_after_lunch <- true;
+							lunch_time <- lunch_time add_seconds rnd(30 #mn, 90 #mn);
+							if flip(0.3) and act_coffee != nil{
+								agenda_day[lunch_time] <- activity first_with (each.name = coffee);
+								lunch_time <- lunch_time add_seconds rnd(5#mn, 15 #mn);
+							}
+						} else {
+							if flip(0.3) and  shopping_supermarket != nil{
+								agenda_day[lunch_time] <-shopping_supermarket ;
+								return_after_lunch <- true;
+								lunch_time <- lunch_time add_seconds rnd(5#mn, 10 #mn);
+							}
+							if flip(0.5) and act_coffee != nil{
+								agenda_day[lunch_time] <- act_coffee;
+								return_after_lunch <- true;
+								lunch_time <- lunch_time add_seconds rnd(10#mn, 30 #mn);
+							}	
+						}
+						
+						if (return_after_lunch) {
+							agenda_day[lunch_time] <- first(working);
+						}
+						agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(30),rnd(59))] <- first(going_home_act);
+		
+					} default {
+						if (use_sanitation and not empty(sanitation_rooms) and flip(proba_using_after_work)) {
+							agenda_day[current_date add_seconds (max(1#mn,timeSpent) - 1)] <- first(sanitation_activity);
+						}
+						agenda_day[current_date add_seconds (max(1#mn,timeSpent))] <- first(going_home_act);
 					}
-					agenda_day[date(current_date.year,current_date.month,current_date.day,18, rnd(30),rnd(59))] <- first(going_home_act);
-	
-				} default {
-					if (use_sanitation and not empty(sanitation_rooms) and flip(proba_using_after_work)) {
-						agenda_day[current_date add_seconds (max(1#mn,timeSpent) - 1)] <- first(sanitation_activity);
-					}
-					agenda_day[current_date add_seconds (max(1#mn,timeSpent))] <- first(going_home_act);
 				}
 			}
+			
 		}	
 	}
 	
@@ -728,15 +736,15 @@ species room_entrance parent:fomitableSurface{
 				break;
 			}
 			line_g <- line_g at_location last(queue_tmp.points );
-			point vector <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
-			float nb <- max(0.5,(max(1, nb_places) * distance_queue) - queue_tmp.perimeter);
-			queue_tmp <-  line(queue_tmp.points + [pt + vector * nb ]);
-			list<geometry> ws <- wall overlapping (queue_tmp+ 0.2);
-			ws <- ws +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue_tmp + 0.2);
-			if (consider_rooms) {ws <- ws +  room overlapping (queue_tmp+ 0.2);}
+			point vector_ <-  (line_g.points[1] - line_g.points[0]) / line_g.perimeter;
+			float nb_ <- max(0.5,(max(1, nb_places) * distance_queue) - queue_tmp.perimeter);
+			queue_tmp <-  line(queue_tmp.points + [pt + vector_ * nb_ ]);
+			list<geometry> ws_ <- wall overlapping (queue_tmp+ 0.2);
+			ws_ <- ws_ +(((room_entrance - self) where (each.queue != nil)) collect each.queue) overlapping (queue_tmp + 0.2);
+			if (consider_rooms) {ws_ <- ws_ +  room overlapping (queue_tmp+ 0.2);}
 			
-			if not empty(ws) {
-				loop w over: ws {
+			if not empty(ws_) {
+				loop w over: ws_ {
 					geometry g <- queue_tmp - w ;
 					if (g != nil) {
 							queue_tmp <- g.geometries with_min_of (each distance_to pt);
@@ -1156,6 +1164,12 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 	point target_desk;
 	float wandering_time_ag;
 	bool finished_goto <- false;
+	list<point> waypoints_loc;
+	bool use_waypoints <- false;
+	point myTarget;
+	building_entrance gateDestination;
+	
+	float activity_time;
 	
 	aspect default {
 		if not is_outside and not end_of_day and not not_yet_active{
@@ -1164,8 +1178,83 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 		//draw obj_file(dataset_path+"/Obj/man.obj",-90::{1,0,0}) color:#gamablue size:2 rotate:heading+90;
 	}
 	
+	action init_waypoints {
+		use_waypoints <- true;
+		building_entrance entry <- one_of(building_entrance);
+		gateDestination <- one_of(building_entrance);
+		
+		location <- any_location_in(entry);
+		path pt;
+		if (entry = gateDestination) {
+			room a_room <- one_of(room);
+			point loc <- any_location_in(a_room);
+			pt <- path_between(pedestrian_network, location, loc);
+			waypoints_loc << loc;
+		} else {
+			pt <- path_between(pedestrian_network, location,gateDestination.location );
+		
+		}
+		
+		geometry shape_path <- (pt.shape + distance_waypoints) ;
+		if shape_path != nil and shape_path.area > 0 {
+			list<room> rooms <- (rnd(1,max_num_waypoints) - length(waypoints_loc)) among (room overlapping shape_path);
+			if not empty(rooms) {
+					loop r over: rooms{
+						
+					waypoints_loc << any_location_in(r);
+				 }
+			}
+			
+			
+			if not empty(waypoints_loc) {
+				
+				target <- first(waypoints_loc);
+				waypoints_loc <- waypoints_loc sort_by (each distance_to location);
+				myTarget<-first(waypoints_loc);
+				waypoints_loc >> myTarget;
+			
+			} else {
+				myTarget <- any_location_in(gateDestination);	
+			}
+		}
+	}
 	
-	reflex common_area_behavior when: species(target_room) = common_area and (location overlaps target_room) {
+
+	action test_is_arrived_at_target {
+		if empty(waypoints_loc) and final_waypoint = nil{
+		 do release_path;
+		 end_of_day <- true;
+		}
+		if final_waypoint = nil{
+			if empty(waypoints_loc){
+				myTarget<-gateDestination.location;
+			} else {
+				myTarget<-first(waypoints_loc);
+				waypoints_loc >> myTarget;
+			}	
+			activity_time <- rnd(max_activity_time);
+			 do release_path;
+		} 
+	}
+	
+	action move_using_pedestrian {
+		if (final_waypoint = nil) {
+			do compute_virtual_path pedestrian_graph:pedestrian_network target: myTarget ;
+		}
+		do walk  ;
+		do test_is_arrived_at_target;
+	}
+	
+	reflex do_activity when: use_waypoints and activity_time > 0 {
+		activity_time <- activity_time - step;
+	}
+	reflex vagar when: use_waypoints and activity_time <= 0{
+		do move_using_pedestrian;
+	}
+	
+	
+	
+	reflex common_area_behavior when: not use_waypoints and species(target_room) = common_area and (location overlaps target_room) {
 		if wandering {
 			if (wandering_time_ag > wandering_time) {
 				if (target_place != nil) {
@@ -1226,7 +1315,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 			}
 		}
 	}
-	reflex sanitation_behavior when: using_sanitation {
+	reflex sanitation_behavior when: not use_waypoints and using_sanitation {
 		sanitation_time <- sanitation_time + step;
 		if (sanitation_time > sanitation_usage_duration) {
 			sanitation_time <- 0.0;
@@ -1240,7 +1329,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 			nbPeople<-nbPeople+1;
 		}
 	}
-	reflex define_activity when: not waiting_sanitation and not empty(agenda_day) and 
+	reflex define_activity when: not use_waypoints and not waiting_sanitation and not empty(agenda_day) and 
 		(after(agenda_day.keys[0])){
 		if(target_place != nil and (has_place) ) {target_room.available_places << target_place;}
 		string n <- current_activity = nil ? "" : copy(current_activity.name);
@@ -1263,7 +1352,7 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 		}
 	}
 	
-	reflex goto_activity when: target != nil and not in_line{
+	reflex goto_activity when: not use_waypoints and target != nil and not in_line{
 		bool arrived <- false;
 		point prev_loc <- copy(location);
 		if goto_entrance {
