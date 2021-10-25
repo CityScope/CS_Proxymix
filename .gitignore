@@ -2,6 +2,6 @@
 
 dataProcess/*.ipynb
 
-*.csv
+
 
 ProxymixABM/results/*

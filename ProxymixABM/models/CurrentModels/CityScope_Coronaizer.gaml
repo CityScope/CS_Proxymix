@@ -139,7 +139,7 @@ global{
 					
 				}
 				
-				if nb_i < initial_nb_infected {
+				if nb_i < initial_nb_infected { 
 					list<room> ror <- pp_per_room.keys sort_by each.name;
 					
 					int direction <- 0;

@@ -26,6 +26,7 @@ global {
 	int max_num_waypoints <- 4; 
 	float max_activity_time <- 5 #mn;
 	float distance_waypoints <- 5.0; // distance of the waypoints to the shortest path
+		
 	
 	float proba_goto_common_area <- 0.4;
 	float proba_wander <- 0.003;
@@ -67,10 +68,13 @@ global {
 	
 	list<room> sanitation_rooms;
 	
-	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room"];
+	string density_scenario <- "distance" among: ["data", "distance", "num_people_building", "num_people_room", "fill_with_agents"];
 	int num_people_per_building;
 	int num_people_per_room;
 	float distance_people;
+	int to_create_init ;
+	int nb_agents_to_create;
+	
 	
 	bool display_pedestrian_path <- false;// parameter: true;
 	bool display_free_space <- false;// parameter: true;
@@ -323,10 +327,12 @@ global {
 		officeArea<-sum((room where (each.type in workplace_layer)) collect each.shape.area);
 		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
 		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
-		nbDesk<-length(room accumulate each.available_places);
+		nbDesk<-density_scenario = "fill_with_agents" ? nb_agents_to_create : length(room accumulate each.available_places);
+	
 		do create_people(nbDesk);
+		
 		if (arrival_time_interval = 0.0) {
-			people_to_create[current_date] <- nbDesk;
+			people_to_create[current_date] <- density_scenario = "fill_with_agents" ? nb_agents_to_create :  nbDesk;
 		} else {
 			int nb <- 1 + int(step_arrival * nbDesk / arrival_time_interval);
 			float cpt <- 0.0;
@@ -334,6 +340,26 @@ global {
 				people_to_create[starting_date add_ms (cpt * 1000)] <- nb;
 				cpt <- cpt + step_arrival ;
 			}
+			
+		}
+		
+		if density_scenario = "fill_with_agents" and to_create_init > 0 {
+			do create_people(to_create_init);
+			ask people {
+				int remove_int <- rnd(length(waypoints_loc) - 1);
+				point ref;
+				loop times: remove_int {
+					ref <- first(waypoints_loc);
+					waypoints_loc >> ref;
+				}
+				if ref = nil {
+					location <- any_location_in(one_of(room));
+				} else {
+					location <- any_location_in(ref + 1.0);
+			
+				}
+				not_yet_active <- false;
+			}	
 			
 		}
 	}
@@ -961,7 +987,7 @@ species room {
 			
 			
 		} 
-		else if (density_scenario = "distance") or (type != workplace_layer) {
+		else if (density_scenario in ["fill_with_agents", "distance"]) or (type != workplace_layer) {
 			squares <-  to_squares(inside_geom, distance_people, true) where (each.location overlaps inside_geom);
 		}
 		else if (density_scenario= "num_people_room"){
