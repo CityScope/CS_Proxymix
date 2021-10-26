@@ -1277,7 +1277,9 @@ species people skills: [pedestrian] schedules: people where (not each.end_of_day
 	}
 	
 	action move_using_pedestrian {
+		
 		if (final_waypoint = nil) {
+			if myTarget = nil { do release_path;end_of_day <- true;}
 			do compute_virtual_path pedestrian_graph:pedestrian_network target: myTarget ;
 		}
 		do walk  ;
