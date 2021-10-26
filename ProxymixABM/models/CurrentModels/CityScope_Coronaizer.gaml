@@ -71,11 +71,15 @@ global{
 	
 
 	init{	
-     queueing <-false;
-     peopleSize  <-0.3#m;
-	 step_arrival <- 1#s;
-	 arrival_time_interval <- 3 #mn;
-	 filePathName <-"../results/output/"+useCase+".csv";
+		if density_scenario != "fill_with_agents" {
+			step_arrival <- 1#s;
+		 	arrival_time_interval <- 3 #mn;
+		 }
+		 queueing <-false;
+	     peopleSize  <-0.3#m;
+		 filePathName <-"../results/output/"+useCase+".csv";
+		
+    
 	}
 	
 	bool savetoCSV<-true;
@@ -84,7 +88,7 @@ global{
 	reflex initCovid when:cycle = 1{
 		if agenda_scenario = "shopping" {
 			ask initial_nb_infected among ViralPeople{
-				has_been_infected<-true;
+				has_been_infected<-true; 
 				is_susceptible <-  false;
 				is_infected <-  true;
 				is_immune <-  false;

@@ -26,7 +26,7 @@ global {
 	int max_num_waypoints <- 4; 
 	float max_activity_time <- 5 #mn;
 	float distance_waypoints <- 5.0; // distance of the waypoints to the shortest path
-		
+	
 	
 	float proba_goto_common_area <- 0.4;
 	float proba_wander <- 0.003;
@@ -328,24 +328,34 @@ global {
 		nbMeetingRooms<-(room count (each.type="Meeting rooms"));
 		meetingRoomsArea<-sum((room where (each.type="Meeting rooms")) collect each.shape.area);
 		nbDesk<-density_scenario = "fill_with_agents" ? nb_agents_to_create : length(room accumulate each.available_places);
-	
 		do create_people(nbDesk);
 		
 		if (arrival_time_interval = 0.0) {
 			people_to_create[current_date] <- density_scenario = "fill_with_agents" ? nb_agents_to_create :  nbDesk;
 		} else {
-			int nb <- 1 + int(step_arrival * nbDesk / arrival_time_interval);
-			float cpt <- 0.0;
-			loop while: cpt < arrival_time_interval {
-				people_to_create[starting_date add_ms (cpt * 1000)] <- nb;
-				cpt <- cpt + step_arrival ;
+			if density_scenario = "fill_with_agents" {
+				int nb_step <- int(arrival_time_interval / step_arrival);
+				int nb <- int(nbDesk / nb_step);
+			
+				loop i from: 0 to: nb_step -1 {
+					people_to_create[copy(starting_date) + (i * step_arrival)] <- nb;
+				}
+			} else {
+				int nb <- 1 + int(step_arrival * nbDesk / arrival_time_interval);
+				float cpt <- 0.0;
+				loop while: cpt < arrival_time_interval {
+					people_to_create[starting_date add_ms (cpt * 1000)] <- nb;
+					cpt <- cpt + step_arrival ;
+				}
 			}
+			
 			
 		}
 		
 		if density_scenario = "fill_with_agents" and to_create_init > 0 {
-			do create_people(to_create_init);
-			ask people {
+			list<people> people_created <- create_people(to_create_init);
+			write sample(to_create_init);
+			ask people_created {
 				int remove_int <- rnd(length(waypoints_loc) - 1);
 				point ref;
 				loop times: remove_int {
@@ -361,7 +371,9 @@ global {
 				not_yet_active <- false;
 			}	
 			
+			
 		}
+		
 	}
 	
 	reflex save_model_output when: (cycle = 1 and savetoCSV){
@@ -407,8 +419,8 @@ global {
 		}
 	}
 	
-	action create_people(int nb) {
-		create people number: nb {
+	list<people> create_people(int nb) {
+		create people number: nb returns: people_created{
 			age <- rnd(18, 70); 
 			pedestrian_model <- "simple";
 			n_SFM <- 2.0;
@@ -534,7 +546,8 @@ global {
 				}
 			}
 			
-		}	
+		}
+		return people_created;	
 	}
 	
 	reflex reset_proximity_cell when: draw_proximity_grid {
